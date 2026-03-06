@@ -1,11 +1,7 @@
 <Solution>
-  <Folder Name="/src/">
-    <Project Path="ItemNest.Api/ItemNest.Api.csproj" />
-    <Project Path="ItemNest.Application/ItemNest.Application.csproj" />
-    <Project Path="ItemNest.Domain/ItemNest.Domain.csproj" />
-    <Project Path="ItemNest.Infrastructure/ItemNest.Infrastructure.csproj" />
-  </Folder>
-  <Folder Name="/tests/">
-    <Project Path="ItemNest.Tests/ItemNest.Tests.csproj" />
-  </Folder>
+  <Project Path="ItemNest.Api/ItemNest.Api.csproj" />
+  <Project Path="ItemNest.Application/ItemNest.Application.csproj" />
+  <Project Path="ItemNest.Domain/ItemNest.Domain.csproj" />
+  <Project Path="ItemNest.Infrastructure/ItemNest.Infrastructure.csproj" />
+  <Project Path="ItemNest.Tests/ItemNest.Tests.csproj" />
 </Solution>

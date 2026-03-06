@@ -8,7 +8,7 @@ using System.Text;
 
 namespace ItemNest.Infrastructure.Services;
 
-internal class JwtTokenService : IJwtTokenService
+public class JwtTokenService : IJwtTokenService
 {
     private readonly IConfiguration _configuration;
 
