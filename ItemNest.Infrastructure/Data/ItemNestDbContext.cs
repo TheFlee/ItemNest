@@ -36,6 +36,17 @@ public class ItemNestDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, 
             entity.Property(x => x.Name)
                   .IsRequired()
                   .HasMaxLength(50);
+
+            entity.HasData(
+                new Category { Id = 1, Name = "Wallet" },
+                new Category { Id = 2, Name = "Phone" },
+                new Category { Id = 3, Name = "Keys" },
+                new Category { Id = 4, Name = "Bag" },
+                new Category { Id = 5, Name = "Documents" },
+                new Category { Id = 6, Name = "Watch" },
+                new Category { Id = 7, Name = "Jewelry" },
+                new Category { Id = 8, Name = "Other" }
+            );
         });
 
         builder.Entity<ItemPost>(entity =>

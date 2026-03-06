@@ -1,6 +1,6 @@
 ﻿using ItemNest.Domain.Entities;
 
-namespace ItemNest.Application.Interfaces.Auth;
+namespace ItemNest.Application.Interfaces;
 
 public interface IJwtTokenService
 {

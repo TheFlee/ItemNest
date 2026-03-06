@@ -1,4 +1,4 @@
-﻿using ItemNest.Application.Interfaces.Auth;
+﻿using ItemNest.Application.Interfaces;
 using ItemNest.Domain.Entities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -29,6 +29,7 @@ public class JwtTokenService : IJwtTokenService
         var claims = new List<Claim>
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
             new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName ?? string.Empty),
             new Claim("fullName", user.FullName)
@@ -42,15 +43,14 @@ public class JwtTokenService : IJwtTokenService
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
-        var expiresAt = DateTime.UtcNow.AddMinutes(expiryMinutes);
+        var expiresAt = DateTimeOffset.UtcNow.AddMinutes(expiryMinutes);
 
         var token = new JwtSecurityToken(
             issuer: issuer,
             audience: audience,
             claims: claims,
-            expires: expiresAt,
-            signingCredentials: credentials
-        );
+            expires: expiresAt.UtcDateTime,
+            signingCredentials: credentials);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
@@ -58,6 +58,6 @@ public class JwtTokenService : IJwtTokenService
     public DateTimeOffset GetTokenExpiration()
     {
         var expiryMinutes = int.Parse(_configuration["Jwt:ExpiryMinutes"]!);
-        return DateTime.UtcNow.AddMinutes(expiryMinutes);
+        return DateTimeOffset.UtcNow.AddMinutes(expiryMinutes);
     }
 }

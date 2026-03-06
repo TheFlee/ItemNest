@@ -11,9 +11,9 @@ public class ItemPost
     public PostStatus Status { get; set; }
     public ItemColor Color { get; set; }
     public string Location { get; set; } = null!;
-    public DateTime EventDate { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public DateTime? UpdatedAt { get; set; }
+    public DateTimeOffset EventDate { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
+    public DateTimeOffset? UpdatedAt { get; set; }
     public Guid UserId { get; set; }
     public AppUser User { get; set; } = null!;
     public int CategoryId { get; set; }
