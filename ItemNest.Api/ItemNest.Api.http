@@ -1,0 +1,6 @@
+@ItemNest.Api_HostAddress = http://localhost:5174
+
+GET {{ItemNest.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
