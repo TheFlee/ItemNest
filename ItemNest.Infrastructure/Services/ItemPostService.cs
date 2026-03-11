@@ -23,6 +23,7 @@ public class ItemPostService : IItemPostService
         var query = _context.ItemPosts
             .Include(x => x.Category)
             .Include(x => x.User)
+            .Include(x => x.Images)
             .AsQueryable();
 
         if (filter.Type.HasValue)
@@ -63,6 +64,7 @@ public class ItemPostService : IItemPostService
         var post = await _context.ItemPosts
             .Include(x => x.Category)
             .Include(x => x.User)
+            .Include(x => x.Images)
             .FirstOrDefaultAsync(x => x.Id == id);
 
         if (post is null)
@@ -134,6 +136,7 @@ public class ItemPostService : IItemPostService
             .AsNoTracking()
             .Include(x => x.Category)
             .Include(x => x.User)
+            .Include(x => x.Images)
             .Where(x => x.UserId == userId)
             .OrderByDescending(x => x.CreatedAt)
             .ToListAsync();
