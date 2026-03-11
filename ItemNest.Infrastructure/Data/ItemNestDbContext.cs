@@ -99,6 +99,20 @@ public class ItemNestDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, 
                   .IsRequired()
                   .HasMaxLength(500);
 
+            entity.Property(x => x.StoredFileName)
+                  .IsRequired()
+                  .HasMaxLength(255);
+
+            entity.Property(x => x.ContentType)
+                  .IsRequired()
+                  .HasMaxLength(100);
+
+            entity.Property(x => x.FileSize)
+                  .IsRequired();
+
+            entity.Property(x => x.CreatedAt)
+                  .IsRequired();
+
             entity.HasOne(x => x.ItemPost)
                   .WithMany(x => x.Images)
                   .HasForeignKey(x => x.ItemPostId)
