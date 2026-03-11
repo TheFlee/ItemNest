@@ -27,6 +27,7 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.CreatedAt,
                         opt => opt.MapFrom(_ => DateTimeOffset.UtcNow));
 
+        // ItemPost
         CreateMap<CreateItemPostDto, ItemPost>()
             .ForMember(dest => dest.CreatedAt,
                         opt => opt.MapFrom(_ => DateTimeOffset.UtcNow))
@@ -37,10 +38,14 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.CategoryName,
                         opt => opt.MapFrom(src => src.Category.Name))
             .ForMember(dest => dest.UserFullName,
-                        opt => opt.MapFrom(src => src.User.FullName));
+                        opt => opt.MapFrom(src => src.User.FullName))
+            .ForMember(dest => dest.Images,
+                        opt => opt.MapFrom(src => src.Images));
 
         CreateMap<UpdateItemPostDto, ItemPost>()
             .ForMember(dest => dest.UpdatedAt,
                         opt => opt.MapFrom(_ => DateTimeOffset.UtcNow));
+        // ItemImage
+        CreateMap<ItemImage, ItemImageDto>();
     }
 }

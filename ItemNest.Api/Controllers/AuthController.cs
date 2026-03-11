@@ -1,8 +1,5 @@
 ﻿using ItemNest.Application.DTOs;
 using ItemNest.Application.Interfaces;
-using ItemNest.Domain.Entities;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ItemNest.Api.Controllers;
