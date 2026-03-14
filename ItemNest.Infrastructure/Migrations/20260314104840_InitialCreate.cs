@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace ItemNest.Infrastructure.Migrations
 {
     /// <inheritdoc />
@@ -182,9 +184,9 @@ namespace ItemNest.Infrastructure.Migrations
                     Status = table.Column<int>(type: "int", nullable: false),
                     Color = table.Column<int>(type: "int", nullable: false),
                     Location = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    EventDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    EventDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CategoryId = table.Column<int>(type: "int", nullable: false)
                 },
@@ -206,11 +208,40 @@ namespace ItemNest.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Favorites",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ItemPostId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Favorites", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Favorites_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Favorites_ItemPosts_ItemPostId",
+                        column: x => x.ItemPostId,
+                        principalTable: "ItemPosts",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ItemImages",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ImageUrl = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    StoredFileName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    ContentType = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    FileSize = table.Column<long>(type: "bigint", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     ItemPostId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
@@ -222,6 +253,21 @@ namespace ItemNest.Infrastructure.Migrations
                         principalTable: "ItemPosts",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.InsertData(
+                table: "Categories",
+                columns: new[] { "Id", "Name" },
+                values: new object[,]
+                {
+                    { 1, "Wallet" },
+                    { 2, "Phone" },
+                    { 3, "Keys" },
+                    { 4, "Bag" },
+                    { 5, "Documents" },
+                    { 6, "Watch" },
+                    { 7, "Jewelry" },
+                    { 8, "Other" }
                 });
 
             migrationBuilder.CreateIndex(
@@ -264,6 +310,17 @@ namespace ItemNest.Infrastructure.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Favorites_ItemPostId",
+                table: "Favorites",
+                column: "ItemPostId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Favorites_UserId_ItemPostId",
+                table: "Favorites",
+                columns: new[] { "UserId", "ItemPostId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ItemImages_ItemPostId",
                 table: "ItemImages",
                 column: "ItemPostId");
@@ -296,6 +353,9 @@ namespace ItemNest.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUserTokens");
+
+            migrationBuilder.DropTable(
+                name: "Favorites");
 
             migrationBuilder.DropTable(
                 name: "ItemImages");

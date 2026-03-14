@@ -14,6 +14,7 @@ public class ItemNestDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, 
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<ItemPost> ItemPosts => Set<ItemPost>();
     public DbSet<ItemImage> ItemImages => Set<ItemImage>();
+    public DbSet<Favorite> Favorites => Set<Favorite>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -117,6 +118,27 @@ public class ItemNestDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, 
                   .WithMany(x => x.Images)
                   .HasForeignKey(x => x.ItemPostId)
                   .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<Favorite>(entity =>
+        {
+            entity.HasKey(x => x.Id);
+
+            entity.Property(x => x.CreatedAt)
+                  .IsRequired();
+
+            entity.HasOne(x => x.User)
+                  .WithMany()
+                  .HasForeignKey(x => x.UserId)
+                  .OnDelete(DeleteBehavior.NoAction);
+
+            entity.HasOne(x => x.ItemPost)
+                  .WithMany()
+                  .HasForeignKey(x => x.ItemPostId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(x => new { x.UserId, x.ItemPostId })
+                  .IsUnique();
         });
     }
 

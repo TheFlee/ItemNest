@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Reflection;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,17 +21,37 @@ builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo
     {
+        Version = "v1",
         Title = "ItemNest API",
-        Version = "v1"
+        License = new OpenApiLicense
+        {
+            Name = "MIT License",
+            Url = new Uri("https://opensource.org/licenses/MIT")
+        }
     });
+
+
+    var apiXmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var apiXmlPath = Path.Combine(AppContext.BaseDirectory, apiXmlFile);
+
+    if (File.Exists(apiXmlPath))
+        options.IncludeXmlComments(apiXmlPath);
+
+    var applicationAssembly = typeof(ItemNest.Application.DTOs.RegisterDto).Assembly;
+    var applicationXmlFile = $"{applicationAssembly.GetName().Name}.xml";
+    var applicationXmlPath = Path.Combine(AppContext.BaseDirectory, applicationXmlFile);
+
+    if (File.Exists(applicationXmlPath))
+        options.IncludeXmlComments(applicationXmlPath);
 
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Description = "JWT token daxil edin. Nümunə: Bearer {token}",
+        Description = "Enter the JWT token. Example: Bearer {token}",
         Name = "Authorization",
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.Http,
-        Scheme = "Bearer"
+        Scheme = "bearer",
+        BearerFormat = "JWT"
     });
 
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -70,6 +91,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IItemPostService, ItemPostService>();
 builder.Services.AddScoped<IItemImageService, ItemImageService>();
+builder.Services.AddScoped<IFavoriteService, FavoriteService>();
 
 var jwtSection = builder.Configuration.GetSection("Jwt");
 var jwtKey = jwtSection["Key"]!;
@@ -104,9 +126,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI(options =>
     {
-        options.EnableTryItOutByDefault();
-        options.EnableDeepLinking();
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "ItemNest API v1");
+        options.DisplayRequestDuration();
         options.EnableFilter();
+        options.EnableDeepLinking();
+        options.EnableTryItOutByDefault();
     });
 }
 

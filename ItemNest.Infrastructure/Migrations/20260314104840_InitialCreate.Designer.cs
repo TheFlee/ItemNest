@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ItemNest.Infrastructure.Migrations
 {
     [DbContext(typeof(ItemNestDbContext))]
-    [Migration("20260306062326_InitialCreate")]
+    [Migration("20260314104840_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -115,6 +115,73 @@ namespace ItemNest.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Categories");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Wallet"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Phone"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Keys"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "Bag"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "Documents"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Name = "Watch"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Name = "Jewelry"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Name = "Other"
+                        });
+                });
+
+            modelBuilder.Entity("ItemNest.Domain.Entities.Favorite", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("ItemPostId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ItemPostId");
+
+                    b.HasIndex("UserId", "ItemPostId")
+                        .IsUnique();
+
+                    b.ToTable("Favorites");
                 });
 
             modelBuilder.Entity("ItemNest.Domain.Entities.ItemImage", b =>
@@ -123,6 +190,17 @@ namespace ItemNest.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<long>("FileSize")
+                        .HasColumnType("bigint");
+
                     b.Property<string>("ImageUrl")
                         .IsRequired()
                         .HasMaxLength(500)
@@ -130,6 +208,11 @@ namespace ItemNest.Infrastructure.Migrations
 
                     b.Property<Guid>("ItemPostId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("StoredFileName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.HasKey("Id");
 
@@ -150,16 +233,16 @@ namespace ItemNest.Infrastructure.Migrations
                     b.Property<int>("Color")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
 
-                    b.Property<DateTime>("EventDate")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset>("EventDate")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Location")
                         .IsRequired()
@@ -177,8 +260,8 @@ namespace ItemNest.Infrastructure.Migrations
                     b.Property<int>("Type")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
@@ -321,6 +404,25 @@ namespace ItemNest.Infrastructure.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("ItemNest.Domain.Entities.Favorite", b =>
+                {
+                    b.HasOne("ItemNest.Domain.Entities.ItemPost", "ItemPost")
+                        .WithMany()
+                        .HasForeignKey("ItemPostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ItemNest.Domain.Entities.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("ItemPost");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("ItemNest.Domain.Entities.ItemImage", b =>

@@ -21,17 +21,17 @@ public class AuthService : IAuthService
     public async Task<AuthResponseDto> RegisterAsync(RegisterDto dto)
     {
         if (string.IsNullOrWhiteSpace(dto.FullName))
-            throw new ArgumentException("Full name boş ola bilməz.");
+            throw new ArgumentException("Full name cannot be empty.");
 
         if (string.IsNullOrWhiteSpace(dto.Email))
-            throw new ArgumentException("Email boş ola bilməz.");
+            throw new ArgumentException("Email cannot be empty.");
 
         if (string.IsNullOrWhiteSpace(dto.Password))
-            throw new ArgumentException("Password boş ola bilməz.");
+            throw new ArgumentException("Password cannot be empty.");
 
         var existingUser = await _userManager.FindByEmailAsync(dto.Email);
         if (existingUser is not null)
-            throw new InvalidOperationException("Bu email artıq istifadə olunur.");
+            throw new InvalidOperationException("This email is already in use.");
 
         var user = new AppUser
         {
@@ -56,18 +56,18 @@ public class AuthService : IAuthService
     public async Task<AuthResponseDto> LoginAsync(LoginDto dto)
     {
         if (string.IsNullOrWhiteSpace(dto.Email))
-            throw new ArgumentException("Email boş ola bilməz.");
+            throw new ArgumentException("Email cannot be empty.");
 
         if (string.IsNullOrWhiteSpace(dto.Password))
-            throw new ArgumentException("Password boş ola bilməz.");
+            throw new ArgumentException("Password cannot be empty.");
 
         var user = await _userManager.FindByEmailAsync(dto.Email.Trim());
         if (user is null)
-            throw new InvalidOperationException("Email və ya şifrə yanlışdır.");
+            throw new InvalidOperationException("Incorrect email or password.");
 
         var isPasswordValid = await _userManager.CheckPasswordAsync(user, dto.Password);
         if (!isPasswordValid)
-            throw new InvalidOperationException("Email və ya şifrə yanlışdır.");
+            throw new InvalidOperationException("Incorrect email or password.");
 
         return await CreateAuthResponseAsync(user);
     }

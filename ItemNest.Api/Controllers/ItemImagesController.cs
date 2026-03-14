@@ -26,7 +26,7 @@ public class ItemImagesController : ControllerBase
         CancellationToken cancellationToken)
     {
         if (request.File is null || request.File.Length == 0)
-            throw new ArgumentException("Şəkil faylı boş ola bilməz.");
+            throw new ArgumentException("Image file cannot be empty.");
 
         var userId = GetCurrentUserId();
 
@@ -71,9 +71,8 @@ public class ItemImagesController : ControllerBase
                          ?? User.FindFirstValue("sub");
 
         if (string.IsNullOrWhiteSpace(userIdClaim))
-            throw new UnauthorizedAccessException("İstifadəçi məlumatı token-də tapılmadı.");
+            throw new UnauthorizedAccessException("User information was not found in the token.");
 
         return Guid.Parse(userIdClaim);
     }
 }
-
