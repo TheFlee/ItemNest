@@ -1,5 +1,6 @@
 ﻿using ItemNest.Application.DTOs;
 using ItemNest.Application.Interfaces;
+using ItemNest.Infrastructure.Seed;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -31,15 +32,23 @@ public class CategoriesController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize]
+    [Authorize(Roles = AppRoles.Admin)]
     public async Task<ActionResult<CategoryDto>> Create(CreateCategoryDto dto)
     {
         var createdCategory = await _categoryService.CreateAsync(dto);
         return CreatedAtAction(nameof(GetById), new { id = createdCategory.Id }, createdCategory);
     }
 
+    [HttpPut("{id:int}")]
+    [Authorize(Roles = AppRoles.Admin)]
+    public async Task<ActionResult<CategoryDto>> Update(int id, UpdateCategoryDto dto)
+    {
+        var updatedCategory = await _categoryService.UpdateAsync(id, dto);
+        return Ok(updatedCategory);
+    }
+
     [HttpDelete("{id:int}")]
-    [Authorize]
+    [Authorize(Roles = AppRoles.Admin)]
     public async Task<IActionResult> Delete(int id)
     {
         await _categoryService.DeleteAsync(id);

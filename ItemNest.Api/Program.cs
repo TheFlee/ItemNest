@@ -1,8 +1,13 @@
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using ItemNest.Api.Middlewares;
+using ItemNest.Application.Configurations;
 using ItemNest.Application.Interfaces;
 using ItemNest.Application.Mappings;
+using ItemNest.Application.Validators;
 using ItemNest.Domain.Entities;
 using ItemNest.Infrastructure.Data;
+using ItemNest.Infrastructure.Seed;
 using ItemNest.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -93,6 +98,13 @@ builder.Services.AddScoped<IItemPostService, ItemPostService>();
 builder.Services.AddScoped<IItemImageService, ItemImageService>();
 builder.Services.AddScoped<IFavoriteService, FavoriteService>();
 
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<RegisterDtoValidator>();
+
+builder.Services.Configure<AdminSeedSettings>(builder.Configuration.GetSection(AdminSeedSettings.SectionName));
+
+builder.Services.AddScoped<AdminUserSeeder>();
+
 var jwtSection = builder.Configuration.GetSection("Jwt");
 var jwtKey = jwtSection["Key"]!;
 
@@ -132,6 +144,15 @@ if (app.Environment.IsDevelopment())
         options.EnableDeepLinking();
         options.EnableTryItOutByDefault();
     });
+
+    using var scope = app.Services.CreateScope();
+    var services = scope.ServiceProvider;
+
+    var roleManager = services.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
+    await RoleSeeder.SeedAsync(roleManager);
+
+    var adminUserSeeder = services.GetRequiredService<AdminUserSeeder>();
+    await adminUserSeeder.SeedAsync();
 }
 
 app.UseMiddleware<GlobalExceptionMiddleware>();

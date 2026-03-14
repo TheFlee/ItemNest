@@ -61,6 +61,31 @@ public class CategoryService : ICategoryService
         return _mapper.Map<CategoryDto>(category);
     }
 
+    public async Task<CategoryDto> UpdateAsync(int id, UpdateCategoryDto dto)
+    {
+        if (string.IsNullOrWhiteSpace(dto.Name))
+            throw new ArgumentException("Category name cannot be empty.");
+
+        var category = await _context.Categories.FirstOrDefaultAsync(x => x.Id == id);
+
+        if (category is null)
+            throw new KeyNotFoundException("Category not found.");
+
+        var normalizedName = dto.Name.Trim();
+
+        var exists = await _context.Categories
+            .AnyAsync(x => x.Id != id && x.Name.ToLower() == normalizedName.ToLower());
+
+        if (exists)
+            throw new InvalidOperationException("This category already exists.");
+
+        category.Name = normalizedName;
+
+        await _context.SaveChangesAsync();
+
+        return _mapper.Map<CategoryDto>(category);
+    }
+
     public async Task DeleteAsync(int id)
     {
         var category = await _context.Categories.FindAsync(id);
