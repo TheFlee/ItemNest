@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using ItemNest.Application.DTOs;
+using ItemNest.Application.Exceptions;
 using ItemNest.Application.Interfaces;
 using ItemNest.Domain.Entities;
 using ItemNest.Infrastructure.Data;
@@ -18,45 +19,66 @@ public class ItemPostService : IItemPostService
         _mapper = mapper;
     }
 
-    public async Task<IReadOnlyList<ItemPostDto>> GetAllAsync(ItemPostFilterDto filter)
+    public async Task<PagedResponseDto<ItemPostDto>> GetAllAsync(ItemPostFilterDto filter)
     {
-        var query = _context.ItemPosts
+        IQueryable<ItemPost> query = _context.ItemPosts
+            .AsNoTracking()
             .Include(x => x.Category)
-            .Include(x => x.User)
-            .Include(x => x.Images)
-            .AsQueryable();
+            .Include(x => x.Images);
 
         if (filter.Type.HasValue)
+        {
             query = query.Where(x => x.Type == filter.Type.Value);
+        }
 
         if (filter.Status.HasValue)
+        {
             query = query.Where(x => x.Status == filter.Status.Value);
+        }
 
         if (filter.Color.HasValue)
+        {
             query = query.Where(x => x.Color == filter.Color.Value);
+        }
 
         if (filter.CategoryId.HasValue)
+        {
             query = query.Where(x => x.CategoryId == filter.CategoryId.Value);
+        }
 
         if (!string.IsNullOrWhiteSpace(filter.Location))
         {
-            var location = filter.Location.Trim().ToLower();
-            query = query.Where(x => x.Location.ToLower().Contains(location));
+            var location = filter.Location.Trim();
+            query = query.Where(x => EF.Functions.Like(x.Location, $"%{location}%"));
         }
 
         if (!string.IsNullOrWhiteSpace(filter.SearchTerm))
         {
-            var search = filter.SearchTerm.Trim().ToLower();
+            var search = filter.SearchTerm.Trim();
             query = query.Where(x =>
-                x.Title.ToLower().Contains(search) ||
-                x.Description.ToLower().Contains(search));
+                EF.Functions.Like(x.Title, $"%{search}%") ||
+                EF.Functions.Like(x.Description, $"%{search}%"));
         }
 
-        var posts = await query
-            .OrderByDescending(x => x.CreatedAt)
+        query = ApplySorting(query, filter.SortBy, filter.SortDirection);
+
+        var totalCount = await query.CountAsync();
+
+        var items = await query
+            .Skip((filter.PageNumber - 1) * filter.PageSize)
+            .Take(filter.PageSize)
             .ToListAsync();
 
-        return _mapper.Map<IReadOnlyList<ItemPostDto>>(posts);
+        var itemDtos = _mapper.Map<List<ItemPostDto>>(items);
+
+        return new PagedResponseDto<ItemPostDto>
+        {
+            Items = itemDtos,
+            PageNumber = filter.PageNumber,
+            PageSize = filter.PageSize,
+            TotalCount = totalCount,
+            TotalPages = (int)Math.Ceiling(totalCount / (double)filter.PageSize)
+        };
     }
 
     public async Task<ItemPostDto> GetByIdAsync(Guid id)
@@ -75,8 +97,6 @@ public class ItemPostService : IItemPostService
 
     public async Task<ItemPostDto> CreateAsync(Guid userId, CreateItemPostDto dto)
     {
-        ValidateCreateDto(dto);
-
         var categoryExists = await _context.Categories.AnyAsync(x => x.Id == dto.CategoryId);
         if (!categoryExists)
             throw new KeyNotFoundException("Category not found.");
@@ -97,14 +117,12 @@ public class ItemPostService : IItemPostService
 
     public async Task<ItemPostDto> UpdateAsync(Guid userId, Guid id, UpdateItemPostDto dto)
     {
-        ValidateUpdateDto(dto);
-
         var post = await _context.ItemPosts.FirstOrDefaultAsync(x => x.Id == id);
         if (post is null)
             throw new KeyNotFoundException("Post not found.");
 
         if (post.UserId != userId)
-            throw new UnauthorizedAccessException("You are not allowed to update this post.");
+            throw new ForbiddenException("You are not allowed to update this post.");
 
         var categoryExists = await _context.Categories.AnyAsync(x => x.Id == dto.CategoryId);
         if (!categoryExists)
@@ -124,7 +142,7 @@ public class ItemPostService : IItemPostService
             throw new KeyNotFoundException("Post not found.");
 
         if (post.UserId != userId)
-            throw new UnauthorizedAccessException("You are not allowed to delete this post.");
+            throw new ForbiddenException("You are not allowed to delete this post.");
 
         _context.ItemPosts.Remove(post);
         await _context.SaveChangesAsync();
@@ -144,33 +162,26 @@ public class ItemPostService : IItemPostService
         return _mapper.Map<IReadOnlyList<ItemPostDto>>(posts);
     }
 
-    private static void ValidateCreateDto(CreateItemPostDto dto)
+    private static IQueryable<ItemPost> ApplySorting(IQueryable<ItemPost> query, string? sortBy, string? sortDirection)
     {
-        if (string.IsNullOrWhiteSpace(dto.Title))
-            throw new ArgumentException("Title cannot be empty.");
+        var normalizedSortBy = sortBy?.Trim().ToLower() ?? "createdat";
+        var normalizedSortDirection = sortDirection?.Trim().ToLower() ?? "desc";
 
-        if (string.IsNullOrWhiteSpace(dto.Description))
-            throw new ArgumentException("Description cannot be empty.");
+        var isAscending = normalizedSortDirection == "asc";
 
-        if (string.IsNullOrWhiteSpace(dto.Location))
-            throw new ArgumentException("Location cannot be empty.");
+        return normalizedSortBy switch
+        {
+            "title" => isAscending
+                ? query.OrderBy(x => x.Title)
+                : query.OrderByDescending(x => x.Title),
 
-        if (dto.CategoryId <= 0)
-            throw new ArgumentException("Invalid category ID.");
-    }
+            "eventdate" => isAscending
+                ? query.OrderBy(x => x.EventDate)
+                : query.OrderByDescending(x => x.EventDate),
 
-    private static void ValidateUpdateDto(UpdateItemPostDto dto)
-    {
-        if (string.IsNullOrWhiteSpace(dto.Title))
-            throw new ArgumentException("Title cannot be empty.");
-
-        if (string.IsNullOrWhiteSpace(dto.Description))
-            throw new ArgumentException("Description cannot be empty.");
-
-        if (string.IsNullOrWhiteSpace(dto.Location))
-            throw new ArgumentException("Location cannot be empty.");
-
-        if (dto.CategoryId <= 0)
-            throw new ArgumentException("Invalid category ID.");
+            "createdat" or _ => isAscending
+                ? query.OrderBy(x => x.CreatedAt)
+                : query.OrderByDescending(x => x.CreatedAt)
+        };
     }
 }

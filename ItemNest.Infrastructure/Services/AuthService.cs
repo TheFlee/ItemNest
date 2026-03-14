@@ -1,6 +1,7 @@
 ﻿using ItemNest.Application.DTOs;
 using ItemNest.Application.Interfaces;
 using ItemNest.Domain.Entities;
+using ItemNest.Infrastructure.Seed;
 using Microsoft.AspNetCore.Identity;
 
 namespace ItemNest.Infrastructure.Services;
@@ -50,6 +51,7 @@ public class AuthService : IAuthService
             throw new InvalidOperationException(errors);
         }
 
+        await _userManager.AddToRoleAsync(user, AppRoles.User);
         return await CreateAuthResponseAsync(user);
     }
 

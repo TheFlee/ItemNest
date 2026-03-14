@@ -18,7 +18,7 @@ public class ItemPostsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IReadOnlyList<ItemPostDto>>> GetAll([FromQuery] ItemPostFilterDto filter)
+    public async Task<ActionResult<PagedResponseDto<ItemPostDto>>> GetAll([FromQuery] ItemPostFilterDto filter)
     {
         var posts = await _itemPostService.GetAllAsync(filter);
         return Ok(posts);
@@ -74,7 +74,7 @@ public class ItemPostsController : ControllerBase
                          ?? User.FindFirstValue("sub");
 
         if (string.IsNullOrWhiteSpace(userIdClaim))
-            throw new UnauthorizedAccessException("İstifadəçi məlumatı token-də tapılmadı.");
+            throw new UnauthorizedAccessException("User information was not found in the token.");
 
         return Guid.Parse(userIdClaim);
     }

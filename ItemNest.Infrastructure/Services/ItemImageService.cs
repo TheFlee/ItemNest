@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using ItemNest.Application.DTOs;
+using ItemNest.Application.Exceptions;
 using ItemNest.Application.Interfaces;
 using ItemNest.Domain.Entities;
 using ItemNest.Infrastructure.Data;
@@ -81,7 +82,7 @@ public class ItemImageService : IItemImageService
             throw new KeyNotFoundException("Post not found.");
 
         if (post.UserId != userId)
-            throw new UnauthorizedAccessException("You are not allowed to upload images to this post.");
+            throw new ForbiddenException("You are not allowed to upload images to this post.");
 
         if (post.Images.Count >= MaxImageCountPerPost)
             throw new InvalidOperationException("A post can have a maximum of 5 images.");
@@ -152,7 +153,7 @@ public class ItemImageService : IItemImageService
             throw new KeyNotFoundException("Image not found.");
 
         if (image.ItemPost.UserId != userId)
-            throw new UnauthorizedAccessException("You are not allowed to delete this image.");
+            throw new ForbiddenException("You are not allowed to delete this image.");
 
         var webRootPath = _environment.WebRootPath;
         if (string.IsNullOrWhiteSpace(webRootPath))

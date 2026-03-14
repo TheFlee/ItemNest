@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using ItemNest.Application.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 
@@ -71,6 +72,14 @@ public class GlobalExceptionMiddleware
                      context,
                      StatusCodes.Status401Unauthorized,
                      "Unauthorized",
+                     ex.Message)),
+
+            ForbiddenException =>
+                (StatusCodes.Status403Forbidden,
+                 CreateProblemDetails(
+                     context,
+                     StatusCodes.Status403Forbidden,
+                     "Forbidden",
                      ex.Message)),
 
             _ =>

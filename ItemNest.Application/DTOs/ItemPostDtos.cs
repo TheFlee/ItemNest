@@ -198,39 +198,16 @@ public class ItemPostDto
 /// </summary>
 public class ItemPostFilterDto
 {
-    /// <summary>
-    /// Filter by post type.
-    /// </summary>
-    /// <example>Lost</example>
     public PostType? Type { get; set; }
-
-    /// <summary>
-    /// Filter by post status.
-    /// </summary>
-    /// <example>Open</example>
     public PostStatus? Status { get; set; }
-
-    /// <summary>
-    /// Filter by item color.
-    /// </summary>
-    /// <example>Black</example>
     public ItemColor? Color { get; set; }
-
-    /// <summary>
-    /// Filter by category identifier.
-    /// </summary>
-    /// <example>1</example>
     public int? CategoryId { get; set; }
-
-    /// <summary>
-    /// Filter by location.
-    /// </summary>
-    /// <example>Baku</example>
     public string Location { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Search term for title or description.
-    /// </summary>
-    /// <example>wallet</example>
     public string SearchTerm { get; set; } = string.Empty;
+
+    public int PageNumber { get; set; } = 1;
+    public int PageSize { get; set; } = 10;
+    public string SortBy { get; set; } = "createdAt";
+    public string SortDirection { get; set; } = "desc";
+
 }

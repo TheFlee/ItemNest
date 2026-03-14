@@ -29,3 +29,15 @@ public class CreateCategoryDto
     /// <example>Phone</example>
     public string Name { get; set; } = string.Empty;
 }
+
+/// <summary>
+/// Request model for updating a category.
+/// </summary>
+public class UpdateCategoryDto
+{
+    /// <summary>
+    /// Updated category name.
+    /// </summary>
+    /// <example>Electronics</example>
+    public string Name { get; set; } = string.Empty;
+}
