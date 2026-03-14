@@ -68,7 +68,7 @@ public class ItemPostService : IItemPostService
             .FirstOrDefaultAsync(x => x.Id == id);
 
         if (post is null)
-            throw new KeyNotFoundException("Post tapılmadı.");
+            throw new KeyNotFoundException("Post not found.");
 
         return _mapper.Map<ItemPostDto>(post);
     }
@@ -79,11 +79,11 @@ public class ItemPostService : IItemPostService
 
         var categoryExists = await _context.Categories.AnyAsync(x => x.Id == dto.CategoryId);
         if (!categoryExists)
-            throw new KeyNotFoundException("Kateqoriya tapılmadı.");
+            throw new KeyNotFoundException("Category not found.");
 
         var userExists = await _context.Users.AnyAsync(x => x.Id == userId);
         if (!userExists)
-            throw new KeyNotFoundException("İstifadəçi tapılmadı.");
+            throw new KeyNotFoundException("User not found.");
 
         var post = _mapper.Map<ItemPost>(dto);
         post.Id = Guid.NewGuid();
@@ -101,14 +101,14 @@ public class ItemPostService : IItemPostService
 
         var post = await _context.ItemPosts.FirstOrDefaultAsync(x => x.Id == id);
         if (post is null)
-            throw new KeyNotFoundException("Post tapılmadı.");
+            throw new KeyNotFoundException("Post not found.");
 
         if (post.UserId != userId)
-            throw new UnauthorizedAccessException("Bu postu yeniləməyə icazəniz yoxdur.");
+            throw new UnauthorizedAccessException("You are not allowed to update this post.");
 
         var categoryExists = await _context.Categories.AnyAsync(x => x.Id == dto.CategoryId);
         if (!categoryExists)
-            throw new KeyNotFoundException("Kateqoriya tapılmadı.");
+            throw new KeyNotFoundException("Category not found.");
 
         _mapper.Map(dto, post);
 
@@ -121,10 +121,10 @@ public class ItemPostService : IItemPostService
     {
         var post = await _context.ItemPosts.FirstOrDefaultAsync(x => x.Id == id);
         if (post is null)
-            throw new KeyNotFoundException("Post tapılmadı.");
+            throw new KeyNotFoundException("Post not found.");
 
         if (post.UserId != userId)
-            throw new UnauthorizedAccessException("Bu postu silməyə icazəniz yoxdur.");
+            throw new UnauthorizedAccessException("You are not allowed to delete this post.");
 
         _context.ItemPosts.Remove(post);
         await _context.SaveChangesAsync();
@@ -147,30 +147,30 @@ public class ItemPostService : IItemPostService
     private static void ValidateCreateDto(CreateItemPostDto dto)
     {
         if (string.IsNullOrWhiteSpace(dto.Title))
-            throw new ArgumentException("Başlıq boş ola bilməz.");
+            throw new ArgumentException("Title cannot be empty.");
 
         if (string.IsNullOrWhiteSpace(dto.Description))
-            throw new ArgumentException("Təsvir boş ola bilməz.");
+            throw new ArgumentException("Description cannot be empty.");
 
         if (string.IsNullOrWhiteSpace(dto.Location))
-            throw new ArgumentException("Məkan boş ola bilməz.");
+            throw new ArgumentException("Location cannot be empty.");
 
         if (dto.CategoryId <= 0)
-            throw new ArgumentException("Kateqoriya düzgün deyil.");
+            throw new ArgumentException("Invalid category ID.");
     }
 
     private static void ValidateUpdateDto(UpdateItemPostDto dto)
     {
         if (string.IsNullOrWhiteSpace(dto.Title))
-            throw new ArgumentException("Başlıq boş ola bilməz.");
+            throw new ArgumentException("Title cannot be empty.");
 
         if (string.IsNullOrWhiteSpace(dto.Description))
-            throw new ArgumentException("Təsvir boş ola bilməz.");
+            throw new ArgumentException("Description cannot be empty.");
 
         if (string.IsNullOrWhiteSpace(dto.Location))
-            throw new ArgumentException("Məkan boş ola bilməz.");
+            throw new ArgumentException("Location cannot be empty.");
 
         if (dto.CategoryId <= 0)
-            throw new ArgumentException("Kateqoriya düzgün deyil.");
+            throw new ArgumentException("Invalid category ID.");
     }
 }

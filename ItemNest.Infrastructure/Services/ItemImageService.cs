@@ -3,8 +3,8 @@ using ItemNest.Application.DTOs;
 using ItemNest.Application.Interfaces;
 using ItemNest.Domain.Entities;
 using ItemNest.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 
 namespace ItemNest.Infrastructure.Services;
 
@@ -52,39 +52,39 @@ public class ItemImageService : IItemImageService
         CancellationToken cancellationToken = default)
     {
         if (stream is null)
-            throw new ArgumentException("Fayl stream boş ola bilməz.");
+            throw new ArgumentException("File stream cannot be null.");
 
         if (string.IsNullOrWhiteSpace(originalFileName))
-            throw new ArgumentException("Fayl adı boş ola bilməz.");
+            throw new ArgumentException("File name cannot be empty.");
 
         if (string.IsNullOrWhiteSpace(contentType))
-            throw new ArgumentException("Content type boş ola bilməz.");
+            throw new ArgumentException("Content type cannot be empty.");
 
         if (length <= 0)
-            throw new ArgumentException("Fayl boş ola bilməz.");
+            throw new ArgumentException("File cannot be empty.");
 
         if (length > MaxFileSize)
-            throw new ArgumentException("Şəkilin ölçüsü maksimum 5 MB ola bilər.");
+            throw new ArgumentException("Image size cannot exceed 5 MB.");
 
         if (!AllowedContentTypes.Contains(contentType.ToLower()))
-            throw new ArgumentException("Yalnız jpeg, png və webp şəkillər qəbul olunur.");
+            throw new ArgumentException("Only JPEG, PNG, and WebP images are allowed.");
 
         var extension = Path.GetExtension(originalFileName).ToLowerInvariant();
         if (!AllowedExtensions.Contains(extension))
-            throw new ArgumentException("Fayl uzantısı düzgün deyil.");
+            throw new ArgumentException("Invalid file extension.");
 
         var post = await _context.ItemPosts
             .Include(x => x.Images)
             .FirstOrDefaultAsync(x => x.Id == itemPostId, cancellationToken);
 
         if (post is null)
-            throw new KeyNotFoundException("Post tapılmadı.");
+            throw new KeyNotFoundException("Post not found.");
 
         if (post.UserId != userId)
-            throw new UnauthorizedAccessException("Bu posta şəkil əlavə etməyə icazəniz yoxdur.");
+            throw new UnauthorizedAccessException("You are not allowed to upload images to this post.");
 
         if (post.Images.Count >= MaxImageCountPerPost)
-            throw new InvalidOperationException("Bir posta maksimum 5 şəkil əlavə etmək olar.");
+            throw new InvalidOperationException("A post can have a maximum of 5 images.");
 
         var webRootPath = _environment.WebRootPath;
         if (string.IsNullOrWhiteSpace(webRootPath))
@@ -128,7 +128,7 @@ public class ItemImageService : IItemImageService
             .AnyAsync(x => x.Id == itemPostId, cancellationToken);
 
         if (!postExists)
-            throw new KeyNotFoundException("Post tapılmadı.");
+            throw new KeyNotFoundException("Post not found.");
 
         var images = await _context.ItemImages
             .AsNoTracking()
@@ -149,10 +149,10 @@ public class ItemImageService : IItemImageService
             .FirstOrDefaultAsync(x => x.Id == imageId, cancellationToken);
 
         if (image is null)
-            throw new KeyNotFoundException("Şəkil tapılmadı.");
+            throw new KeyNotFoundException("Image not found.");
 
         if (image.ItemPost.UserId != userId)
-            throw new UnauthorizedAccessException("Bu şəkli silməyə icazəniz yoxdur.");
+            throw new UnauthorizedAccessException("You are not allowed to delete this image.");
 
         var webRootPath = _environment.WebRootPath;
         if (string.IsNullOrWhiteSpace(webRootPath))

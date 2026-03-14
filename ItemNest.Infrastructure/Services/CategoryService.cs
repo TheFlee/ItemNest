@@ -35,7 +35,7 @@ public class CategoryService : ICategoryService
             .FirstOrDefaultAsync(x => x.Id == id);
 
         if (category is null)
-            throw new KeyNotFoundException("Kateqoriya tapılmadı.");
+            throw new KeyNotFoundException("Category not found.");
 
         return _mapper.Map<CategoryDto>(category);
     }
@@ -43,7 +43,7 @@ public class CategoryService : ICategoryService
     public async Task<CategoryDto> CreateAsync(CreateCategoryDto dto)
     {
         if (string.IsNullOrWhiteSpace(dto.Name))
-            throw new ArgumentException("Kateqoriya adı boş ola bilməz.");
+            throw new ArgumentException("Category name cannot be empty.");
 
         var normalizedName = dto.Name.Trim();
 
@@ -51,7 +51,7 @@ public class CategoryService : ICategoryService
             .AnyAsync(x => x.Name.ToLower() == normalizedName.ToLower());
 
         if (exists)
-            throw new InvalidOperationException("Bu kateqoriya artıq mövcuddur.");
+            throw new InvalidOperationException("This category already exists.");
 
         var category = _mapper.Map<Category>(dto);
 
@@ -66,15 +66,14 @@ public class CategoryService : ICategoryService
         var category = await _context.Categories.FindAsync(id);
 
         if (category is null)
-            throw new KeyNotFoundException("Kateqoriya tapılmadı.");
+            throw new KeyNotFoundException("Category not found.");
 
         var isUsed = await _context.ItemPosts.AnyAsync(x => x.CategoryId == id);
 
         if (isUsed)
-            throw new InvalidOperationException("Bu kateqoriya istifadə olunduğu üçün silinə bilməz.");
+            throw new InvalidOperationException("This category cannot be deleted because it is in use.");
 
         _context.Categories.Remove(category);
         await _context.SaveChangesAsync();
     }
 }
-

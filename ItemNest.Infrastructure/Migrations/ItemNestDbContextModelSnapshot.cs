@@ -156,6 +156,31 @@ namespace ItemNest.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("ItemNest.Domain.Entities.Favorite", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("ItemPostId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ItemPostId");
+
+                    b.HasIndex("UserId", "ItemPostId")
+                        .IsUnique();
+
+                    b.ToTable("Favorites");
+                });
+
             modelBuilder.Entity("ItemNest.Domain.Entities.ItemImage", b =>
                 {
                     b.Property<Guid>("Id")
@@ -376,6 +401,25 @@ namespace ItemNest.Infrastructure.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("ItemNest.Domain.Entities.Favorite", b =>
+                {
+                    b.HasOne("ItemNest.Domain.Entities.ItemPost", "ItemPost")
+                        .WithMany()
+                        .HasForeignKey("ItemPostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ItemNest.Domain.Entities.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("ItemPost");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("ItemNest.Domain.Entities.ItemImage", b =>
