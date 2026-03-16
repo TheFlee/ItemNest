@@ -15,6 +15,7 @@ public class ItemNestDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, 
     public DbSet<ItemPost> ItemPosts => Set<ItemPost>();
     public DbSet<ItemImage> ItemImages => Set<ItemImage>();
     public DbSet<Favorite> Favorites => Set<Favorite>();
+    public DbSet<Report> Reports => Set<Report>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -138,6 +139,41 @@ public class ItemNestDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, 
                   .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasIndex(x => new { x.UserId, x.ItemPostId })
+                  .IsUnique();
+        });
+
+        builder.Entity<Report>(entity =>
+        {
+            entity.HasKey(x => x.Id);
+
+            entity.Property(x => x.Description)
+                  .HasMaxLength(1000);
+
+            entity.Property(x => x.CreatedAt)
+                  .IsRequired();
+
+            entity.Property(x => x.Reason)
+                  .IsRequired();
+
+            entity.Property(x => x.Status)
+                  .IsRequired();
+
+            entity.HasOne(x => x.ReporterUser)
+                  .WithMany(x => x.Reports)
+                  .HasForeignKey(x => x.ReporterUserId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(x => x.ItemPost)
+                  .WithMany(x => x.Reports)
+                  .HasForeignKey(x => x.ItemPostId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(x => x.ReviewedByUser)
+                  .WithMany(x => x.ReviewedReports)
+                  .HasForeignKey(x => x.ReviewedByUserId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(x => new { x.ReporterUserId, x.ItemPostId })
                   .IsUnique();
         });
     }

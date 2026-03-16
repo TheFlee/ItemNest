@@ -3,6 +3,7 @@ using ItemNest.Application.DTOs;
 using ItemNest.Application.Exceptions;
 using ItemNest.Application.Interfaces;
 using ItemNest.Domain.Entities;
+using ItemNest.Domain.Enums;
 using ItemNest.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -184,4 +185,124 @@ public class ItemPostService : IItemPostService
                 : query.OrderByDescending(x => x.CreatedAt)
         };
     }
+
+    public async Task<IReadOnlyCollection<MatchedItemPostDto>> GetMatchesAsync(Guid postId)
+    {
+        var sourcePost = await _context.ItemPosts
+            .AsNoTracking()
+            .Include(x => x.Category)
+            .Include(x => x.Images)
+            .FirstOrDefaultAsync(x => x.Id == postId);
+
+        if (sourcePost is null)
+            throw new KeyNotFoundException("Item post not found.");
+
+        var oppositeType = sourcePost.Type == PostType.Lost
+            ? PostType.Found
+            : PostType.Lost;
+
+        var minDate = sourcePost.EventDate.Date.AddDays(-30);
+        var maxDate = sourcePost.EventDate.Date.AddDays(30);
+
+        var candidatePosts = await _context.ItemPosts
+            .AsNoTracking()
+            .Include(x => x.Category)
+            .Include(x => x.Images)
+            .Where(x => x.Id != sourcePost.Id)
+            .Where(x => x.UserId != sourcePost.UserId)
+            .Where(x => x.Type == oppositeType)
+            .Where(x => x.CategoryId == sourcePost.CategoryId)
+            .Where(x => x.EventDate >= minDate && x.EventDate <= maxDate)
+            .ToListAsync();
+
+        var matches = new List<MatchedItemPostDto>();
+
+        foreach (var candidate in candidatePosts)
+        {
+            var score = 0;
+            var reasons = new List<string>();
+
+            var hasSameCategory = candidate.CategoryId == sourcePost.CategoryId;
+            var hasSameColor = candidate.Color == sourcePost.Color;
+            var hasSimilarLocation = IsSimilarLocation(sourcePost.Location, candidate.Location);
+
+            var dayDifference = Math.Abs((candidate.EventDate.Date - sourcePost.EventDate.Date).Days);
+            var hasCloseDate = dayDifference <= 3;
+
+            if (!hasSameCategory)
+                continue;
+
+            if (!hasSimilarLocation && !hasCloseDate)
+                continue;
+
+            if (hasSameCategory)
+            {
+                score += 40;
+                reasons.Add("Same category");
+            }
+
+            if (hasSameColor)
+            {
+                score += 20;
+                reasons.Add("Same color");
+            }
+
+            if (hasSimilarLocation)
+            {
+                score += 25;
+                reasons.Add("Similar location");
+            }
+
+            if (hasCloseDate)
+            {
+                score += 15;
+                reasons.Add("Close event date");
+            }
+
+            matches.Add(new MatchedItemPostDto
+            {
+                Id = candidate.Id,
+                Title = candidate.Title,
+                Description = candidate.Description,
+                Location = candidate.Location,
+                EventDate = candidate.EventDate,
+                CategoryId = candidate.CategoryId,
+                CategoryName = candidate.Category?.Name ?? string.Empty,
+                MatchScore = score,
+                MatchReasons = reasons,
+                Images = _mapper.Map<List<ItemImageDto>>(candidate.Images.OrderBy(x => x.CreatedAt).ToList())
+            });
+        }
+
+        return matches
+            .OrderByDescending(x => x.MatchScore)
+            .ThenByDescending(x => x.EventDate)
+            .Take(10)
+            .ToList();
+    }
+
+    private static bool IsSimilarLocation(string sourceLocation, string candidateLocation)
+    {
+        if (string.IsNullOrWhiteSpace(sourceLocation) || string.IsNullOrWhiteSpace(candidateLocation))
+            return false;
+
+        var normalizedSource = NormalizeText(sourceLocation);
+        var normalizedCandidate = NormalizeText(candidateLocation);
+
+        return normalizedSource.Contains(normalizedCandidate) ||
+               normalizedCandidate.Contains(normalizedSource);
+    }
+
+    private static string NormalizeText(string text)
+    {
+        return text.Trim().ToLower()
+                   .Replace("ə", "e")
+                   .Replace("ı", "i")
+                   .Replace("ö", "o")
+                   .Replace("ü", "u")
+                   .Replace("ş", "s")
+                   .Replace("ç", "c")
+                   .Replace("ğ", "g");
+    }
+
 }

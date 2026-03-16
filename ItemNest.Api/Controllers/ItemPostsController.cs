@@ -67,6 +67,14 @@ public class ItemPostsController : ControllerBase
         return NoContent();
     }
 
+    [HttpGet("{id:guid}/matches")]
+    [Authorize]
+    public async Task<ActionResult<IReadOnlyCollection<MatchedItemPostDto>>> GetMatches(Guid id)
+    {
+        var matches = await _itemPostService.GetMatchesAsync(id);
+        return Ok(matches);
+    }
+
     private Guid GetCurrentUserId()
     {
         var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier)

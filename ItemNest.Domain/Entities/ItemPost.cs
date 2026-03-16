@@ -19,4 +19,5 @@ public class ItemPost
     public int CategoryId { get; set; }
     public Category Category { get; set; } = null!;
     public ICollection<ItemImage> Images { get; set; } = new List<ItemImage>();
+    public ICollection<Report> Reports { get; set; } = new List<Report>();
 }

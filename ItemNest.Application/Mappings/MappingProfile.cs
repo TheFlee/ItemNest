@@ -47,5 +47,12 @@ public class MappingProfile : Profile
                         opt => opt.MapFrom(_ => DateTimeOffset.UtcNow));
         // ItemImage
         CreateMap<ItemImage, ItemImageDto>();
+
+        // Report
+        CreateMap<Report, ReportDto>()
+            .ForMember(dest => dest.ReporterFullName,
+                        opt => opt.MapFrom(src => src.ReporterUser.FullName))
+            .ForMember(dest => dest.ItemPostTitle,
+                        opt => opt.MapFrom(src => src.ItemPost.Title));
     }
 }
