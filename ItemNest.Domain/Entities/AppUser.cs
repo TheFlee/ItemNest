@@ -9,4 +9,6 @@ public class AppUser : IdentityUser<Guid>
     public ICollection<ItemPost> ItemPosts { get; set; } = new List<ItemPost>();
     public ICollection<Report> Reports { get; set; } = new List<Report>();
     public ICollection<Report> ReviewedReports { get; set; } = new List<Report>();
+    public ICollection<ContactRequest> SentContactRequests { get; set; } = new List<ContactRequest>();
+    public ICollection<ContactRequest> ReceivedContactRequests { get; set; } = new List<ContactRequest>();
 }
