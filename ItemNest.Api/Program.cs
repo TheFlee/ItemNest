@@ -98,6 +98,7 @@ builder.Services.AddScoped<IItemPostService, ItemPostService>();
 builder.Services.AddScoped<IItemImageService, ItemImageService>();
 builder.Services.AddScoped<IFavoriteService, FavoriteService>();
 builder.Services.AddScoped<IReportService, ReportService>();
+builder.Services.AddScoped<IContactRequestService, ContactRequestService>();
 
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<RegisterDtoValidator>();

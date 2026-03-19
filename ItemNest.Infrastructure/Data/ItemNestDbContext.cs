@@ -16,6 +16,7 @@ public class ItemNestDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, 
     public DbSet<ItemImage> ItemImages => Set<ItemImage>();
     public DbSet<Favorite> Favorites => Set<Favorite>();
     public DbSet<Report> Reports => Set<Report>();
+    public DbSet<ContactRequest> ContactRequests => Set<ContactRequest>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -175,6 +176,37 @@ public class ItemNestDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, 
 
             entity.HasIndex(x => new { x.ReporterUserId, x.ItemPostId })
                   .IsUnique();
+        });
+
+        builder.Entity<ContactRequest>(entity =>
+        {
+            entity.HasKey(x => x.Id);
+
+            entity.Property(x => x.Message)
+                .HasMaxLength(1000);
+
+            entity.Property(x => x.Status)
+                .IsRequired();
+
+            entity.Property(x => x.CreatedAt)
+                .IsRequired();
+
+            entity.HasOne(x => x.RequesterUser)
+                .WithMany(x => x.SentContactRequests)
+                .HasForeignKey(x => x.RequesterUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(x => x.PostOwnerUser)
+                .WithMany(x => x.ReceivedContactRequests)
+                .HasForeignKey(x => x.PostOwnerUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(x => x.ItemPost)
+                .WithMany(x => x.ContactRequests)
+                .HasForeignKey(x => x.ItemPostId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(x => new { x.RequesterUserId, x.ItemPostId, x.Status });
         });
     }
 
