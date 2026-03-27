@@ -6,7 +6,7 @@ using System.Security.Claims;
 
 namespace ItemNest.Api.Controllers;
 
-[Route("api/[controller]")]
+[Route("api")]
 [ApiController]
 public class ItemImagesController : ControllerBase
 {

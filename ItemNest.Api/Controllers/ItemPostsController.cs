@@ -20,14 +20,16 @@ public class ItemPostsController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<PagedResponseDto<ItemPostDto>>> GetAll([FromQuery] ItemPostFilterDto filter)
     {
-        var posts = await _itemPostService.GetAllAsync(filter);
+        var currentUserId = TryGetCurrentUserId();
+        var posts = await _itemPostService.GetAllAsync(filter, currentUserId);
         return Ok(posts);
     }
 
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<ItemPostDto>> GetById(Guid id)
     {
-        var post = await _itemPostService.GetByIdAsync(id);
+        var currentUserId = TryGetCurrentUserId();
+        var post = await _itemPostService.GetByIdAsync(id, currentUserId);
         return Ok(post);
     }
 
@@ -83,6 +85,18 @@ public class ItemPostsController : ControllerBase
 
         if (string.IsNullOrWhiteSpace(userIdClaim))
             throw new UnauthorizedAccessException("User information was not found in the token.");
+
+        return Guid.Parse(userIdClaim);
+    }
+
+    private Guid? TryGetCurrentUserId()
+    {
+        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                         ?? User.FindFirstValue(ClaimTypes.Name)
+                         ?? User.FindFirstValue("sub");
+
+        if (string.IsNullOrWhiteSpace(userIdClaim))
+            return null;
 
         return Guid.Parse(userIdClaim);
     }

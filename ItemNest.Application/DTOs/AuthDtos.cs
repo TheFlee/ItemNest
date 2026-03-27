@@ -12,6 +12,12 @@ public class AuthResponseDto
     public string Token { get; set; } = string.Empty;
 
     /// <summary>
+    /// Unique identifier of the authenticated user.
+    /// </summary>
+    /// <example>5b8a2d90-77f4-4c8d-9463-9483fc7b1f88</example>
+    public Guid UserId { get; set; }
+
+    /// <summary>
     /// Email address of the authenticated user.
     /// </summary>
     /// <example>firidun@example.com</example>
@@ -22,6 +28,12 @@ public class AuthResponseDto
     /// </summary>
     /// <example>Firidun Hesenli</example>
     public string FullName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Roles of the authenticated user.
+    /// </summary>
+    /// <example>["User"]</example>
+    public List<string> Roles { get; set; } = new();
 
     /// <summary>
     /// Expiration date and time of the JWT token.

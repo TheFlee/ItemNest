@@ -4,8 +4,8 @@ namespace ItemNest.Application.Interfaces;
 
 public interface IItemPostService
 {
-    Task<PagedResponseDto<ItemPostDto>> GetAllAsync(ItemPostFilterDto filter);
-    Task<ItemPostDto> GetByIdAsync(Guid id);
+    Task<PagedResponseDto<ItemPostDto>> GetAllAsync(ItemPostFilterDto filter, Guid? currentUserId = null);
+    Task<ItemPostDto> GetByIdAsync(Guid id, Guid? currentUserId = null);
     Task<ItemPostDto> CreateAsync(Guid userId, CreateItemPostDto dto);
     Task<ItemPostDto> UpdateAsync(Guid userId, Guid id, UpdateItemPostDto dto);
     Task DeleteAsync(Guid userId, Guid id);

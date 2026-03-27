@@ -20,11 +20,12 @@ public class ItemPostService : IItemPostService
         _mapper = mapper;
     }
 
-    public async Task<PagedResponseDto<ItemPostDto>> GetAllAsync(ItemPostFilterDto filter)
+    public async Task<PagedResponseDto<ItemPostDto>> GetAllAsync(ItemPostFilterDto filter, Guid? currentUserId = null)
     {
         IQueryable<ItemPost> query = _context.ItemPosts
             .AsNoTracking()
             .Include(x => x.Category)
+            .Include(x => x.User)
             .Include(x => x.Images);
 
         if (filter.Type.HasValue)
@@ -72,6 +73,8 @@ public class ItemPostService : IItemPostService
 
         var itemDtos = _mapper.Map<List<ItemPostDto>>(items);
 
+        await EnrichPostDtosAsync(itemDtos, currentUserId);
+
         return new PagedResponseDto<ItemPostDto>
         {
             Items = itemDtos,
@@ -82,9 +85,10 @@ public class ItemPostService : IItemPostService
         };
     }
 
-    public async Task<ItemPostDto> GetByIdAsync(Guid id)
+    public async Task<ItemPostDto> GetByIdAsync(Guid id, Guid? currentUserId = null)
     {
         var post = await _context.ItemPosts
+            .AsNoTracking()
             .Include(x => x.Category)
             .Include(x => x.User)
             .Include(x => x.Images)
@@ -93,7 +97,10 @@ public class ItemPostService : IItemPostService
         if (post is null)
             throw new KeyNotFoundException("Post not found.");
 
-        return _mapper.Map<ItemPostDto>(post);
+        var dto = _mapper.Map<ItemPostDto>(post);
+        await EnrichPostDtosAsync([dto], currentUserId);
+
+        return dto;
     }
 
     public async Task<ItemPostDto> CreateAsync(Guid userId, CreateItemPostDto dto)
@@ -113,7 +120,7 @@ public class ItemPostService : IItemPostService
         _context.ItemPosts.Add(post);
         await _context.SaveChangesAsync();
 
-        return await GetByIdAsync(post.Id);
+        return await GetByIdAsync(post.Id, userId);
     }
 
     public async Task<ItemPostDto> UpdateAsync(Guid userId, Guid id, UpdateItemPostDto dto)
@@ -133,7 +140,7 @@ public class ItemPostService : IItemPostService
 
         await _context.SaveChangesAsync();
 
-        return await GetByIdAsync(post.Id);
+        return await GetByIdAsync(post.Id, userId);
     }
 
     public async Task DeleteAsync(Guid userId, Guid id)
@@ -160,7 +167,41 @@ public class ItemPostService : IItemPostService
             .OrderByDescending(x => x.CreatedAt)
             .ToListAsync();
 
-        return _mapper.Map<IReadOnlyList<ItemPostDto>>(posts);
+        var dtos = _mapper.Map<List<ItemPostDto>>(posts);
+        await EnrichPostDtosAsync(dtos, userId);
+
+        return dtos;
+    }
+
+    private async Task EnrichPostDtosAsync(List<ItemPostDto> posts, Guid? currentUserId)
+    {
+        if (posts.Count == 0)
+            return;
+
+        foreach (var post in posts)
+        {
+            post.PrimaryImageUrl = post.Images.FirstOrDefault()?.ImageUrl ?? string.Empty;
+            post.IsOwner = currentUserId.HasValue && post.UserId == currentUserId.Value;
+            post.IsFavorited = false;
+        }
+
+        if (!currentUserId.HasValue)
+            return;
+
+        var postIds = posts.Select(x => x.Id).ToList();
+
+        var favoritedPostIds = await _context.Favorites
+            .AsNoTracking()
+            .Where(x => x.UserId == currentUserId.Value && postIds.Contains(x.ItemPostId))
+            .Select(x => x.ItemPostId)
+            .ToListAsync();
+
+        var favoriteSet = favoritedPostIds.ToHashSet();
+
+        foreach (var post in posts)
+        {
+            post.IsFavorited = favoriteSet.Contains(post.Id);
+        }
     }
 
     private static IQueryable<ItemPost> ApplySorting(IQueryable<ItemPost> query, string? sortBy, string? sortDirection)
@@ -259,6 +300,9 @@ public class ItemPostService : IItemPostService
                 reasons.Add("Close event date");
             }
 
+            if (score == 0)
+                continue;
+
             matches.Add(new MatchedItemPostDto
             {
                 Id = candidate.Id,
@@ -267,42 +311,28 @@ public class ItemPostService : IItemPostService
                 Location = candidate.Location,
                 EventDate = candidate.EventDate,
                 CategoryId = candidate.CategoryId,
-                CategoryName = candidate.Category?.Name ?? string.Empty,
+                CategoryName = candidate.Category.Name,
                 MatchScore = score,
                 MatchReasons = reasons,
-                Images = _mapper.Map<List<ItemImageDto>>(candidate.Images.OrderBy(x => x.CreatedAt).ToList())
+                Images = _mapper.Map<List<ItemImageDto>>(candidate.Images)
             });
         }
 
         return matches
             .OrderByDescending(x => x.MatchScore)
             .ThenByDescending(x => x.EventDate)
-            .Take(10)
             .ToList();
     }
 
-    private static bool IsSimilarLocation(string sourceLocation, string candidateLocation)
+    private static bool IsSimilarLocation(string source, string candidate)
     {
-        if (string.IsNullOrWhiteSpace(sourceLocation) || string.IsNullOrWhiteSpace(candidateLocation))
+        if (string.IsNullOrWhiteSpace(source) || string.IsNullOrWhiteSpace(candidate))
             return false;
 
-        var normalizedSource = NormalizeText(sourceLocation);
-        var normalizedCandidate = NormalizeText(candidateLocation);
+        var normalizedSource = source.Trim().ToLowerInvariant();
+        var normalizedCandidate = candidate.Trim().ToLowerInvariant();
 
         return normalizedSource.Contains(normalizedCandidate) ||
                normalizedCandidate.Contains(normalizedSource);
     }
-
-    private static string NormalizeText(string text)
-    {
-        return text.Trim().ToLower()
-                   .Replace("ə", "e")
-                   .Replace("ı", "i")
-                   .Replace("ö", "o")
-                   .Replace("ü", "u")
-                   .Replace("ş", "s")
-                   .Replace("ç", "c")
-                   .Replace("ğ", "g");
-    }
-
 }
