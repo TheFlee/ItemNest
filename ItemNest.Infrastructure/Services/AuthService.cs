@@ -82,8 +82,10 @@ public class AuthService : IAuthService
         return new AuthResponseDto
         {
             Token = token,
+            UserId = user.Id,
             Email = user.Email ?? string.Empty,
             FullName = user.FullName,
+            Roles = roles.ToList(),
             ExpiresAt = _jwtTokenService.GetTokenExpiration()
         };
     }

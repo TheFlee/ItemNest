@@ -41,3 +41,21 @@ public class FavoriteDto
     /// <example>2026-03-14T10:45:00+00:00</example>
     public DateTimeOffset CreatedAt { get; set; }
 }
+
+/// <summary>
+/// Response model representing favorite status of a specific post for the current user.
+/// </summary>
+public class FavoriteStatusDto
+{
+    /// <summary>
+    /// Identifier of the item post.
+    /// </summary>
+    /// <example>3f10e9c2-f8c3-4f92-a7a2-9306c6a1d123</example>
+    public Guid ItemPostId { get; set; }
+
+    /// <summary>
+    /// Indicates whether the current user has favorited the post.
+    /// </summary>
+    /// <example>true</example>
+    public bool IsFavorited { get; set; }
+}

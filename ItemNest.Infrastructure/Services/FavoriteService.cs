@@ -80,4 +80,21 @@ public class FavoriteService : IFavoriteService
             CreatedAt = x.CreatedAt
         }).ToList();
     }
+
+    public async Task<FavoriteStatusDto> GetStatusAsync(Guid userId, Guid itemPostId)
+    {
+        var postExists = await _context.ItemPosts.AnyAsync(x => x.Id == itemPostId);
+        if (!postExists)
+            throw new KeyNotFoundException("Post not found.");
+
+        var isFavorited = await _context.Favorites
+            .AsNoTracking()
+            .AnyAsync(x => x.UserId == userId && x.ItemPostId == itemPostId);
+
+        return new FavoriteStatusDto
+        {
+            ItemPostId = itemPostId,
+            IsFavorited = isFavorited
+        };
+    }
 }
