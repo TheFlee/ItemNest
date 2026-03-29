@@ -24,3 +24,11 @@ export const itemColorOptions: SelectOption<number>[] = [
   { label: "Silver", value: 12 },
   { label: "Gold", value: 13 },
 ];
+
+export const reportReasonOptions: SelectOption<number>[] = [
+  { label: "Spam", value: 1 },
+  { label: "Fake Post", value: 2 },
+  { label: "Offensive Content", value: 3 },
+  { label: "Wrong Category", value: 4 },
+  { label: "Other", value: 5 },
+];

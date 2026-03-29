@@ -32,3 +32,17 @@ public class CurrentUserDto
     /// <example>2026-03-10T15:00:00+04:00</example>
     public DateTimeOffset CreatedAt { get; set; }
 }
+
+public class AdminUserDto
+{
+    public Guid Id { get; set; }
+    public string FullName { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public List<string> Roles { get; set; } = new();
+    public DateTimeOffset CreatedAt { get; set; }
+}
+
+public class AdminUpdateUserRoleDto
+{
+    public string Role { get; set; } = string.Empty;
+}

@@ -55,3 +55,26 @@ export interface CreatePostRequest {
   eventDate: string;
   categoryId: number;
 }
+
+export interface UpdatePostRequest {
+  title: string;
+  description: string;
+  color: number;
+  location: string;
+  eventDate: string;
+  categoryId: number;
+  status: number;
+}
+
+export interface MatchedItemPost {
+  id: string;
+  title: string;
+  description: string;
+  location: string;
+  eventDate: string;
+  categoryId: number;
+  categoryName: string;
+  matchScore: number;
+  matchReasons: string[];
+  images: ItemImage[];
+}

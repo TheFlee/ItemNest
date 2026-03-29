@@ -5,4 +5,5 @@ namespace ItemNest.Application.Interfaces;
 public interface IDashboardService
 {
     Task<MyDashboardDto> GetMyDashboardAsync(Guid userId);
+    Task<AdminDashboardDto> GetAdminDashboardAsync();
 }
