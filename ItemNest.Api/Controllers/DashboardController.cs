@@ -1,5 +1,6 @@
 ﻿using ItemNest.Application.DTOs;
 using ItemNest.Application.Interfaces;
+using ItemNest.Infrastructure.Seed;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -23,6 +24,14 @@ public class DashboardController : ControllerBase
     {
         var userId = GetCurrentUserId();
         var dashboard = await _dashboardService.GetMyDashboardAsync(userId);
+        return Ok(dashboard);
+    }
+
+    [HttpGet("admin")]
+    [Authorize(Roles = AppRoles.Admin)]
+    public async Task<ActionResult<AdminDashboardDto>> GetAdmin()
+    {
+        var dashboard = await _dashboardService.GetAdminDashboardAsync();
         return Ok(dashboard);
     }
 

@@ -1,4 +1,5 @@
 ﻿using ItemNest.Application.DTOs;
+using ItemNest.Domain.Enums;
 
 namespace ItemNest.Application.Interfaces;
 
@@ -11,4 +12,8 @@ public interface IItemPostService
     Task DeleteAsync(Guid userId, Guid id);
     Task<IReadOnlyList<ItemPostDto>> GetMyPostsAsync(Guid userId);
     Task<IReadOnlyCollection<MatchedItemPostDto>> GetMatchesAsync(Guid postId);
+
+    Task<IReadOnlyList<ItemPostDto>> GetAllForAdminAsync();
+    Task<ItemPostDto> AdminUpdateStatusAsync(Guid id, PostStatus status);
+    Task AdminDeleteAsync(Guid id);
 }

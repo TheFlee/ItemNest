@@ -1,5 +1,6 @@
 ﻿using ItemNest.Application.DTOs;
 using ItemNest.Application.Interfaces;
+using ItemNest.Infrastructure.Seed;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -23,6 +24,23 @@ public class UsersController : ControllerBase
     {
         var userId = GetCurrentUserId();
         var user = await _userService.GetCurrentUserAsync(userId);
+        return Ok(user);
+    }
+
+    [HttpGet("admin")]
+    [Authorize(Roles = AppRoles.Admin)]
+    public async Task<ActionResult<IReadOnlyList<AdminUserDto>>> GetAllForAdmin()
+    {
+        var users = await _userService.GetAllForAdminAsync();
+        return Ok(users);
+    }
+
+    [HttpPut("admin/{id:guid}/role")]
+    [Authorize(Roles = AppRoles.Admin)]
+    public async Task<ActionResult<AdminUserDto>> UpdateRole(Guid id, [FromBody] AdminUpdateUserRoleDto dto)
+    {
+        var currentAdminUserId = GetCurrentUserId();
+        var user = await _userService.AdminUpdateRoleAsync(currentAdminUserId, id, dto.Role);
         return Ok(user);
     }
 

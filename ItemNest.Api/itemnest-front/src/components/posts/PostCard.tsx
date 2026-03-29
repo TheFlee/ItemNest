@@ -6,9 +6,13 @@ import { getPostTypeLabel } from "../../utils/post";
 
 interface PostCardProps {
   post: ItemPost;
+  showOwnerActions?: boolean;
 }
 
-export default function PostCard({ post }: PostCardProps) {
+export default function PostCard({
+  post,
+  showOwnerActions = false,
+}: PostCardProps) {
   return (
     <article className="overflow-hidden rounded-2xl bg-white shadow transition hover:shadow-md">
       <div className="h-52 w-full bg-slate-200">
@@ -85,6 +89,24 @@ export default function PostCard({ post }: PostCardProps) {
             View Details
           </Link>
         </div>
+
+        {showOwnerActions && post.isOwner && (
+          <div className="mt-4 flex gap-2">
+            <Link
+              to={`/posts/${post.id}/edit`}
+              className="rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            >
+              Edit
+            </Link>
+
+            <Link
+              to={`/posts/${post.id}`}
+              className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            >
+              Open
+            </Link>
+          </div>
+        )}
       </div>
     </article>
   );

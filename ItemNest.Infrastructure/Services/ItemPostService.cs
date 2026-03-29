@@ -37,6 +37,10 @@ public class ItemPostService : IItemPostService
         {
             query = query.Where(x => x.Status == filter.Status.Value);
         }
+        else
+        {
+            query = query.Where(x => x.Status == PostStatus.Open);
+        }
 
         if (filter.Color.HasValue)
         {
@@ -145,14 +149,18 @@ public class ItemPostService : IItemPostService
 
     public async Task DeleteAsync(Guid userId, Guid id)
     {
-        var post = await _context.ItemPosts.FirstOrDefaultAsync(x => x.Id == id);
+        var post = await _context.ItemPosts
+            .Include(x => x.Images)
+            .FirstOrDefaultAsync(x => x.Id == id);
+
         if (post is null)
             throw new KeyNotFoundException("Post not found.");
 
         if (post.UserId != userId)
             throw new ForbiddenException("You are not allowed to delete this post.");
 
-        _context.ItemPosts.Remove(post);
+        await DeletePostRelationsAndPostAsync(post);
+
         await _context.SaveChangesAsync();
     }
 
@@ -171,60 +179,6 @@ public class ItemPostService : IItemPostService
         await EnrichPostDtosAsync(dtos, userId);
 
         return dtos;
-    }
-
-    private async Task EnrichPostDtosAsync(List<ItemPostDto> posts, Guid? currentUserId)
-    {
-        if (posts.Count == 0)
-            return;
-
-        foreach (var post in posts)
-        {
-            post.PrimaryImageUrl = post.Images.FirstOrDefault()?.ImageUrl ?? string.Empty;
-            post.IsOwner = currentUserId.HasValue && post.UserId == currentUserId.Value;
-            post.IsFavorited = false;
-        }
-
-        if (!currentUserId.HasValue)
-            return;
-
-        var postIds = posts.Select(x => x.Id).ToList();
-
-        var favoritedPostIds = await _context.Favorites
-            .AsNoTracking()
-            .Where(x => x.UserId == currentUserId.Value && postIds.Contains(x.ItemPostId))
-            .Select(x => x.ItemPostId)
-            .ToListAsync();
-
-        var favoriteSet = favoritedPostIds.ToHashSet();
-
-        foreach (var post in posts)
-        {
-            post.IsFavorited = favoriteSet.Contains(post.Id);
-        }
-    }
-
-    private static IQueryable<ItemPost> ApplySorting(IQueryable<ItemPost> query, string? sortBy, string? sortDirection)
-    {
-        var normalizedSortBy = sortBy?.Trim().ToLower() ?? "createdat";
-        var normalizedSortDirection = sortDirection?.Trim().ToLower() ?? "desc";
-
-        var isAscending = normalizedSortDirection == "asc";
-
-        return normalizedSortBy switch
-        {
-            "title" => isAscending
-                ? query.OrderBy(x => x.Title)
-                : query.OrderByDescending(x => x.Title),
-
-            "eventdate" => isAscending
-                ? query.OrderBy(x => x.EventDate)
-                : query.OrderByDescending(x => x.EventDate),
-
-            "createdat" or _ => isAscending
-                ? query.OrderBy(x => x.CreatedAt)
-                : query.OrderByDescending(x => x.CreatedAt)
-        };
     }
 
     public async Task<IReadOnlyCollection<MatchedItemPostDto>> GetMatchesAsync(Guid postId)
@@ -254,6 +208,7 @@ public class ItemPostService : IItemPostService
             .Where(x => x.Type == oppositeType)
             .Where(x => x.CategoryId == sourcePost.CategoryId)
             .Where(x => x.EventDate >= minDate && x.EventDate <= maxDate)
+            .Where(x => x.Status == PostStatus.Open)
             .ToListAsync();
 
         var matches = new List<MatchedItemPostDto>();
@@ -321,18 +276,157 @@ public class ItemPostService : IItemPostService
         return matches
             .OrderByDescending(x => x.MatchScore)
             .ThenByDescending(x => x.EventDate)
+            .Take(10)
             .ToList();
     }
 
-    private static bool IsSimilarLocation(string source, string candidate)
+    public async Task<IReadOnlyList<ItemPostDto>> GetAllForAdminAsync()
     {
-        if (string.IsNullOrWhiteSpace(source) || string.IsNullOrWhiteSpace(candidate))
+        var posts = await _context.ItemPosts
+            .AsNoTracking()
+            .Include(x => x.Category)
+            .Include(x => x.User)
+            .Include(x => x.Images)
+            .OrderByDescending(x => x.CreatedAt)
+            .ToListAsync();
+
+        var dtos = _mapper.Map<List<ItemPostDto>>(posts);
+        await EnrichPostDtosAsync(dtos, null);
+
+        return dtos;
+    }
+
+    public async Task<ItemPostDto> AdminUpdateStatusAsync(Guid id, PostStatus status)
+    {
+        var post = await _context.ItemPosts.FirstOrDefaultAsync(x => x.Id == id);
+
+        if (post is null)
+            throw new KeyNotFoundException("Post not found.");
+
+        post.Status = status;
+
+        await _context.SaveChangesAsync();
+
+        return await GetByIdAsync(post.Id, null);
+    }
+
+    public async Task AdminDeleteAsync(Guid id)
+    {
+        var post = await _context.ItemPosts
+            .Include(x => x.Images)
+            .FirstOrDefaultAsync(x => x.Id == id);
+
+        if (post is null)
+            throw new KeyNotFoundException("Post not found.");
+
+        await DeletePostRelationsAndPostAsync(post);
+
+        await _context.SaveChangesAsync();
+    }
+
+    private async Task DeletePostRelationsAndPostAsync(ItemPost post)
+    {
+        var favorites = await _context.Favorites
+            .Where(x => x.ItemPostId == post.Id)
+            .ToListAsync();
+
+        var reports = await _context.Reports
+            .Where(x => x.ItemPostId == post.Id)
+            .ToListAsync();
+
+        var contactRequests = await _context.ContactRequests
+            .Where(x => x.ItemPostId == post.Id)
+            .ToListAsync();
+
+        var images = await _context.ItemImages
+            .Where(x => x.ItemPostId == post.Id)
+            .ToListAsync();
+
+        if (favorites.Count > 0)
+        {
+            _context.Favorites.RemoveRange(favorites);
+        }
+
+        if (reports.Count > 0)
+        {
+            _context.Reports.RemoveRange(reports);
+        }
+
+        if (contactRequests.Count > 0)
+        {
+            _context.ContactRequests.RemoveRange(contactRequests);
+        }
+
+        if (images.Count > 0)
+        {
+            _context.ItemImages.RemoveRange(images);
+        }
+
+        _context.ItemPosts.Remove(post);
+    }
+
+    private async Task EnrichPostDtosAsync(List<ItemPostDto> posts, Guid? currentUserId)
+    {
+        if (posts.Count == 0)
+            return;
+
+        foreach (var post in posts)
+        {
+            post.PrimaryImageUrl = post.Images.FirstOrDefault()?.ImageUrl ?? string.Empty;
+            post.IsOwner = currentUserId.HasValue && post.UserId == currentUserId.Value;
+            post.IsFavorited = false;
+        }
+
+        if (!currentUserId.HasValue)
+            return;
+
+        var postIds = posts.Select(x => x.Id).ToList();
+
+        var favoritedPostIds = await _context.Favorites
+            .AsNoTracking()
+            .Where(x => x.UserId == currentUserId.Value && postIds.Contains(x.ItemPostId))
+            .Select(x => x.ItemPostId)
+            .ToListAsync();
+
+        var favoriteSet = favoritedPostIds.ToHashSet();
+
+        foreach (var post in posts)
+        {
+            post.IsFavorited = favoriteSet.Contains(post.Id);
+        }
+    }
+
+    private static IQueryable<ItemPost> ApplySorting(IQueryable<ItemPost> query, string? sortBy, string? sortDirection)
+    {
+        var normalizedSortBy = sortBy?.Trim().ToLower() ?? "createdat";
+        var normalizedSortDirection = sortDirection?.Trim().ToLower() ?? "desc";
+
+        var isAscending = normalizedSortDirection == "asc";
+
+        return normalizedSortBy switch
+        {
+            "title" => isAscending
+                ? query.OrderBy(x => x.Title)
+                : query.OrderByDescending(x => x.Title),
+
+            "eventdate" => isAscending
+                ? query.OrderBy(x => x.EventDate)
+                : query.OrderByDescending(x => x.EventDate),
+
+            "createdat" or _ => isAscending
+                ? query.OrderBy(x => x.CreatedAt)
+                : query.OrderByDescending(x => x.CreatedAt)
+        };
+    }
+
+    private static bool IsSimilarLocation(string sourceLocation, string candidateLocation)
+    {
+        if (string.IsNullOrWhiteSpace(sourceLocation) || string.IsNullOrWhiteSpace(candidateLocation))
             return false;
 
-        var normalizedSource = source.Trim().ToLowerInvariant();
-        var normalizedCandidate = candidate.Trim().ToLowerInvariant();
+        var source = sourceLocation.Trim().ToLowerInvariant();
+        var candidate = candidateLocation.Trim().ToLowerInvariant();
 
-        return normalizedSource.Contains(normalizedCandidate) ||
-               normalizedCandidate.Contains(normalizedSource);
+        return source.Contains(candidate) || candidate.Contains(source);
     }
 }

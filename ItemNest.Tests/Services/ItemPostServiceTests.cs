@@ -108,7 +108,7 @@ public class ItemPostServiceTests
             Color = ItemColor.Black
         };
 
-        var action = async () => await service.UpdateAsync(post.Id, Guid.NewGuid(), dto);
+        var action = async () => await service.UpdateAsync(Guid.NewGuid(), post.Id, dto);
 
         await action.Should().ThrowAsync<Exception>();
     }

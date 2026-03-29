@@ -9,6 +9,7 @@ function navClassName({ isActive }: { isActive: boolean }) {
 
 export default function Navbar() {
   const { isAuthenticated, user, logout } = useAuth();
+  const isAdmin = user?.roles.includes("Admin") ?? false;
 
   return (
     <header className="border-b bg-white">
@@ -17,7 +18,7 @@ export default function Navbar() {
           ItemNest
         </Link>
 
-        <nav className="flex items-center gap-4 text-sm">
+        <nav className="flex flex-wrap items-center gap-4 text-sm">
           <NavLink to="/" className={navClassName}>
             Home
           </NavLink>
@@ -33,10 +34,37 @@ export default function Navbar() {
               <NavLink to="/favorites" className={navClassName}>
                 Favorites
               </NavLink>
+              <NavLink to="/contact-requests/sent" className={navClassName}>
+                Sent Requests
+              </NavLink>
+              <NavLink to="/contact-requests/received" className={navClassName}>
+                Received Requests
+              </NavLink>
+              <NavLink to="/my-reports" className={navClassName}>
+                My Reports
+              </NavLink>
+              {isAdmin && (
+                <>
+                  <NavLink to="/admin/dashboard" className={navClassName}>
+                    Admin Dashboard
+                  </NavLink>
+                  <NavLink to="/admin/reports" className={navClassName}>
+                    Admin Reports
+                  </NavLink>
+                  <NavLink to="/admin/posts" className={navClassName}>
+                    Admin Posts
+                  </NavLink>
+                  <NavLink to="/admin/users" className={navClassName}>
+                    Admin Users
+                  </NavLink>
+                </>
+              )}
               <NavLink to="/create-post" className={navClassName}>
                 Create Post
               </NavLink>
+
               <span className="text-slate-500">{user?.fullName}</span>
+
               <button
                 onClick={logout}
                 className="rounded-lg bg-slate-800 px-3 py-2 text-white hover:bg-slate-900"
