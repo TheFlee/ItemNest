@@ -62,20 +62,22 @@ export default function PostImageManager({
   }
 
   return (
-    <div className="rounded-2xl bg-white p-6 shadow">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="flex flex-col gap-4 border-b border-slate-200 pb-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-xl font-semibold text-slate-800">Manage Images</h2>
-          <p className="mt-1 text-sm text-slate-500">
-            You can upload up to {maxImages} images for this post.
+          <h2 className="text-xl font-semibold tracking-tight text-slate-900">
+            Manage Images
+          </h2>
+          <p className="mt-1 text-sm text-slate-600">
+            Upload or remove images for this post. Maximum: {maxImages}.
           </p>
         </div>
 
         <label
-          className={`cursor-pointer rounded-lg px-4 py-2 text-sm font-medium text-white ${
+          className={`inline-flex cursor-pointer items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-sm ${
             images.length >= maxImages || isUploading
               ? "bg-slate-400"
-              : "bg-slate-800 hover:bg-slate-900"
+              : "bg-slate-900 hover:bg-slate-800"
           }`}
         >
           {isUploading ? "Uploading..." : "Upload Image"}
@@ -90,39 +92,49 @@ export default function PostImageManager({
       </div>
 
       {errorMessage && (
-        <div className="mt-4 rounded-lg bg-red-100 px-4 py-3 text-red-700">
+        <div className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {errorMessage}
         </div>
       )}
 
-      <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {images.map((image) => (
-          <div key={image.id} className="overflow-hidden rounded-2xl border bg-white">
-            <img
-              src={buildFileUrl(image.imageUrl)}
-              alt="Post"
-              className="h-40 w-full object-cover"
-            />
+      {images.length > 0 ? (
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {images.map((image, index) => (
+            <div
+              key={image.id}
+              className="overflow-hidden rounded-2xl border border-slate-200 bg-white"
+            >
+              <img
+                src={buildFileUrl(image.imageUrl)}
+                alt={`Post image ${index + 1}`}
+                className="h-44 w-full object-cover"
+              />
 
-            <div className="p-3">
-              <button
-                type="button"
-                onClick={() => handleDelete(image.id)}
-                disabled={deletingImageId === image.id}
-                className="rounded-lg bg-red-100 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-200 disabled:opacity-60"
-              >
-                {deletingImageId === image.id ? "Deleting..." : "Delete"}
-              </button>
+              <div className="flex items-center justify-between gap-3 p-4">
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">
+                    Image {index + 1}
+                  </p>
+                  <p className="text-xs text-slate-500">Uploaded for this post</p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => handleDelete(image.id)}
+                  disabled={deletingImageId === image.id}
+                  className="inline-flex items-center justify-center rounded-xl border border-red-200 bg-white px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {deletingImageId === image.id ? "Deleting..." : "Delete"}
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
-
-      {images.length === 0 && (
-        <p className="mt-4 text-sm text-slate-500">
+          ))}
+        </div>
+      ) : (
+        <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
           No uploaded images yet.
-        </p>
+        </div>
       )}
-    </div>
+    </section>
   );
 }

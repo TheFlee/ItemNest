@@ -12,6 +12,14 @@ interface DashboardCard {
   to: string;
 }
 
+function getPercentage(value: number, total: number) {
+  if (total <= 0) {
+    return 0;
+  }
+
+  return Math.min(100, Math.round((value / total) * 100));
+}
+
 export default function DashboardPage() {
   const [dashboard, setDashboard] = useState<MyDashboard | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
@@ -97,137 +105,204 @@ export default function DashboardPage() {
     },
   ];
 
+  const summaryRows = [
+    {
+      label: "Open",
+      value: dashboard.openPostsCount,
+      percentage: getPercentage(dashboard.openPostsCount, dashboard.myPostsCount),
+    },
+    {
+      label: "Returned",
+      value: dashboard.returnedPostsCount,
+      percentage: getPercentage(dashboard.returnedPostsCount, dashboard.myPostsCount),
+    },
+    {
+      label: "Closed",
+      value: dashboard.closedPostsCount,
+      percentage: getPercentage(dashboard.closedPostsCount, dashboard.myPostsCount),
+    },
+  ];
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-slate-800">Dashboard</h1>
-        <p className="mt-2 text-slate-600">
-          Overview of your account activity and quick access to important areas.
-        </p>
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {cards.map((card) => (
-          <Link
-            key={card.title}
-            to={card.to}
-            className="rounded-2xl bg-white p-5 shadow transition hover:-translate-y-0.5 hover:shadow-md"
-          >
-            <p className="text-sm font-medium text-slate-500">{card.title}</p>
-            <p className="mt-2 text-3xl font-bold text-slate-800">{card.value}</p>
-            <p className="mt-3 text-sm text-slate-600">{card.description}</p>
-            <p className="mt-4 text-sm font-medium text-slate-800">Open →</p>
-          </Link>
-        ))}
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        <div className="rounded-2xl bg-white p-6 shadow">
-          <h2 className="text-xl font-semibold text-slate-800">Post Summary</h2>
-          <p className="mt-2 text-slate-600">
-            Quick breakdown of your post statuses.
-          </p>
-
-          <div className="mt-5 space-y-4">
-            <div>
-              <div className="mb-1 flex items-center justify-between text-sm">
-                <span className="text-slate-600">Open</span>
-                <span className="font-medium text-slate-800">
-                  {dashboard.openPostsCount}
-                </span>
-              </div>
-              <div className="h-2 rounded-full bg-slate-100">
-                <div
-                  className="h-2 rounded-full bg-slate-800"
-                  style={{
-                    width:
-                      dashboard.myPostsCount > 0
-                        ? `${(dashboard.openPostsCount / dashboard.myPostsCount) * 100}%`
-                        : "0%",
-                  }}
-                />
-              </div>
-            </div>
-
-            <div>
-              <div className="mb-1 flex items-center justify-between text-sm">
-                <span className="text-slate-600">Returned</span>
-                <span className="font-medium text-slate-800">
-                  {dashboard.returnedPostsCount}
-                </span>
-              </div>
-              <div className="h-2 rounded-full bg-slate-100">
-                <div
-                  className="h-2 rounded-full bg-slate-800"
-                  style={{
-                    width:
-                      dashboard.myPostsCount > 0
-                        ? `${(dashboard.returnedPostsCount / dashboard.myPostsCount) * 100}%`
-                        : "0%",
-                  }}
-                />
-              </div>
-            </div>
-
-            <div>
-              <div className="mb-1 flex items-center justify-between text-sm">
-                <span className="text-slate-600">Closed</span>
-                <span className="font-medium text-slate-800">
-                  {dashboard.closedPostsCount}
-                </span>
-              </div>
-              <div className="h-2 rounded-full bg-slate-100">
-                <div
-                  className="h-2 rounded-full bg-slate-800"
-                  style={{
-                    width:
-                      dashboard.myPostsCount > 0
-                        ? `${(dashboard.closedPostsCount / dashboard.myPostsCount) * 100}%`
-                        : "0%",
-                  }}
-                />
-              </div>
-            </div>
+    <div className="space-y-8">
+      <section className="rounded-2xl border border-slate-200 bg-white px-6 py-6 shadow-sm sm:px-8 sm:py-7">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+              Account overview
+            </p>
+            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900 sm:text-[2rem]">
+              Dashboard
+            </h1>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600 sm:text-base">
+              Review your activity, monitor post status, and move quickly to the areas that need attention.
+            </p>
           </div>
-        </div>
 
-        <div className="rounded-2xl bg-white p-6 shadow">
-          <h2 className="text-xl font-semibold text-slate-800">Quick Actions</h2>
-          <p className="mt-2 text-slate-600">
-            Use these shortcuts to manage your activity faster.
-          </p>
-
-          <div className="mt-4 flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3">
             <Link
               to="/create-post"
-              className="rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-900"
+              className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800"
             >
-              Create New Post
+              Create Post
             </Link>
-
             <Link
               to="/my-posts"
-              className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+              className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-50"
             >
               Manage My Posts
             </Link>
+          </div>
+        </div>
 
+        <div className="mt-6 grid gap-4 md:grid-cols-3">
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+            <p className="text-sm font-medium text-slate-500">Total posts</p>
+            <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+              {dashboard.myPostsCount}
+            </p>
+            <p className="mt-3 text-sm leading-6 text-slate-600">
+              All item posts currently created under your account.
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+            <p className="text-sm font-medium text-slate-500">Requests waiting</p>
+            <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+              {dashboard.pendingReceivedContactRequestsCount}
+            </p>
+            <p className="mt-3 text-sm leading-6 text-slate-600">
+              Pending received requests that still need your decision.
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+            <p className="text-sm font-medium text-slate-500">Saved and tracked</p>
+            <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+              {dashboard.favoritesCount}
+            </p>
+            <p className="mt-3 text-sm leading-6 text-slate-600">
+              Favorite posts saved for later review and follow-up.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div className="mb-4">
+          <h2 className="text-xl font-semibold tracking-tight text-slate-900">
+            Quick access
+          </h2>
+          <p className="mt-1 text-sm text-slate-600">
+            Open the main areas of your account with a cleaner overview.
+          </p>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {cards.map((card) => (
+            <Link
+              key={card.title}
+              to={card.to}
+              className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md"
+            >
+              <p className="text-sm font-medium text-slate-500">{card.title}</p>
+              <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+                {card.value}
+              </p>
+              <p className="mt-3 text-sm leading-6 text-slate-600">{card.description}</p>
+              <p className="mt-5 text-sm font-medium text-slate-900">Open section</p>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="text-xl font-semibold tracking-tight text-slate-900">
+                Post status summary
+              </h2>
+              <p className="mt-1 text-sm text-slate-600">
+                Distribution of your current post statuses.
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2">
+              <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-500">
+                Base total
+              </p>
+              <p className="mt-1 text-sm font-semibold text-slate-900">
+                {dashboard.myPostsCount} posts
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-6 space-y-5">
+            {summaryRows.map((row) => (
+              <div key={row.label}>
+                <div className="mb-2 flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-slate-800">{row.label}</p>
+                    <p className="text-xs text-slate-500">{row.percentage}% of all posts</p>
+                  </div>
+                  <p className="text-sm font-semibold text-slate-900">{row.value}</p>
+                </div>
+
+                <div className="h-2.5 rounded-full bg-slate-100">
+                  <div
+                    className="h-2.5 rounded-full bg-slate-900"
+                    style={{ width: `${row.percentage}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h2 className="text-xl font-semibold tracking-tight text-slate-900">
+            Actions
+          </h2>
+          <p className="mt-1 text-sm text-slate-600">
+            Common account tasks with direct access.
+          </p>
+
+          <div className="mt-5 space-y-3">
             <Link
               to="/contact-requests/received"
-              className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+              className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-800 hover:border-slate-300 hover:bg-slate-100"
             >
-              Review Requests
+              <span>Review received requests</span>
+              <span>{dashboard.pendingReceivedContactRequestsCount}</span>
+            </Link>
+
+            <Link
+              to="/contact-requests/sent"
+              className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-800 hover:border-slate-300 hover:bg-slate-100"
+            >
+              <span>Check sent requests</span>
+              <span>{dashboard.pendingSentContactRequestsCount}</span>
+            </Link>
+
+            <Link
+              to="/favorites"
+              className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-800 hover:border-slate-300 hover:bg-slate-100"
+            >
+              <span>Open favorites</span>
+              <span>{dashboard.favoritesCount}</span>
             </Link>
 
             <Link
               to="/my-reports"
-              className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+              className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-800 hover:border-slate-300 hover:bg-slate-100"
             >
-              View My Reports
+              <span>Open my reports</span>
+              <span>{dashboard.myReportsCount}</span>
             </Link>
           </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 }

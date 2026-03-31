@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getMyFavorites, removeFavorite } from "../../api/favoriteApi";
 import PageState from "../../components/common/PageState";
 import type { FavoriteItem } from "../../types/favorite";
@@ -12,6 +12,7 @@ export default function FavoritesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const [removingPostId, setRemovingPostId] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
     async function loadFavorites() {
@@ -32,17 +33,28 @@ export default function FavoritesPage() {
   }, []);
 
   async function handleRemove(itemPostId: string) {
+    setErrorMessage("");
+    setSuccessMessage("");
     setRemovingPostId(itemPostId);
 
     try {
       await removeFavorite(itemPostId);
       setFavorites((prev) => prev.filter((x) => x.itemPostId !== itemPostId));
+      setSuccessMessage("Post was removed from favorites.");
     } catch (error: any) {
       setErrorMessage(getApiErrorMessage(error));
     } finally {
       setRemovingPostId(null);
     }
   }
+
+  const latestSavedAt = useMemo(() => {
+    if (!favorites.length) {
+      return "-";
+    }
+
+    return formatDateTime(favorites[0].createdAt);
+  }, [favorites]);
 
   if (isLoading || errorMessage || favorites.length === 0) {
     return (
@@ -56,72 +68,162 @@ export default function FavoritesPage() {
   }
 
   return (
-    <div>
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-slate-800">Favorites</h1>
-        <p className="mt-2 text-slate-600">
-          Posts you saved for later review.
-        </p>
-      </div>
-
-      <div className="grid gap-4">
-        {favorites.map((favorite) => (
-          <div
-            key={favorite.id}
-            className="flex flex-col gap-4 rounded-2xl bg-white p-4 shadow sm:flex-row"
-          >
-            <div className="h-40 w-full shrink-0 overflow-hidden rounded-xl bg-slate-200 sm:w-56">
-              {favorite.firstImageUrl ? (
-                <img
-                  src={buildFileUrl(favorite.firstImageUrl)}
-                  alt={favorite.title}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <div className="flex h-full items-center justify-center text-sm text-slate-500">
-                  No image
-                </div>
-              )}
-            </div>
-
-            <div className="flex flex-1 flex-col justify-between gap-3">
-              <div>
-                <h2 className="text-xl font-semibold text-slate-800">
-                  {favorite.title}
-                </h2>
-                <p className="mt-2 text-sm text-slate-600">
-                  <span className="font-medium text-slate-700">Category:</span>{" "}
-                  {favorite.categoryName}
-                </p>
-                <p className="mt-1 text-sm text-slate-600">
-                  <span className="font-medium text-slate-700">Saved At:</span>{" "}
-                  {formatDateTime(favorite.createdAt)}
-                </p>
-              </div>
-
-              <div className="flex flex-wrap gap-3">
-                <Link
-                  to={`/posts/${favorite.itemPostId}`}
-                  className="rounded-lg bg-slate-800 px-4 py-2 text-sm text-white hover:bg-slate-900"
-                >
-                  View Post
-                </Link>
-
-                <button
-                  type="button"
-                  onClick={() => void handleRemove(favorite.itemPostId)}
-                  disabled={removingPostId === favorite.itemPostId}
-                  className="rounded-lg border border-red-200 px-4 py-2 text-sm text-red-700 hover:bg-red-50 disabled:opacity-60"
-                >
-                  {removingPostId === favorite.itemPostId
-                    ? "Removing..."
-                    : "Remove Favorite"}
-                </button>
-              </div>
-            </div>
+    <div className="space-y-8">
+      <section className="rounded-2xl border border-slate-200 bg-white px-6 py-6 shadow-sm sm:px-8 sm:py-7">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+              Saved posts
+            </p>
+            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900 sm:text-[2rem]">
+              Favorites
+            </h1>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600 sm:text-base">
+              Review posts you saved for later, reopen them quickly, and remove items you no longer want to track.
+            </p>
           </div>
+
+          <div className="flex flex-wrap gap-3">
+            <Link
+              to="/"
+              className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800"
+            >
+              Browse Posts
+            </Link>
+            <Link
+              to="/dashboard"
+              className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-50"
+            >
+              Back to Dashboard
+            </Link>
+          </div>
+        </div>
+
+        <div className="mt-6 grid gap-4 md:grid-cols-3">
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+            <p className="text-sm font-medium text-slate-500">Saved posts</p>
+            <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+              {favorites.length}
+            </p>
+            <p className="mt-3 text-sm leading-6 text-slate-600">
+              Total posts currently saved in your account.
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+            <p className="text-sm font-medium text-slate-500">Latest save</p>
+            <p className="mt-2 text-lg font-semibold text-slate-900">{latestSavedAt}</p>
+            <p className="mt-3 text-sm leading-6 text-slate-600">
+              Most recent time a post was added to your favorites list.
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+            <p className="text-sm font-medium text-slate-500">Use case</p>
+            <p className="mt-2 text-lg font-semibold text-slate-900">Track and revisit</p>
+            <p className="mt-3 text-sm leading-6 text-slate-600">
+              Keep useful posts visible while comparing details or following updates.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {successMessage && (
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+          {successMessage}
+        </div>
+      )}
+
+      <section className="flex flex-col gap-2">
+        <h2 className="text-xl font-semibold tracking-tight text-slate-900">
+          Saved items
+        </h2>
+        <p className="text-sm text-slate-600">
+          Open a post to review details, send requests, or remove it from your saved list.
+        </p>
+      </section>
+
+      <section className="grid gap-4">
+        {favorites.map((favorite) => (
+          <article
+            key={favorite.id}
+            className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+          >
+            <div className="flex flex-col lg:flex-row">
+              <div className="h-52 w-full shrink-0 overflow-hidden bg-slate-100 lg:h-auto lg:w-72">
+                {favorite.firstImageUrl ? (
+                  <img
+                    src={buildFileUrl(favorite.firstImageUrl)}
+                    alt={favorite.title}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full min-h-52 items-center justify-center text-sm text-slate-500">
+                    No image
+                  </div>
+                )}
+              </div>
+
+              <div className="flex flex-1 flex-col justify-between p-6">
+                <div>
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+                        {favorite.title}
+                      </h2>
+                      <p className="mt-2 text-sm leading-6 text-slate-600">
+                        This post is saved in your favorites and can be reopened any time.
+                      </p>
+                    </div>
+
+                    <span className="inline-flex rounded-full bg-amber-100 px-3 py-1 text-sm font-medium text-amber-700">
+                      Favorite
+                    </span>
+                  </div>
+
+                  <div className="mt-5 grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm md:grid-cols-2">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                        Category
+                      </p>
+                      <p className="mt-1 font-medium text-slate-700">{favorite.categoryName}</p>
+                    </div>
+
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                        Saved At
+                      </p>
+                      <p className="mt-1 font-medium text-slate-700">
+                        {formatDateTime(favorite.createdAt)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <Link
+                    to={`/posts/${favorite.itemPostId}`}
+                    className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800"
+                  >
+                    View Post
+                  </Link>
+
+                  <button
+                    type="button"
+                    onClick={() => void handleRemove(favorite.itemPostId)}
+                    disabled={removingPostId === favorite.itemPostId}
+                    className="inline-flex items-center justify-center rounded-xl border border-red-200 bg-white px-4 py-2.5 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {removingPostId === favorite.itemPostId
+                      ? "Removing..."
+                      : "Remove Favorite"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </article>
         ))}
-      </div>
+      </section>
     </div>
   );
 }

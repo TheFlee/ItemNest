@@ -22,14 +22,12 @@ export default function FormSelect({
 }: FormSelectProps) {
   return (
     <div>
-      <label className="mb-1 block text-sm font-medium text-slate-700">
-        {label}
-      </label>
+      <label className="mb-1.5 block text-sm font-medium text-slate-700">{label}</label>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
         required={required}
-        className="w-full rounded-lg border bg-white px-3 py-2 outline-none focus:border-slate-500"
+        className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none focus:border-slate-500"
       >
         {placeholder && <option value="">{placeholder}</option>}
         {options.map((option) => (
