@@ -35,23 +35,27 @@ export default function ImagePicker({
   }
 
   return (
-    <div>
-      <label className="mb-1 block text-sm font-medium text-slate-700">
-        Images
-      </label>
+    <div className="space-y-4">
+      <label className="block text-sm font-medium text-slate-700">Images</label>
 
-      <div className="rounded-2xl border border-dashed bg-slate-50 p-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="font-medium text-slate-800">
+            <p className="text-sm font-semibold text-slate-900">
               Upload up to {maxFiles} images
             </p>
-            <p className="text-sm text-slate-500">
-              JPG, JPEG, PNG or WEBP formats are supported.
+            <p className="mt-1 text-sm text-slate-500">
+              JPG, JPEG, PNG, or WEBP formats are supported.
             </p>
           </div>
 
-          <label className="cursor-pointer rounded-lg bg-slate-800 px-4 py-2 text-sm text-white hover:bg-slate-900">
+          <label
+            className={`inline-flex cursor-pointer items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-sm ${
+              files.length >= maxFiles
+                ? "bg-slate-400"
+                : "bg-slate-900 hover:bg-slate-800"
+            }`}
+          >
             Select Images
             <input
               type="file"
@@ -64,21 +68,21 @@ export default function ImagePicker({
           </label>
         </div>
 
-        {files.length > 0 && (
-          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {files.length > 0 ? (
+          <div className="mt-5 grid gap-4 sm:grid-cols-2">
             {files.map((file, index) => (
               <div
                 key={`${file.name}-${index}`}
-                className="overflow-hidden rounded-2xl bg-white shadow"
+                className="overflow-hidden rounded-2xl border border-slate-200 bg-white"
               >
                 <img
                   src={previewUrls[index]}
                   alt={file.name}
-                  className="h-40 w-full object-cover"
+                  className="h-44 w-full object-cover"
                 />
 
-                <div className="p-3">
-                  <p className="truncate text-sm font-medium text-slate-800">
+                <div className="p-4">
+                  <p className="truncate text-sm font-semibold text-slate-900">
                     {file.name}
                   </p>
                   <p className="mt-1 text-xs text-slate-500">
@@ -88,7 +92,7 @@ export default function ImagePicker({
                   <button
                     type="button"
                     onClick={() => onRemoveFile(index)}
-                    className="mt-3 rounded-lg bg-red-100 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-200"
+                    className="mt-4 inline-flex items-center justify-center rounded-xl border border-red-200 bg-white px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-50"
                   >
                     Remove
                   </button>
@@ -96,12 +100,8 @@ export default function ImagePicker({
               </div>
             ))}
           </div>
-        )}
-
-        {files.length === 0 && (
-          <p className="mt-4 text-sm text-slate-500">
-            No images selected yet.
-          </p>
+        ) : (
+          <p className="mt-5 text-sm text-slate-500">No images selected yet.</p>
         )}
       </div>
     </div>

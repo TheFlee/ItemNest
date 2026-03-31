@@ -5,9 +5,9 @@ interface DetailRowProps {
 
 export default function DetailRow({ label, value }: DetailRowProps) {
   return (
-    <div className="border-b py-3 last:border-b-0">
+    <div className="grid gap-1 border-b border-slate-200 py-4 last:border-b-0 sm:grid-cols-[160px_1fr] sm:gap-4">
       <p className="text-sm font-medium text-slate-500">{label}</p>
-      <div className="mt-1 text-slate-800">{value}</div>
+      <div className="text-sm font-medium text-slate-800 sm:text-[15px]">{value}</div>
     </div>
   );
 }

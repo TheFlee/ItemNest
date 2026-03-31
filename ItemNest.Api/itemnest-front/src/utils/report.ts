@@ -35,7 +35,7 @@ export function getReportStatusClassName(status: number): string {
     case 2:
       return "bg-emerald-100 text-emerald-700";
     case 3:
-      return "bg-slate-100 text-slate-700";
+      return "bg-red-100 text-red-700";
     default:
       return "bg-slate-100 text-slate-700";
   }

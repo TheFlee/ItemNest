@@ -26,12 +26,20 @@ import {
   getPostTypeLabel,
 } from "../../utils/post";
 
+interface LocationState {
+  warningMessage?: string;
+  successMessage?: string;
+}
+
+function getMatchScoreWidth(score: number) {
+  return `${Math.max(0, Math.min(100, Math.round(score)))}%`;
+}
+
 export default function PostDetailsPage() {
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const warningMessage = location.state?.warningMessage as string | undefined;
-  const routeSuccessMessage = location.state?.successMessage as string | undefined;
+  const routeState = (location.state ?? {}) as LocationState;
   const { isAuthenticated } = useAuth();
 
   const [post, setPost] = useState<ItemPost | null>(null);
@@ -298,17 +306,15 @@ export default function PostDetailsPage() {
     );
   }, [reportReason]);
 
-  const stateBlock = (
-    <PageState
-      isLoading={isLoading}
-      errorMessage={errorMessage}
-      isEmpty={!isLoading && !errorMessage && !post}
-      emptyMessage="Post not found."
-    />
-  );
-
   if (isLoading || errorMessage || !post) {
-    return stateBlock;
+    return (
+      <PageState
+        isLoading={isLoading}
+        errorMessage={errorMessage}
+        isEmpty={!isLoading && !errorMessage && !post}
+        emptyMessage="Post not found."
+      />
+    );
   }
 
   const canMarkReturned = post.isOwner && post.status !== 1;
@@ -316,155 +322,203 @@ export default function PostDetailsPage() {
   const isOwnerActionBusy = statusSubmittingTo !== null || isDeletingPost;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
-        <Link
-          to="/"
-          className="text-sm font-medium text-slate-600 hover:text-slate-900"
-        >
+        <Link to="/" className="text-sm font-medium text-slate-600 hover:text-slate-900">
           ← Back to posts
         </Link>
       </div>
 
-      {warningMessage && (
-        <div className="rounded-lg bg-amber-100 px-4 py-3 text-amber-800">
-          {warningMessage}
+      {routeState.warningMessage && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          {routeState.warningMessage}
         </div>
       )}
 
-      {routeSuccessMessage && (
-        <div className="rounded-lg bg-emerald-100 px-4 py-3 text-emerald-800">
-          {routeSuccessMessage}
+      {routeState.successMessage && (
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+          {routeState.successMessage}
         </div>
       )}
 
       {successMessage && (
-        <div className="rounded-lg bg-emerald-100 px-4 py-3 text-emerald-800">
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
           {successMessage}
         </div>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <PostImageGallery title={post.title} images={post.images} />
+      <section className="rounded-2xl border border-slate-200 bg-white px-6 py-6 shadow-sm sm:px-8 sm:py-7">
+        <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+              Post details
+            </p>
+            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900 sm:text-[2rem]">
+              {post.title}
+            </h1>
 
-        <div className="rounded-2xl bg-white p-6 shadow">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <h1 className="text-3xl font-bold text-slate-800">{post.title}</h1>
-
-              <div className="mt-3 flex flex-wrap gap-2">
-                <span
-                  className={`rounded-full px-3 py-1 text-sm font-medium ${
-                    post.type === 0
-                      ? "bg-red-100 text-red-700"
-                      : "bg-emerald-100 text-emerald-700"
-                  }`}
-                >
-                  {getPostTypeLabel(post.type)}
-                </span>
-
-                <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700">
-                  {getPostStatusLabel(post.status)}
-                </span>
-
-                {post.isOwner && (
-                  <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700">
-                    My Post
-                  </span>
-                )}
-
-                {post.isFavorited && !post.isOwner && (
-                  <span className="rounded-full bg-amber-100 px-3 py-1 text-sm font-medium text-amber-700">
-                    Favorited
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {isAuthenticated && !post.isOwner && (
-              <button
-                type="button"
-                onClick={handleFavoriteToggle}
-                disabled={isFavoriteSubmitting}
-                className={`rounded-lg px-4 py-2 text-sm font-medium text-white ${
-                  post.isFavorited
-                    ? "bg-amber-600 hover:bg-amber-700"
-                    : "bg-slate-800 hover:bg-slate-900"
-                } disabled:opacity-60`}
+            <div className="mt-4 flex flex-wrap gap-2">
+              <span
+                className={`rounded-full px-3 py-1 text-sm font-medium ${
+                  post.type === 0
+                    ? "bg-red-100 text-red-700"
+                    : "bg-emerald-100 text-emerald-700"
+                }`}
               >
-                {isFavoriteSubmitting
-                  ? "Saving..."
-                  : post.isFavorited
-                  ? "Remove Favorite"
-                  : "Add to Favorites"}
-              </button>
-            )}
-          </div>
+                {getPostTypeLabel(post.type)}
+              </span>
 
-          {post.isOwner && (
-            <div className="mt-4 flex flex-wrap gap-3">
-              <Link
-                to={`/posts/${post.id}/edit`}
-                className="inline-flex rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-              >
-                Edit Post
-              </Link>
+              <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700">
+                {getPostStatusLabel(post.status)}
+              </span>
 
-              {canMarkReturned && (
-                <button
-                  type="button"
-                  onClick={() => void handleUpdateStatus(1)}
-                  disabled={isOwnerActionBusy}
-                  className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-60"
-                >
-                  {statusSubmittingTo === 1 ? "Saving..." : "Mark as Returned"}
-                </button>
+              {post.isOwner && (
+                <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700">
+                  My Post
+                </span>
               )}
 
-              {canClosePost && (
-                <button
-                  type="button"
-                  onClick={() => void handleUpdateStatus(2)}
-                  disabled={isOwnerActionBusy}
-                  className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
-                >
-                  {statusSubmittingTo === 2 ? "Saving..." : "Close Post"}
-                </button>
+              {post.isFavorited && !post.isOwner && (
+                <span className="rounded-full bg-amber-100 px-3 py-1 text-sm font-medium text-amber-700">
+                  Favorited
+                </span>
               )}
-
-              <button
-                type="button"
-                onClick={() => void handleDeletePost()}
-                disabled={isOwnerActionBusy}
-                className="rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-60"
-              >
-                {isDeletingPost ? "Deleting..." : "Delete Post"}
-              </button>
             </div>
-          )}
 
-          <div className="mt-6 rounded-xl bg-slate-50 p-4">
-            <h2 className="text-lg font-semibold text-slate-800">Description</h2>
-            <p className="mt-2 whitespace-pre-wrap text-slate-700">
-              {post.description}
+            <p className="mt-4 max-w-3xl text-sm leading-6 text-slate-600 sm:text-base">
+              Review the full post information, related images, possible matches, and
+              available actions.
             </p>
           </div>
 
-          <div className="mt-6">
-            <DetailRow label="Category" value={post.categoryName} />
-            <DetailRow label="Location" value={post.location} />
-            <DetailRow label="Color" value={getItemColorLabel(post.color)} />
-            <DetailRow label="Event Date" value={formatDate(post.eventDate)} />
-            <DetailRow label="Posted By" value={post.userFullName} />
-            <DetailRow label="Created At" value={formatDateTime(post.createdAt)} />
-            {post.updatedAt && (
-              <DetailRow label="Updated At" value={formatDateTime(post.updatedAt)} />
-            )}
-          </div>
+          {isAuthenticated && !post.isOwner && (
+            <button
+              type="button"
+              onClick={handleFavoriteToggle}
+              disabled={isFavoriteSubmitting}
+              className={`inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-sm disabled:cursor-not-allowed disabled:opacity-60 ${
+                post.isFavorited
+                  ? "bg-amber-600 hover:bg-amber-700"
+                  : "bg-slate-900 hover:bg-slate-800"
+              }`}
+            >
+              {isFavoriteSubmitting
+                ? "Saving..."
+                : post.isFavorited
+                ? "Remove Favorite"
+                : "Add to Favorites"}
+            </button>
+          )}
+        </div>
+      </section>
+
+      <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
+        <PostImageGallery title={post.title} images={post.images} />
+
+        <div className="space-y-6">
+          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="border-b border-slate-200 pb-5">
+              <h2 className="text-xl font-semibold tracking-tight text-slate-900">
+                Description
+              </h2>
+              <p className="mt-1 text-sm text-slate-600">
+                Main information shared by the post owner.
+              </p>
+            </div>
+
+            <p className="mt-5 whitespace-pre-wrap text-sm leading-7 text-slate-700 sm:text-base">
+              {post.description}
+            </p>
+          </section>
+
+          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="border-b border-slate-200 pb-5">
+              <h2 className="text-xl font-semibold tracking-tight text-slate-900">
+                Post information
+              </h2>
+              <p className="mt-1 text-sm text-slate-600">
+                Structured item details and timeline information.
+              </p>
+            </div>
+
+            <div className="mt-4">
+              <DetailRow label="Category" value={post.categoryName} />
+              <DetailRow label="Location" value={post.location} />
+              <DetailRow label="Color" value={getItemColorLabel(post.color)} />
+              <DetailRow label="Event Date" value={formatDate(post.eventDate)} />
+              <DetailRow label="Posted By" value={post.userFullName} />
+              <DetailRow label="Created At" value={formatDateTime(post.createdAt)} />
+              {post.updatedAt && (
+                <DetailRow label="Updated At" value={formatDateTime(post.updatedAt)} />
+              )}
+            </div>
+          </section>
+
+          {post.isOwner && (
+            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="border-b border-slate-200 pb-5">
+                <h2 className="text-xl font-semibold tracking-tight text-slate-900">
+                  Owner actions
+                </h2>
+                <p className="mt-1 text-sm text-slate-600">
+                  Manage this post, update its status, or remove it.
+                </p>
+              </div>
+
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Link
+                  to={`/posts/${post.id}/edit`}
+                  className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700"
+                >
+                  Edit Post
+                </Link>
+
+                {canMarkReturned && (
+                  <button
+                    type="button"
+                    onClick={() => void handleUpdateStatus(1)}
+                    disabled={isOwnerActionBusy}
+                    className="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {statusSubmittingTo === 1 ? "Saving..." : "Mark as Returned"}
+                  </button>
+                )}
+
+                {canClosePost && (
+                  <button
+                    type="button"
+                    onClick={() => void handleUpdateStatus(2)}
+                    disabled={isOwnerActionBusy}
+                    className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {statusSubmittingTo === 2 ? "Saving..." : "Close Post"}
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => void handleDeletePost()}
+                  disabled={isOwnerActionBusy}
+                  className="inline-flex items-center justify-center rounded-xl border border-red-200 bg-white px-4 py-2.5 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isDeletingPost ? "Deleting..." : "Delete Post"}
+                </button>
+              </div>
+            </section>
+          )}
 
           {isAuthenticated && !post.isOwner && (
-            <div className="mt-6 space-y-4 border-t pt-6">
-              <div className="flex flex-wrap gap-3">
+            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="border-b border-slate-200 pb-5">
+                <h2 className="text-xl font-semibold tracking-tight text-slate-900">
+                  Actions
+                </h2>
+                <p className="mt-1 text-sm text-slate-600">
+                  Contact the owner or report this post if necessary.
+                </p>
+              </div>
+
+              <div className="mt-6 flex flex-wrap gap-3">
                 <button
                   type="button"
                   onClick={() => {
@@ -473,7 +527,7 @@ export default function PostDetailsPage() {
                     setErrorMessage("");
                     setSuccessMessage("");
                   }}
-                  className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                  className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700"
                 >
                   {showContactForm ? "Close Contact Form" : "Send Contact Request"}
                 </button>
@@ -486,23 +540,23 @@ export default function PostDetailsPage() {
                     setErrorMessage("");
                     setSuccessMessage("");
                   }}
-                  className="rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50"
+                  className="inline-flex items-center justify-center rounded-xl border border-red-200 bg-white px-4 py-2.5 text-sm font-semibold text-red-700 hover:bg-red-50"
                 >
                   {showReportForm ? "Close Report Form" : "Report Post"}
                 </button>
               </div>
 
               {showContactForm && (
-                <div className="rounded-xl bg-slate-50 p-4">
-                  <h2 className="text-lg font-semibold text-slate-800">
+                <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                  <h3 className="text-lg font-semibold tracking-tight text-slate-900">
                     Contact Request
-                  </h2>
-                  <p className="mt-2 text-sm text-slate-600">
-                    Send a message to the post owner. Contact details become visible
-                    only after the request is accepted.
+                  </h3>
+                  <p className="mt-1 text-sm leading-6 text-slate-600">
+                    Send a short message to the post owner. Contact details become
+                    visible only after the request is accepted.
                   </p>
 
-                  <div className="mt-4">
+                  <div className="mt-5">
                     <FormTextarea
                       label="Message"
                       value={contactMessage}
@@ -512,12 +566,12 @@ export default function PostDetailsPage() {
                     />
                   </div>
 
-                  <div className="mt-4">
+                  <div className="mt-5">
                     <button
                       type="button"
                       onClick={() => void handleSendContactRequest()}
                       disabled={isContactSubmitting}
-                      className="rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-900 disabled:opacity-60"
+                      className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {isContactSubmitting ? "Sending..." : "Submit Contact Request"}
                     </button>
@@ -526,17 +580,19 @@ export default function PostDetailsPage() {
               )}
 
               {showReportForm && (
-                <div className="rounded-xl bg-slate-50 p-4">
-                  <h2 className="text-lg font-semibold text-slate-800">Report Post</h2>
+                <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                  <h3 className="text-lg font-semibold tracking-tight text-slate-900">
+                    Report Post
+                  </h3>
 
-                  <div className="mt-4">
-                    <label className="mb-1 block text-sm font-medium text-slate-700">
+                  <div className="mt-5">
+                    <label className="mb-1.5 block text-sm font-medium text-slate-700">
                       Reason
                     </label>
                     <select
                       value={reportReason}
                       onChange={(e) => setReportReason(Number(e.target.value))}
-                      className="w-full rounded-lg border px-3 py-2 outline-none focus:border-slate-500"
+                      className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none focus:border-slate-500"
                     >
                       {reportReasonOptions.map((option) => (
                         <option key={option.value} value={option.value}>
@@ -549,7 +605,7 @@ export default function PostDetailsPage() {
                     </p>
                   </div>
 
-                  <div className="mt-4">
+                  <div className="mt-5">
                     <FormTextarea
                       label="Description"
                       value={reportDescription}
@@ -559,19 +615,19 @@ export default function PostDetailsPage() {
                     />
                   </div>
 
-                  <div className="mt-4">
+                  <div className="mt-5">
                     <button
                       type="button"
                       onClick={() => void handleSubmitReport()}
                       disabled={isReportSubmitting}
-                      className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-60"
+                      className="inline-flex items-center justify-center rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {isReportSubmitting ? "Submitting..." : "Submit Report"}
                     </button>
                   </div>
                 </div>
               )}
-            </div>
+            </section>
           )}
         </div>
       </div>
@@ -585,89 +641,130 @@ export default function PostDetailsPage() {
       )}
 
       {isAuthenticated && (
-        <div className="rounded-2xl bg-white p-6 shadow">
-          <div className="flex items-center justify-between gap-3">
+        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex flex-col gap-2 border-b border-slate-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-slate-800">Possible Matches</h2>
-              <p className="mt-2 text-slate-600">
+              <h2 className="text-xl font-semibold tracking-tight text-slate-900">
+                Possible Matches
+              </h2>
+              <p className="mt-1 text-sm text-slate-600">
                 Similar posts based on category, timing, location, color, and title.
               </p>
             </div>
           </div>
 
           {isMatchesLoading ? (
-            <div className="mt-4 text-sm text-slate-500">Loading matches...</div>
+            <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+              Loading matches...
+            </div>
           ) : matches.length === 0 ? (
-            <div className="mt-4 rounded-xl bg-slate-50 px-4 py-3 text-sm text-slate-600">
-              No possible matches were found for this post yet.
+            <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+              No matches found for this post yet.
             </div>
           ) : (
-            <div className="mt-6 grid gap-4 md:grid-cols-2">
+            <div className="mt-6 grid gap-4 lg:grid-cols-2">
               {matches.map((match) => (
-                <div
+                <article
                   key={match.id}
-                  className="rounded-xl border border-slate-200 p-4"
+                  className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50"
                 >
-                  <div className="flex gap-4">
-                    <div className="h-24 w-24 shrink-0 overflow-hidden rounded-lg bg-slate-100">
-                      {match.images.length > 0 ? (
-                        <img
-                          src={buildFileUrl(match.images[0].imageUrl)}
-                          alt={match.title}
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <div className="flex h-full items-center justify-center text-xs text-slate-500">
-                          No image
+                  <div className="relative h-48 bg-slate-100">
+                    {match.images.length > 0 ? (
+                      <img
+                        src={buildFileUrl(match.images[0].imageUrl)}
+                        alt={match.title}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center text-sm text-slate-500">
+                        No image
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="text-lg font-semibold tracking-tight text-slate-900">
+                          {match.title}
+                        </h3>
+                        <p className="mt-2 text-sm leading-6 text-slate-600">
+                          {match.description}
+                        </p>
+                      </div>
+
+                      <div className="shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-right">
+                        <p className="text-xs font-medium uppercase tracking-[0.14em] text-slate-500">
+                          Score
+                        </p>
+                        <p className="mt-1 text-sm font-semibold text-slate-900">
+                          {Math.round(match.matchScore)}%
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 h-2.5 rounded-full bg-white">
+                      <div
+                        className="h-2.5 rounded-full bg-slate-900"
+                        style={{ width: getMatchScoreWidth(match.matchScore) }}
+                      />
+                    </div>
+
+                    <div className="mt-5 grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 text-sm">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                          Category
+                        </p>
+                        <p className="mt-1 font-medium text-slate-700">{match.categoryName}</p>
+                      </div>
+
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                          Location
+                        </p>
+                        <p className="mt-1 font-medium text-slate-700">{match.location}</p>
+                      </div>
+
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                          Event Date
+                        </p>
+                        <p className="mt-1 font-medium text-slate-700">
+                          {formatDate(match.eventDate)}
+                        </p>
+                      </div>
+                    </div>
+
+                    {match.matchReasons.length > 0 && (
+                      <div className="mt-5">
+                        <p className="text-sm font-medium text-slate-800">Match reasons</p>
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {match.matchReasons.map((reason, index) => (
+                            <span
+                              key={`${match.id}-${index}-${reason}`}
+                              className="rounded-full bg-slate-200 px-3 py-1 text-xs font-medium text-slate-700"
+                            >
+                              {reason}
+                            </span>
+                          ))}
                         </div>
-                      )}
-                    </div>
+                      </div>
+                    )}
 
-                    <div className="min-w-0 flex-1">
-                      <h3 className="truncate text-lg font-semibold text-slate-800">
-                        {match.title}
-                      </h3>
-
-                      <p className="mt-1 text-sm text-slate-600">
-                        Match Score: <span className="font-semibold">{match.matchScore}</span>
-                      </p>
-
-                      <p className="mt-1 text-sm text-slate-600">
-                        {match.categoryName} • {formatDate(match.eventDate)}
-                      </p>
-
-                      <p className="mt-1 line-clamp-2 text-sm text-slate-600">
-                        {match.description}
-                      </p>
+                    <div className="mt-5">
+                      <Link
+                        to={`/posts/${match.id}`}
+                        className="text-sm font-semibold text-slate-900 hover:text-slate-700"
+                      >
+                        View matched post →
+                      </Link>
                     </div>
                   </div>
-
-                  {match.matchReasons.length > 0 && (
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      {match.matchReasons.map((reason, index) => (
-                        <span
-                          key={`${match.id}-${index}`}
-                          className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-700"
-                        >
-                          {reason}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-
-                  <div className="mt-4">
-                    <Link
-                      to={`/posts/${match.id}`}
-                      className="text-sm font-medium text-slate-800 hover:text-slate-950"
-                    >
-                      View matched post →
-                    </Link>
-                  </div>
-                </div>
+                </article>
               ))}
             </div>
           )}
-        </div>
+        </section>
       )}
     </div>
   );
