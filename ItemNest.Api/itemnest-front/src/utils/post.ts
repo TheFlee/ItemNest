@@ -37,35 +37,33 @@ export function getPostStatusClassName(status: number): string {
 export function getItemColorLabel(color: number): string {
   switch (color) {
     case 0:
-      return "Black";
+      return "Unknown";
     case 1:
-      return "White";
+      return "Black";
     case 2:
-      return "Gray";
+      return "White";
     case 3:
-      return "Blue";
+      return "Gray";
     case 4:
-      return "Red";
+      return "Blue";
     case 5:
-      return "Green";
+      return "Red";
     case 6:
-      return "Yellow";
+      return "Green";
     case 7:
-      return "Brown";
+      return "Yellow";
     case 8:
-      return "Pink";
+      return "Brown";
     case 9:
-      return "Purple";
+      return "Pink";
     case 10:
-      return "Orange";
+      return "Purple";
     case 11:
-      return "Gold";
+      return "Orange";
     case 12:
       return "Silver";
     case 13:
-      return "Beige";
-    case 14:
-      return "Other";
+      return "Gold";
     default:
       return "Unknown";
   }

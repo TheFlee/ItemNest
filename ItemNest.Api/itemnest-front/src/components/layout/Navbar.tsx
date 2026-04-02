@@ -64,14 +64,17 @@ export default function Navbar() {
 
               {isAuthenticated ? (
                 <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
-                  <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2">
+                  <Link
+                    to="/account"
+                    className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 transition hover:border-slate-300 hover:bg-slate-100"
+                  >
                     <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-500">
                       Account
                     </p>
                     <p className="mt-1 text-sm font-semibold text-slate-800">
                       {user?.fullName}
                     </p>
-                  </div>
+                  </Link>
 
                   <div className="flex flex-wrap gap-3">
                     <Link
@@ -118,7 +121,6 @@ export default function Navbar() {
 
                 {isAdmin && (
                   <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-3">
-
                     <div className="flex flex-wrap gap-2">
                       {adminLinks.map((link) => renderLink(link.to, link.label))}
                     </div>

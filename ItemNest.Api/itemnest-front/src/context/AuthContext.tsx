@@ -6,9 +6,17 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import type { AuthResponse, LoginRequest, RegisterRequest } from "../types/auth";
+import type {
+  AuthResponse,
+  LoginRequest,
+  RegisterRequest,
+} from "../types/auth";
 import type { CurrentUser } from "../types/user";
-import { login as loginRequest, register as registerRequest } from "../api/authApi";
+import {
+  googleLogin as googleLoginRequest,
+  login as loginRequest,
+  register as registerRequest,
+} from "../api/authApi";
 import { getCurrentUser } from "../api/userApi";
 import { getToken, removeToken, setToken } from "../utils/token";
 
@@ -19,8 +27,10 @@ interface AuthContextValue {
   isLoading: boolean;
   login: (request: LoginRequest) => Promise<void>;
   register: (request: RegisterRequest) => Promise<void>;
+  googleLogin: (idToken: string) => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
+  updateAuth: (response: AuthResponse) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -54,8 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  async function login(request: LoginRequest): Promise<void> {
-    const response = await loginRequest(request);
+  async function updateAuth(response: AuthResponse): Promise<void> {
     handleAuthSuccess(response);
     setTokenState(response.token);
 
@@ -63,13 +72,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(currentUser);
   }
 
+  async function login(request: LoginRequest): Promise<void> {
+    const response = await loginRequest(request);
+    await updateAuth(response);
+  }
+
   async function register(request: RegisterRequest): Promise<void> {
     const response = await registerRequest(request);
-    handleAuthSuccess(response);
-    setTokenState(response.token);
+    await updateAuth(response);
+  }
 
-    const currentUser = await getCurrentUser();
-    setUser(currentUser);
+  async function googleLogin(idToken: string): Promise<void> {
+    const response = await googleLoginRequest({ idToken });
+    await updateAuth(response);
   }
 
   function logout(): void {
@@ -98,8 +113,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isLoading,
       login,
       register,
+      googleLogin,
       logout,
       refreshUser,
+      updateAuth,
     }),
     [user, token, isLoading]
   );

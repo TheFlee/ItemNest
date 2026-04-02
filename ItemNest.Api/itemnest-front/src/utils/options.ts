@@ -8,6 +8,12 @@ export const postTypeOptions: SelectOption<number>[] = [
   { label: "Found", value: 1 },
 ];
 
+export const postStatusOptions: SelectOption<number>[] = [
+  { label: "Open", value: 0 },
+  { label: "Returned", value: 1 },
+  { label: "Closed", value: 2 },
+];
+
 export const itemColorOptions: SelectOption<number>[] = [
   { label: "Unknown", value: 0 },
   { label: "Black", value: 1 },

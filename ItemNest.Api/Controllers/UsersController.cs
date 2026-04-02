@@ -1,6 +1,7 @@
 ﻿using ItemNest.Application.DTOs;
 using ItemNest.Application.Interfaces;
 using ItemNest.Infrastructure.Seed;
+using ItemNest.Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -27,6 +28,22 @@ public class UsersController : ControllerBase
         return Ok(user);
     }
 
+    [HttpPut("me/email")]
+    public async Task<ActionResult<AuthResponseDto>> UpdateMyEmail([FromBody] UpdateUserEmailDto dto)
+    {
+        var userId = GetCurrentUserId();
+        var response = await _userService.UpdateEmailAsync(userId, dto);
+        return Ok(response);
+    }
+
+    [HttpPut("me/password")]
+    public async Task<IActionResult> ChangeMyPassword([FromBody] ChangePasswordDto dto)
+    {
+        var userId = GetCurrentUserId();
+        await _userService.ChangePasswordAsync(userId, dto);
+        return NoContent();
+    }
+
     [HttpGet("admin")]
     [Authorize(Roles = AppRoles.Admin)]
     public async Task<ActionResult<IReadOnlyList<AdminUserDto>>> GetAllForAdmin()
@@ -41,6 +58,15 @@ public class UsersController : ControllerBase
     {
         var currentAdminUserId = GetCurrentUserId();
         var user = await _userService.AdminUpdateRoleAsync(currentAdminUserId, id, dto.Role);
+        return Ok(user);
+    }
+
+    [HttpPut("admin/{id:guid}/block-status")]
+    [Authorize(Roles = AppRoles.Admin)]
+    public async Task<ActionResult<AdminUserDto>> UpdateBlockStatus(Guid id, [FromBody] AdminUpdateUserBlockStatusDto dto)
+    {
+        var currentAdminUserId = GetCurrentUserId();
+        var user = await _userService.AdminUpdateBlockStatusAsync(currentAdminUserId, id, dto.IsBlocked);
         return Ok(user);
     }
 
