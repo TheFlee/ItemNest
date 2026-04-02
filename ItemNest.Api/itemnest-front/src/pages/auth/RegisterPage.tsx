@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import GoogleLoginButton from "../../components/auth/GoogleLoginButton";
 import { useAuth } from "../../context/AuthContext";
 import { getApiErrorMessage } from "../../utils/error";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
-  const { register } = useAuth();
+  const { register, googleLogin } = useAuth();
 
   const [form, setForm] = useState({
     fullName: "",
@@ -38,6 +39,23 @@ export default function RegisterPage() {
     }
   }
 
+  const handleGoogleCredential = useCallback(
+    async (credential: string) => {
+      setErrorMessage("");
+      setIsSubmitting(true);
+
+      try {
+        await googleLogin(credential);
+        navigate("/dashboard");
+      } catch (error: any) {
+        setErrorMessage(getApiErrorMessage(error));
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [googleLogin, navigate]
+  );
+
   return (
     <div>
       <div className="border-b border-slate-200 pb-5">
@@ -50,6 +68,22 @@ export default function RegisterPage() {
         <p className="mt-2 text-sm leading-6 text-slate-600">
           Create your account to publish lost or found items and manage all related activity in one place.
         </p>
+      </div>
+
+      <div className="mt-6 space-y-4">
+        <GoogleLoginButton
+          text="signup_with"
+          isDisabled={isSubmitting}
+          onCredential={handleGoogleCredential}
+        />
+
+        <div className="flex items-center gap-3">
+          <div className="h-px flex-1 bg-slate-200" />
+          <span className="text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
+            Or register with email
+          </span>
+          <div className="h-px flex-1 bg-slate-200" />
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-5">

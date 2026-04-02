@@ -28,6 +28,10 @@ public class ItemNestDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, 
                   .IsRequired()
                   .HasMaxLength(100);
 
+            entity.Property(x => x.IsBlocked)
+                  .IsRequired()
+                  .HasDefaultValue(false);
+
             entity.Property(x => x.CreatedAt)
                   .IsRequired();
         });

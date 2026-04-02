@@ -15,10 +15,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
+using System.Security.Claims;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
-
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -34,7 +34,6 @@ builder.Services.AddSwaggerGen(options =>
             Url = new Uri("https://opensource.org/licenses/MIT")
         }
     });
-
 
     var apiXmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var apiXmlPath = Path.Combine(AppContext.BaseDirectory, apiXmlFile);
@@ -117,11 +116,13 @@ builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<IContactRequestService, ContactRequestService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<TestDataSeeder>();
 
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<RegisterDtoValidator>();
 
 builder.Services.Configure<AdminSeedSettings>(builder.Configuration.GetSection(AdminSeedSettings.SectionName));
+builder.Services.Configure<GoogleAuthSettings>(builder.Configuration.GetSection(GoogleAuthSettings.SectionName));
 
 builder.Services.AddScoped<AdminUserSeeder>();
 
@@ -146,6 +147,31 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = jwtSection["Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
         ClockSkew = TimeSpan.Zero
+    };
+
+    options.Events = new JwtBearerEvents
+    {
+        OnTokenValidated = async context =>
+        {
+            var userManager = context.HttpContext.RequestServices.GetRequiredService<UserManager<AppUser>>();
+
+            var userIdClaim = context.Principal?.FindFirstValue(ClaimTypes.NameIdentifier)
+                             ?? context.Principal?.FindFirstValue(ClaimTypes.Name)
+                             ?? context.Principal?.FindFirstValue("sub");
+
+            if (string.IsNullOrWhiteSpace(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+            {
+                context.Fail("Invalid authentication token.");
+                return;
+            }
+
+            var user = await userManager.FindByIdAsync(userId.ToString());
+
+            if (user is null || user.IsBlocked)
+            {
+                context.Fail("This account is blocked.");
+            }
+        }
     };
 });
 
@@ -172,6 +198,9 @@ if (app.Environment.IsDevelopment())
 
     var adminUserSeeder = services.GetRequiredService<AdminUserSeeder>();
     await adminUserSeeder.SeedAsync();
+
+    var testDataSeeder = services.GetRequiredService<TestDataSeeder>();
+    await testDataSeeder.SeedAsync();
 }
 
 app.UseMiddleware<GlobalExceptionMiddleware>();

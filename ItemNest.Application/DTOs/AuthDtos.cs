@@ -83,3 +83,14 @@ public class RegisterDto
     /// <example>123456</example>
     public string Password { get; set; } = string.Empty;
 }
+
+/// <summary>
+/// Request model for Google login.
+/// </summary>
+public class GoogleLoginDto
+{
+    /// <summary>
+    /// Google ID token returned by Google Identity Services.
+    /// </summary>
+    public string IdToken { get; set; } = string.Empty;
+}

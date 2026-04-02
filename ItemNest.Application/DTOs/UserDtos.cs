@@ -27,10 +27,27 @@ public class CurrentUserDto
     public List<string> Roles { get; set; } = new();
 
     /// <summary>
+    /// Indicates whether the account is blocked.
+    /// </summary>
+    public bool IsBlocked { get; set; }
+
+    /// <summary>
     /// Account creation date and time.
     /// </summary>
     /// <example>2026-03-10T15:00:00+04:00</example>
     public DateTimeOffset CreatedAt { get; set; }
+}
+
+public class UpdateUserEmailDto
+{
+    public string NewEmail { get; set; } = string.Empty;
+    public string CurrentPassword { get; set; } = string.Empty;
+}
+
+public class ChangePasswordDto
+{
+    public string CurrentPassword { get; set; } = string.Empty;
+    public string NewPassword { get; set; } = string.Empty;
 }
 
 public class AdminUserDto
@@ -39,10 +56,16 @@ public class AdminUserDto
     public string FullName { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public List<string> Roles { get; set; } = new();
+    public bool IsBlocked { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
 }
 
 public class AdminUpdateUserRoleDto
 {
     public string Role { get; set; } = string.Empty;
+}
+
+public class AdminUpdateUserBlockStatusDto
+{
+    public bool IsBlocked { get; set; }
 }

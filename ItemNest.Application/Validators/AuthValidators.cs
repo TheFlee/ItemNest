@@ -33,3 +33,38 @@ public class LoginDtoValidator : AbstractValidator<LoginDto>
             .NotEmpty().WithMessage("Password is required.");
     }
 }
+
+public class GoogleLoginDtoValidator : AbstractValidator<GoogleLoginDto>
+{
+    public GoogleLoginDtoValidator()
+    {
+        RuleFor(x => x.IdToken)
+            .NotEmpty().WithMessage("Google ID token is required.");
+    }
+}
+
+public class UpdateUserEmailDtoValidator : AbstractValidator<UpdateUserEmailDto>
+{
+    public UpdateUserEmailDtoValidator()
+    {
+        RuleFor(x => x.NewEmail)
+            .NotEmpty().WithMessage("New email is required.")
+            .EmailAddress().WithMessage("Invalid email format.");
+
+        RuleFor(x => x.CurrentPassword)
+            .NotEmpty().WithMessage("Current password is required.");
+    }
+}
+
+public class ChangePasswordDtoValidator : AbstractValidator<ChangePasswordDto>
+{
+    public ChangePasswordDtoValidator()
+    {
+        RuleFor(x => x.CurrentPassword)
+            .NotEmpty().WithMessage("Current password is required.");
+
+        RuleFor(x => x.NewPassword)
+            .NotEmpty().WithMessage("New password is required.")
+            .MinimumLength(6).WithMessage("New password must be at least 6 characters long.");
+    }
+}

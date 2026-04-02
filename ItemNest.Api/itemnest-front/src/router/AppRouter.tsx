@@ -8,6 +8,7 @@ import AdminDashboardPage from "../pages/admin/AdminDashboardPage";
 import AdminPostsPage from "../pages/admin/AdminPostsPage";
 import AdminReportsPage from "../pages/admin/AdminReportsPage";
 import AdminUsersPage from "../pages/admin/AdminUsersPage";
+import AccountPage from "../pages/account/AccountPage";
 import ReceivedContactRequestsPage from "../pages/contactRequests/ReceivedContactRequestsPage";
 import SentContactRequestsPage from "../pages/contactRequests/SentContactRequestsPage";
 import DashboardPage from "../pages/dashboard/DashboardPage";
@@ -36,6 +37,7 @@ export default function AppRouter() {
         <Route element={<ProtectedRoute />}>
           <Route element={<MainLayout />}>
             <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/account" element={<AccountPage />} />
             <Route path="/favorites" element={<FavoritesPage />} />
             <Route path="/my-posts" element={<MyPostsPage />} />
             <Route path="/create-post" element={<CreatePostPage />} />
