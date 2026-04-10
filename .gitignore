@@ -5,3 +5,17 @@ obj/
 *.suo
 *.db
 node_modules/
+
+# Secrets — do not commit
+ItemNest.Api/appsettings.json
+ItemNest.Api/itemnest-front/.env
+
+# Uploads (local storage, replaced by S3)
+ItemNest.Api/wwwroot/uploads/
+
+# Build artifacts
+ItemNest.Api/itemnest-front.zip
+ItemNest.zip
+
+# Claude memory
+.claude/

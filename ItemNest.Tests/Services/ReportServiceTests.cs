@@ -1,9 +1,10 @@
-﻿using AutoMapper;
+using AutoMapper;
 using FluentAssertions;
 using ItemNest.Application.DTOs;
 using ItemNest.Application.Mappings;
 using ItemNest.Domain.Entities;
 using ItemNest.Domain.Enums;
+using ItemNest.Infrastructure.Repositories;
 using ItemNest.Infrastructure.Services;
 using ItemNest.Tests.Helpers;
 
@@ -51,7 +52,9 @@ public class ReportServiceTests
 
         await context.SaveChangesAsync();
 
-        var service = new ReportService(context, _mapper);
+        var reportRepo = new ReportRepository(context);
+        var itemPostRepo = new ItemPostRepository(context);
+        var service = new ReportService(reportRepo, itemPostRepo, _mapper);
 
         var dto = new CreateReportDto
         {
@@ -88,7 +91,9 @@ public class ReportServiceTests
         context.ItemPosts.Add(post);
         await context.SaveChangesAsync();
 
-        var service = new ReportService(context, _mapper);
+        var reportRepo = new ReportRepository(context);
+        var itemPostRepo = new ItemPostRepository(context);
+        var service = new ReportService(reportRepo, itemPostRepo, _mapper);
 
         var dto = new CreateReportDto
         {
@@ -140,7 +145,9 @@ public class ReportServiceTests
 
         await context.SaveChangesAsync();
 
-        var service = new ReportService(context, _mapper);
+        var reportRepo = new ReportRepository(context);
+        var itemPostRepo = new ItemPostRepository(context);
+        var service = new ReportService(reportRepo, itemPostRepo, _mapper);
 
         var dto = new CreateReportDto
         {

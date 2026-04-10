@@ -1,136 +1,30 @@
-using FluentValidation;
-using FluentValidation.AspNetCore;
+using ItemNest.Api.Extensions;
 using ItemNest.Api.Middlewares;
-using ItemNest.Application.Configurations;
-using ItemNest.Application.Interfaces;
-using ItemNest.Application.Mappings;
-using ItemNest.Application.Validators;
 using ItemNest.Domain.Entities;
 using ItemNest.Infrastructure.Data;
 using ItemNest.Infrastructure.Seed;
-using ItemNest.Infrastructure.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
-using System.Reflection;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options =>
+builder.Services.AddSwaggerDocs();
+builder.Services.AddCors(options =>
 {
-    options.SwaggerDoc("v1", new OpenApiInfo
+    options.AddPolicy("FrontendCorsPolicy", policy =>
     {
-        Version = "v1",
-        Title = "ItemNest API",
-        License = new OpenApiLicense
-        {
-            Name = "MIT License",
-            Url = new Uri("https://opensource.org/licenses/MIT")
-        }
-    });
-
-
-    var apiXmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    var apiXmlPath = Path.Combine(AppContext.BaseDirectory, apiXmlFile);
-
-    if (File.Exists(apiXmlPath))
-        options.IncludeXmlComments(apiXmlPath);
-
-    var applicationAssembly = typeof(ItemNest.Application.DTOs.RegisterDto).Assembly;
-    var applicationXmlFile = $"{applicationAssembly.GetName().Name}.xml";
-    var applicationXmlPath = Path.Combine(AppContext.BaseDirectory, applicationXmlFile);
-
-    if (File.Exists(applicationXmlPath))
-        options.IncludeXmlComments(applicationXmlPath);
-
-    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Description = "Enter the JWT token. Example: Bearer {token}",
-        Name = "Authorization",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.Http,
-        Scheme = "bearer",
-        BearerFormat = "JWT"
-    });
-
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            Array.Empty<string>()
-        }
+        policy
+            .WithOrigins(
+                "http://localhost:5173",
+                "https://localhost:5173")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
     });
 });
-
-builder.Services.AddDbContext<ItemNestDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-builder.Services.AddAutoMapper(typeof(MappingProfile));
-
-builder.Services.AddIdentity<AppUser, IdentityRole<Guid>>(options =>
-{
-    options.Password.RequiredLength = 6;
-    options.Password.RequireDigit = false;
-    options.Password.RequireUppercase = false;
-    options.Password.RequireLowercase = false;
-    options.Password.RequireNonAlphanumeric = false;
-})
-.AddEntityFrameworkStores<ItemNestDbContext>()
-.AddDefaultTokenProviders();
-
-builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<ICategoryService, CategoryService>();
-builder.Services.AddScoped<IItemPostService, ItemPostService>();
-builder.Services.AddScoped<IItemImageService, ItemImageService>();
-builder.Services.AddScoped<IFavoriteService, FavoriteService>();
-builder.Services.AddScoped<IReportService, ReportService>();
-builder.Services.AddScoped<IContactRequestService, ContactRequestService>();
-
-builder.Services.AddFluentValidationAutoValidation();
-builder.Services.AddValidatorsFromAssemblyContaining<RegisterDtoValidator>();
-
-builder.Services.Configure<AdminSeedSettings>(builder.Configuration.GetSection(AdminSeedSettings.SectionName));
-
-builder.Services.AddScoped<AdminUserSeeder>();
-
-var jwtSection = builder.Configuration.GetSection("Jwt");
-var jwtKey = jwtSection["Key"]!;
-
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = jwtSection["Issuer"],
-        ValidAudience = jwtSection["Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
-        ClockSkew = TimeSpan.Zero
-    };
-});
-
+builder.Services.AddDatabase(builder.Configuration);
+builder.Services.AddApplicationServices(builder.Configuration);
+builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
@@ -140,7 +34,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI(options =>
     {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "ItemNest API v1");
         options.DisplayRequestDuration();
         options.EnableFilter();
         options.EnableDeepLinking();
@@ -155,12 +48,16 @@ if (app.Environment.IsDevelopment())
 
     var adminUserSeeder = services.GetRequiredService<AdminUserSeeder>();
     await adminUserSeeder.SeedAsync();
+
+    var testDataSeeder = services.GetRequiredService<TestDataSeeder>();
+    await testDataSeeder.SeedAsync();
 }
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
 app.UseHttpsRedirection();
 
+app.UseCors("FrontendCorsPolicy");
 app.UseStaticFiles();
 
 app.UseAuthentication();

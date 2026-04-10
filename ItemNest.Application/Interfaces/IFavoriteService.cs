@@ -7,4 +7,5 @@ public interface IFavoriteService
     Task AddAsync(Guid userId, Guid itemPostId);
     Task RemoveAsync(Guid userId, Guid itemPostId);
     Task<IReadOnlyList<FavoriteDto>> GetMyFavoritesAsync(Guid userId);
+    Task<FavoriteStatusDto> GetStatusAsync(Guid userId, Guid itemPostId);
 }

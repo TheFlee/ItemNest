@@ -6,7 +6,6 @@ using System.Security.Claims;
 
 namespace ItemNest.Api.Controllers;
 
-
 [Route("api/[controller]")]
 [ApiController]
 [Authorize]
@@ -41,6 +40,14 @@ public class FavoritesController : ControllerBase
         var userId = GetUserId();
         var favorites = await _favoriteService.GetMyFavoritesAsync(userId);
         return Ok(favorites);
+    }
+
+    [HttpGet("{itemPostId:guid}/status")]
+    public async Task<ActionResult<FavoriteStatusDto>> GetStatus(Guid itemPostId)
+    {
+        var userId = GetUserId();
+        var result = await _favoriteService.GetStatusAsync(userId, itemPostId);
+        return Ok(result);
     }
 
     private Guid GetUserId()
