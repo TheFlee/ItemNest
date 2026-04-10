@@ -16,6 +16,3 @@ ItemNest.Api/wwwroot/uploads/
 # Build artifacts
 ItemNest.Api/itemnest-front.zip
 ItemNest.zip
-
-# Claude memory
-.claude/
