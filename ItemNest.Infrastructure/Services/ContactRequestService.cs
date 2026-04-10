@@ -1,28 +1,33 @@
-﻿using AutoMapper;
+using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using ItemNest.Application.DTOs;
 using ItemNest.Application.Interfaces;
+using ItemNest.Application.Interfaces.Repositories;
 using ItemNest.Domain.Entities;
 using ItemNest.Domain.Enums;
-using ItemNest.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace ItemNest.Infrastructure.Services;
 
 public class ContactRequestService : IContactRequestService
 {
-    private readonly ItemNestDbContext _context;
+    private readonly IContactRequestRepository _contactRequestRepository;
+    private readonly IItemPostRepository _itemPostRepository;
     private readonly IMapper _mapper;
 
-    public ContactRequestService(ItemNestDbContext context, IMapper mapper)
+    public ContactRequestService(
+        IContactRequestRepository contactRequestRepository,
+        IItemPostRepository itemPostRepository,
+        IMapper mapper)
     {
-        _context = context;
+        _contactRequestRepository = contactRequestRepository;
+        _itemPostRepository = itemPostRepository;
         _mapper = mapper;
     }
 
     public async Task<ContactRequestDto> CreateAsync(Guid requesterUserId, CreateContactRequestDto dto)
     {
-        var post = await _context.ItemPosts
+        var post = await _itemPostRepository.Query()
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == dto.ItemPostId);
 
@@ -32,11 +37,10 @@ public class ContactRequestService : IContactRequestService
         if (post.UserId == requesterUserId)
             throw new InvalidOperationException("You cannot send a contact request for your own post.");
 
-        var pendingExists = await _context.ContactRequests
-            .AnyAsync(x =>
-                x.RequesterUserId == requesterUserId &&
-                x.ItemPostId == dto.ItemPostId &&
-                x.Status == ContactRequestStatus.Pending);
+        var pendingExists = await _contactRequestRepository.AnyAsync(x =>
+            x.RequesterUserId == requesterUserId &&
+            x.ItemPostId == dto.ItemPostId &&
+            x.Status == ContactRequestStatus.Pending);
 
         if (pendingExists)
             throw new InvalidOperationException("You already have a pending contact request for this post.");
@@ -52,8 +56,8 @@ public class ContactRequestService : IContactRequestService
             CreatedAt = DateTime.UtcNow
         };
 
-        _context.ContactRequests.Add(contactRequest);
-        await _context.SaveChangesAsync();
+        await _contactRequestRepository.AddAsync(contactRequest);
+        await _contactRequestRepository.SaveChangesAsync();
 
         return await GetProjectedQuery()
             .FirstAsync(x => x.Id == contactRequest.Id);
@@ -61,7 +65,7 @@ public class ContactRequestService : IContactRequestService
 
     public async Task<IReadOnlyCollection<ContactRequestDto>> GetSentAsync(Guid requesterUserId)
     {
-        var items = await _context.ContactRequests
+        var items = await _contactRequestRepository.Query()
             .AsNoTracking()
             .Where(x => x.RequesterUserId == requesterUserId)
             .OrderByDescending(x => x.CreatedAt)
@@ -73,7 +77,7 @@ public class ContactRequestService : IContactRequestService
 
     public async Task<IReadOnlyCollection<ContactRequestDto>> GetReceivedAsync(Guid postOwnerUserId)
     {
-        var items = await _context.ContactRequests
+        var items = await _contactRequestRepository.Query()
             .AsNoTracking()
             .Where(x => x.PostOwnerUserId == postOwnerUserId)
             .OrderByDescending(x => x.CreatedAt)
@@ -85,7 +89,7 @@ public class ContactRequestService : IContactRequestService
 
     public async Task<ContactRequestDto> AcceptAsync(Guid requestId, Guid postOwnerUserId)
     {
-        var request = await _context.ContactRequests
+        var request = await _contactRequestRepository.Query()
             .FirstOrDefaultAsync(x => x.Id == requestId);
 
         if (request is null)
@@ -100,7 +104,7 @@ public class ContactRequestService : IContactRequestService
         request.Status = ContactRequestStatus.Accepted;
         request.RespondedAt = DateTime.UtcNow;
 
-        await _context.SaveChangesAsync();
+        await _contactRequestRepository.SaveChangesAsync();
 
         return await GetProjectedQuery()
             .FirstAsync(x => x.Id == request.Id);
@@ -108,7 +112,7 @@ public class ContactRequestService : IContactRequestService
 
     public async Task<ContactRequestDto> RejectAsync(Guid requestId, Guid postOwnerUserId)
     {
-        var request = await _context.ContactRequests
+        var request = await _contactRequestRepository.Query()
             .FirstOrDefaultAsync(x => x.Id == requestId);
 
         if (request is null)
@@ -123,17 +127,15 @@ public class ContactRequestService : IContactRequestService
         request.Status = ContactRequestStatus.Rejected;
         request.RespondedAt = DateTime.UtcNow;
 
-        await _context.SaveChangesAsync();
+        await _contactRequestRepository.SaveChangesAsync();
 
-        var dto = await GetProjectedQuery()
-            .FirstAsync(x => x.Id == request.Id);
-
-        return HideSensitiveDataIfNeeded(dto);
+        return HideSensitiveDataIfNeeded(await GetProjectedQuery()
+            .FirstAsync(x => x.Id == request.Id));
     }
 
     public async Task<ContactRequestDto> CancelAsync(Guid requestId, Guid requesterUserId)
     {
-        var request = await _context.ContactRequests
+        var request = await _contactRequestRepository.Query()
             .FirstOrDefaultAsync(x => x.Id == requestId);
 
         if (request is null)
@@ -148,20 +150,16 @@ public class ContactRequestService : IContactRequestService
         request.Status = ContactRequestStatus.Cancelled;
         request.RespondedAt = DateTime.UtcNow;
 
-        await _context.SaveChangesAsync();
+        await _contactRequestRepository.SaveChangesAsync();
 
-        var dto = await GetProjectedQuery()
-            .FirstAsync(x => x.Id == request.Id);
-
-        return HideSensitiveDataIfNeeded(dto);
+        return HideSensitiveDataIfNeeded(await GetProjectedQuery()
+            .FirstAsync(x => x.Id == request.Id));
     }
 
-    private IQueryable<ContactRequestDto> GetProjectedQuery()
-    {
-        return _context.ContactRequests
+    private IQueryable<ContactRequestDto> GetProjectedQuery() =>
+        _contactRequestRepository.Query()
             .AsNoTracking()
             .ProjectTo<ContactRequestDto>(_mapper.ConfigurationProvider);
-    }
 
     private static ContactRequestDto HideSensitiveDataIfNeeded(ContactRequestDto dto)
     {
