@@ -2,11 +2,8 @@
 using ItemNest.Domain.Entities;
 using ItemNest.Domain.Enums;
 using ItemNest.Infrastructure.Data;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System.Net;
-using System.Text;
 
 namespace ItemNest.Infrastructure.Seed;
 
@@ -15,7 +12,58 @@ public class TestDataSeeder
     private readonly ItemNestDbContext _context;
     private readonly UserManager<AppUser> _userManager;
     private readonly RoleManager<IdentityRole<Guid>> _roleManager;
-    private readonly IWebHostEnvironment _environment;
+
+    private static readonly Dictionary<string, string[]> CategoryImageUrls = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["Wallet"] =
+        [
+            "https://images.unsplash.com/photo-1627384113710-424c9181ebbb?auto=format&fit=crop&w=800&q=80",
+            "https://images.unsplash.com/photo-1548531244-bc0d11d58f3c?auto=format&fit=crop&w=800&q=80",
+            "https://images.unsplash.com/photo-1601597111158-2fceff292cdc?auto=format&fit=crop&w=800&q=80",
+        ],
+        ["Phone"] =
+        [
+            "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80",
+            "https://images.unsplash.com/photo-1592899667939-3236c5e0d8e5?auto=format&fit=crop&w=800&q=80",
+            "https://images.unsplash.com/photo-1580910051074-3eb694886505?auto=format&fit=crop&w=800&q=80",
+        ],
+        ["Keys"] =
+        [
+            "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=800&q=80",
+            "https://images.unsplash.com/photo-1633265486064-086b219458ec?auto=format&fit=crop&w=800&q=80",
+            "https://images.unsplash.com/photo-1582139312050-41b18d70a1de?auto=format&fit=crop&w=800&q=80",
+        ],
+        ["Bag"] =
+        [
+            "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=800&q=80",
+            "https://images.unsplash.com/photo-1622560480654-d96214fdc887?auto=format&fit=crop&w=800&q=80",
+            "https://images.unsplash.com/photo-1491637639811-60e2756cc1c7?auto=format&fit=crop&w=800&q=80",
+        ],
+        ["Documents"] =
+        [
+            "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?auto=format&fit=crop&w=800&q=80",
+            "https://images.unsplash.com/photo-1586953208448-b95a79798f07?auto=format&fit=crop&w=800&q=80",
+            "https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=800&q=80",
+        ],
+        ["Watch"] =
+        [
+            "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80",
+            "https://images.unsplash.com/photo-1547996160-81dfa63595aa?auto=format&fit=crop&w=800&q=80",
+            "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?auto=format&fit=crop&w=800&q=80",
+        ],
+        ["Jewelry"] =
+        [
+            "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=800&q=80",
+            "https://images.unsplash.com/photo-1602173574767-37ac01994b2a?auto=format&fit=crop&w=800&q=80",
+            "https://images.unsplash.com/photo-1611652022419-a9419f74343d?auto=format&fit=crop&w=800&q=80",
+        ],
+        ["Other"] =
+        [
+            "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?auto=format&fit=crop&w=800&q=80",
+            "https://images.unsplash.com/photo-1572635196237-14b3f281503f?auto=format&fit=crop&w=800&q=80",
+            "https://images.unsplash.com/photo-1585386959984-a4155224a1ad?auto=format&fit=crop&w=800&q=80",
+        ],
+    };
 
     private sealed class PostScenario
     {
@@ -39,13 +87,11 @@ public class TestDataSeeder
     public TestDataSeeder(
         ItemNestDbContext context,
         UserManager<AppUser> userManager,
-        RoleManager<IdentityRole<Guid>> roleManager,
-        IWebHostEnvironment environment)
+        RoleManager<IdentityRole<Guid>> roleManager)
     {
         _context = context;
         _userManager = userManager;
         _roleManager = roleManager;
-        _environment = environment;
     }
 
     public async Task SeedAsync()
@@ -553,103 +599,52 @@ public class TestDataSeeder
         return $"{opening} {colorPart} {detail} {closing}";
     }
 
-    private async Task<List<ItemImage>> CreateImagesAsync(List<GeneratedPostSeed> generatedPostSeeds)
+    private static Task<List<ItemImage>> CreateImagesAsync(List<GeneratedPostSeed> generatedPostSeeds)
     {
-        var webRootPath = _environment.WebRootPath;
-
-        if (string.IsNullOrWhiteSpace(webRootPath))
-        {
-            webRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
-        }
-
-        var uploadFolder = Path.Combine(webRootPath, "uploads", "itemposts");
-        Directory.CreateDirectory(uploadFolder);
-
-        var images = new List<ItemImage>();
         var faker = new Faker();
+        var images = new List<ItemImage>();
 
         foreach (var seed in generatedPostSeeds)
         {
-            var primaryImage = CreateSingleImage(seed, uploadFolder, "main");
-            images.Add(primaryImage);
+            var urls = GetImageUrlsForCategory(seed.CategoryName);
+            var primaryUrl = faker.PickRandom(urls);
+
+            images.Add(new ItemImage
+            {
+                Id = Guid.NewGuid(),
+                ItemPostId = seed.Post.Id,
+                ImageUrl = primaryUrl,
+                StoredFileName = string.Empty,
+                ContentType = "image/jpeg",
+                FileSize = 0,
+                CreatedAt = seed.Post.CreatedAt
+            });
 
             if (faker.Random.Bool(0.35f))
             {
-                var secondaryImage = CreateSingleImage(seed, uploadFolder, "extra");
-                images.Add(secondaryImage);
+                var remaining = urls.Where(u => u != primaryUrl).ToArray();
+                var secondaryUrl = remaining.Length > 0 ? faker.PickRandom(remaining) : primaryUrl;
+
+                images.Add(new ItemImage
+                {
+                    Id = Guid.NewGuid(),
+                    ItemPostId = seed.Post.Id,
+                    ImageUrl = secondaryUrl,
+                    StoredFileName = string.Empty,
+                    ContentType = "image/jpeg",
+                    FileSize = 0,
+                    CreatedAt = seed.Post.CreatedAt
+                });
             }
         }
 
-        return await Task.FromResult(images);
+        return Task.FromResult(images);
     }
 
-    private ItemImage CreateSingleImage(
-        GeneratedPostSeed seed,
-        string uploadFolder,
-        string variant)
+    private static string[] GetImageUrlsForCategory(string categoryName)
     {
-        var storedFileName = $"{Guid.NewGuid()}.svg";
-        var fullPath = Path.Combine(uploadFolder, storedFileName);
-        var svg = BuildSvg(seed, variant);
-        var bytes = Encoding.UTF8.GetBytes(svg);
-
-        File.WriteAllBytes(fullPath, bytes);
-
-        return new ItemImage
-        {
-            Id = Guid.NewGuid(),
-            ItemPostId = seed.Post.Id,
-            ImageUrl = $"/uploads/itemposts/{storedFileName}",
-            StoredFileName = storedFileName,
-            ContentType = "image/svg+xml",
-            FileSize = bytes.Length,
-            CreatedAt = seed.Post.CreatedAt
-        };
-    }
-
-    private static string BuildSvg(GeneratedPostSeed seed, string variant)
-    {
-        var background = seed.Color switch
-        {
-            ItemColor.Black => "#111827",
-            ItemColor.White => "#F8FAFC",
-            ItemColor.Gray => "#CBD5E1",
-            ItemColor.Blue => "#DBEAFE",
-            ItemColor.Red => "#FEE2E2",
-            ItemColor.Green => "#DCFCE7",
-            ItemColor.Yellow => "#FEF3C7",
-            ItemColor.Brown => "#E7D3C2",
-            ItemColor.Pink => "#FCE7F3",
-            ItemColor.Purple => "#EDE9FE",
-            ItemColor.Orange => "#FFEDD5",
-            ItemColor.Silver => "#E5E7EB",
-            ItemColor.Gold => "#FEF08A",
-            _ => "#F1F5F9"
-        };
-
-        var accent = seed.Post.Type == PostType.Lost ? "#DC2626" : "#059669";
-        var text = seed.Color is ItemColor.Black or ItemColor.Blue ? "#FFFFFF" : "#0F172A";
-        var title = WebUtility.HtmlEncode(seed.ItemName);
-        var category = WebUtility.HtmlEncode(seed.CategoryName);
-        var location = WebUtility.HtmlEncode(seed.Location);
-        var variantLabel = variant == "extra" ? "Additional View" : "Seeded Preview";
-
-        return $"""
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900">
-  <rect width="1200" height="900" fill="{background}" />
-  <rect x="60" y="60" width="1080" height="780" rx="32" fill="rgba(255,255,255,0.72)" />
-
-  <text x="90" y="235" font-family="Arial, Helvetica, sans-serif" font-size="64" font-weight="700" fill="{text}">{title}</text>
-  <text x="90" y="310" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="600" fill="{text}">{category}</text>
-  <text x="90" y="365" font-family="Arial, Helvetica, sans-serif" font-size="30" fill="{text}">{location}</text>
-
-  <rect x="90" y="640" width="360" height="110" rx="24" fill="{accent}" />
-  <text x="270" y="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#FFFFFF">{variantLabel}</text>
-
-  <circle cx="925" cy="370" r="165" fill="{accent}" opacity="0.14" />
-  <circle cx="985" cy="435" r="115" fill="{accent}" opacity="0.22" />
-  <circle cx="865" cy="470" r="85" fill="{accent}" opacity="0.28" />
-</svg>
-""";
+        return CategoryImageUrls.TryGetValue(categoryName, out var urls)
+            ? urls
+            : CategoryImageUrls["Other"];
     }
 }
