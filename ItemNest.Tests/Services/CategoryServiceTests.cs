@@ -1,7 +1,8 @@
-﻿using AutoMapper;
+using AutoMapper;
 using FluentAssertions;
 using ItemNest.Application.DTOs;
 using ItemNest.Application.Mappings;
+using ItemNest.Infrastructure.Repositories;
 using ItemNest.Infrastructure.Services;
 using ItemNest.Tests.Helpers;
 
@@ -26,7 +27,8 @@ public class CategoryServiceTests
     {
         // arrange
         var context = DbContextFactory.Create();
-        var service = new CategoryService(context, _mapper);
+        var repo = new CategoryRepository(context);
+        var service = new CategoryService(repo, _mapper);
 
         var dto = new CreateCategoryDto
         {
@@ -47,7 +49,8 @@ public class CategoryServiceTests
     public async Task CreateAsync_ShouldThrow_WhenCategoryAlreadyExists()
     {
         var context = DbContextFactory.Create();
-        var service = new CategoryService(context, _mapper);
+        var repo = new CategoryRepository(context);
+        var service = new CategoryService(repo, _mapper);
 
         await service.CreateAsync(new CreateCategoryDto { Name = "Books" });
 

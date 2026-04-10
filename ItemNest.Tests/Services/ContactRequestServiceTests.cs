@@ -4,6 +4,7 @@ using ItemNest.Application.DTOs;
 using ItemNest.Application.Mappings;
 using ItemNest.Domain.Entities;
 using ItemNest.Domain.Enums;
+using ItemNest.Infrastructure.Repositories;
 using ItemNest.Infrastructure.Services;
 using ItemNest.Tests.Helpers;
 
@@ -59,7 +60,9 @@ public class ContactRequestServiceTests
         context.ItemPosts.Add(post);
         await context.SaveChangesAsync();
 
-        var service = new ContactRequestService(context, _mapper);
+        var contactRequestRepo = new ContactRequestRepository(context);
+        var itemPostRepo = new ItemPostRepository(context);
+        var service = new ContactRequestService(contactRequestRepo, itemPostRepo, _mapper);
 
         var dto = new CreateContactRequestDto
         {
@@ -99,7 +102,9 @@ public class ContactRequestServiceTests
         context.ItemPosts.Add(post);
         await context.SaveChangesAsync();
 
-        var service = new ContactRequestService(context, _mapper);
+        var contactRequestRepo = new ContactRequestRepository(context);
+        var itemPostRepo = new ItemPostRepository(context);
+        var service = new ContactRequestService(contactRequestRepo, itemPostRepo, _mapper);
 
         var dto = new CreateContactRequestDto
         {
@@ -162,7 +167,9 @@ public class ContactRequestServiceTests
         context.ContactRequests.Add(contactRequest);
         await context.SaveChangesAsync();
 
-        var service = new ContactRequestService(context, _mapper);
+        var contactRequestRepo = new ContactRequestRepository(context);
+        var itemPostRepo = new ItemPostRepository(context);
+        var service = new ContactRequestService(contactRequestRepo, itemPostRepo, _mapper);
 
         // act
         var result = await service.AcceptAsync(contactRequest.Id, owner.Id);

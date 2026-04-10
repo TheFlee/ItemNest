@@ -1,7 +1,6 @@
-﻿using AutoMapper;
 using FluentAssertions;
-using ItemNest.Application.Mappings;
 using ItemNest.Domain.Entities;
+using ItemNest.Infrastructure.Repositories;
 using ItemNest.Infrastructure.Services;
 using ItemNest.Tests.Helpers;
 
@@ -9,18 +8,6 @@ namespace ItemNest.Tests.Services;
 
 public class FavoriteServiceTests
 {
-    private readonly IMapper _mapper;
-
-    public FavoriteServiceTests()
-    {
-        var config = new MapperConfiguration(cfg =>
-        {
-            cfg.AddProfile<MappingProfile>();
-        });
-
-        _mapper = config.CreateMapper();
-    }
-
     [Fact]
     public async Task AddAsync_ShouldAddFavorite()
     {
@@ -41,7 +28,9 @@ public class FavoriteServiceTests
 
         await context.SaveChangesAsync();
 
-        var service = new FavoriteService(context, _mapper);
+        var favoriteRepo = new FavoriteRepository(context);
+        var itemPostRepo = new ItemPostRepository(context);
+        var service = new FavoriteService(favoriteRepo, itemPostRepo);
 
         await service.AddAsync(userId, postId);
 
@@ -78,7 +67,9 @@ public class FavoriteServiceTests
 
         await context.SaveChangesAsync();
 
-        var service = new FavoriteService(context, _mapper);
+        var favoriteRepo = new FavoriteRepository(context);
+        var itemPostRepo = new ItemPostRepository(context);
+        var service = new FavoriteService(favoriteRepo, itemPostRepo);
 
         var action = async () => await service.AddAsync(userId, postId);
 
@@ -103,7 +94,9 @@ public class FavoriteServiceTests
 
         await context.SaveChangesAsync();
 
-        var service = new FavoriteService(context, _mapper);
+        var favoriteRepo = new FavoriteRepository(context);
+        var itemPostRepo = new ItemPostRepository(context);
+        var service = new FavoriteService(favoriteRepo, itemPostRepo);
 
         await service.RemoveAsync(userId, postId);
 

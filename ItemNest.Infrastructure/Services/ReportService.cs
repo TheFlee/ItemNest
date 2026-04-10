@@ -1,28 +1,33 @@
-﻿using AutoMapper;
+using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using ItemNest.Application.DTOs;
 using ItemNest.Application.Interfaces;
+using ItemNest.Application.Interfaces.Repositories;
 using ItemNest.Domain.Entities;
 using ItemNest.Domain.Enums;
-using ItemNest.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace ItemNest.Infrastructure.Services;
 
 public class ReportService : IReportService
 {
-    private readonly ItemNestDbContext _context;
+    private readonly IReportRepository _reportRepository;
+    private readonly IItemPostRepository _itemPostRepository;
     private readonly IMapper _mapper;
 
-    public ReportService(ItemNestDbContext context, IMapper mapper)
+    public ReportService(
+        IReportRepository reportRepository,
+        IItemPostRepository itemPostRepository,
+        IMapper mapper)
     {
-        _context = context;
+        _reportRepository = reportRepository;
+        _itemPostRepository = itemPostRepository;
         _mapper = mapper;
     }
 
     public async Task<ReportDto> CreateAsync(Guid reporterUserId, CreateReportDto dto)
     {
-        var itemPost = await _context.ItemPosts
+        var itemPost = await _itemPostRepository.Query()
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == dto.ItemPostId);
 
@@ -32,8 +37,8 @@ public class ReportService : IReportService
         if (itemPost.UserId == reporterUserId)
             throw new InvalidOperationException("You cannot report your own post.");
 
-        var alreadyReported = await _context.Reports
-            .AnyAsync(x => x.ReporterUserId == reporterUserId && x.ItemPostId == dto.ItemPostId);
+        var alreadyReported = await _reportRepository.AnyAsync(
+            x => x.ReporterUserId == reporterUserId && x.ItemPostId == dto.ItemPostId);
 
         if (alreadyReported)
             throw new InvalidOperationException("You have already reported this post.");
@@ -49,8 +54,8 @@ public class ReportService : IReportService
             CreatedAt = DateTime.UtcNow
         };
 
-        _context.Reports.Add(report);
-        await _context.SaveChangesAsync();
+        await _reportRepository.AddAsync(report);
+        await _reportRepository.SaveChangesAsync();
 
         return await ProjectReports()
             .FirstAsync(x => x.Id == report.Id);
@@ -73,7 +78,7 @@ public class ReportService : IReportService
 
     public async Task<ReportDto> ReviewAsync(Guid reportId, Guid adminUserId, ReviewReportDto dto)
     {
-        var report = await _context.Reports
+        var report = await _reportRepository.Query()
             .FirstOrDefaultAsync(x => x.Id == reportId);
 
         if (report is null)
@@ -86,16 +91,14 @@ public class ReportService : IReportService
         report.ReviewedAt = DateTime.UtcNow;
         report.ReviewedByUserId = adminUserId;
 
-        await _context.SaveChangesAsync();
+        await _reportRepository.SaveChangesAsync();
 
         return await ProjectReports()
             .FirstAsync(x => x.Id == report.Id);
     }
 
-    private IQueryable<ReportDto> ProjectReports()
-    {
-        return _context.Reports
+    private IQueryable<ReportDto> ProjectReports() =>
+        _reportRepository.Query()
             .AsNoTracking()
             .ProjectTo<ReportDto>(_mapper.ConfigurationProvider);
-    }
 }
