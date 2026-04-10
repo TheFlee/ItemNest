@@ -96,7 +96,7 @@ export default function CreatePostPage() {
     );
 
     if (oversizedFile) {
-      setErrorMessage(`Each image must be smaller than ${MAX_FILE_SIZE_MB} MB.`);
+      setErrorMessage(t("createPostPage.form.imageTooLarge", { size: MAX_FILE_SIZE_MB }));
       return;
     }
 
@@ -112,42 +112,42 @@ export default function CreatePostPage() {
     setErrorMessage("");
 
     if (!form.title.trim()) {
-      setErrorMessage("Title is required.");
+      setErrorMessage(t("createPostPage.form.titleRequired"));
       return;
     }
 
     if (!form.description.trim()) {
-      setErrorMessage("Description is required.");
+      setErrorMessage(t("createPostPage.form.descriptionRequired"));
       return;
     }
 
     if (form.type === "") {
-      setErrorMessage("Post type is required.");
+      setErrorMessage(t("createPostPage.form.postTypeRequired"));
       return;
     }
 
     if (form.color === "") {
-      setErrorMessage("Color is required.");
+      setErrorMessage(t("createPostPage.form.colorRequired"));
       return;
     }
 
     if (!form.location.trim()) {
-      setErrorMessage("Location is required.");
+      setErrorMessage(t("createPostPage.form.locationRequired"));
       return;
     }
 
     if (!form.eventDate) {
-      setErrorMessage("Event date is required.");
+      setErrorMessage(t("createPostPage.form.eventDateRequired"));
       return;
     }
 
     if (form.categoryId === "") {
-      setErrorMessage("Category is required.");
+      setErrorMessage(t("createPostPage.form.categoryRequired"));
       return;
     }
 
     if (selectedFiles.length > MAX_IMAGE_COUNT) {
-      setErrorMessage(`You can upload at most ${MAX_IMAGE_COUNT} images.`);
+      setErrorMessage(t("createPostPage.form.tooManyImages", { count: MAX_IMAGE_COUNT }));
       return;
     }
 
@@ -175,8 +175,7 @@ export default function CreatePostPage() {
       } catch {
         navigate(`/posts/${createdPost.id}`, {
           state: {
-            warningMessage:
-              "Post was created successfully, but one or more images could not be uploaded.",
+            warningMessage: t("createPostPage.form.imageUploadWarning"),
           },
         });
       }
@@ -190,10 +189,8 @@ export default function CreatePostPage() {
   if (isLoadingCategories) {
     return (
       <div className="rounded-2xl border border-slate-200 bg-white px-6 py-10 text-center shadow-sm">
-        <p className="text-base font-medium text-slate-700">Loading form...</p>
-        <p className="mt-2 text-sm text-slate-500">
-          Categories and form options are being prepared.
-        </p>
+        <p className="text-base font-medium text-slate-700">{t("createPostPage.loadingTitle")}</p>
+        <p className="mt-2 text-sm text-slate-500">{t("createPostPage.loadingSubtitle")}</p>
       </div>
     );
   }
@@ -205,7 +202,7 @@ export default function CreatePostPage() {
           to="/dashboard"
           className="text-sm font-medium text-slate-600 hover:text-slate-900"
         >
-          ← Back to dashboard
+          {t("createPostPage.backToDashboard")}
         </Link>
       </div>
 
@@ -213,33 +210,35 @@ export default function CreatePostPage() {
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-              Post publishing
+              {t("createPostPage.badge")}
             </p>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900 sm:text-[2rem]">
-              Create Post
+              {t("createPostPage.title")}
             </h1>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600 sm:text-base">
-              Publish a lost or found item with clear details and optional images.
+              {t("createPostPage.description")}
             </p>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-3">
             <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
-              <p className="text-sm font-medium text-slate-500">Post types</p>
-              <p className="mt-2 text-lg font-semibold text-slate-900">Lost or Found</p>
-            </div>
-
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
-              <p className="text-sm font-medium text-slate-500">Images</p>
+              <p className="text-sm font-medium text-slate-500">{t("createPostPage.cards.postTypes")}</p>
               <p className="mt-2 text-lg font-semibold text-slate-900">
-                Up to {MAX_IMAGE_COUNT}
+                {t("createPostPage.cards.postTypesValue")}
               </p>
             </div>
 
             <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
-              <p className="text-sm font-medium text-slate-500">Max size</p>
+              <p className="text-sm font-medium text-slate-500">{t("createPostPage.cards.images")}</p>
               <p className="mt-2 text-lg font-semibold text-slate-900">
-                {MAX_FILE_SIZE_MB} MB each
+                {t("createPostPage.cards.imagesValue", { count: MAX_IMAGE_COUNT })}
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
+              <p className="text-sm font-medium text-slate-500">{t("createPostPage.cards.maxSize")}</p>
+              <p className="mt-2 text-lg font-semibold text-slate-900">
+                {t("createPostPage.cards.maxSizeValue", { size: MAX_FILE_SIZE_MB })}
               </p>
             </div>
           </div>
@@ -250,63 +249,63 @@ export default function CreatePostPage() {
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
           <div className="border-b border-slate-200 pb-5">
             <h2 className="text-xl font-semibold tracking-tight text-slate-900">
-              Post information
+              {t("createPostPage.section.postInfo")}
             </h2>
             <p className="mt-1 text-sm text-slate-600">
-              Add clear item information so the post is easier to review and match.
+              {t("createPostPage.section.postInfoSubtitle")}
             </p>
           </div>
 
           <div className="mt-6 grid gap-5 md:grid-cols-2">
             <div className="md:col-span-2">
               <FormInput
-                label="Title"
+                label={t("createPostPage.form.title")}
                 value={form.title}
                 onChange={(value) => updateField("title", value)}
-                placeholder="Example: Lost black wallet near 28 May metro"
+                placeholder={t("createPostPage.form.titlePlaceholder")}
                 required
               />
             </div>
 
             <div className="md:col-span-2">
               <FormTextarea
-                label="Description"
+                label={t("createPostPage.form.description")}
                 value={form.description}
                 onChange={(value) => updateField("description", value)}
-                placeholder="Describe the item clearly, including visible details, brand, size, marks, and where it was seen."
+                placeholder={t("createPostPage.form.descriptionPlaceholder")}
                 required
                 rows={6}
               />
             </div>
 
             <FormSelect
-              label="Post Type"
+              label={t("createPostPage.form.postType")}
               value={form.type}
               onChange={(value) => updateField("type", value)}
               options={postTypeOptions}
-              placeholder="Select post type"
+              placeholder={t("common.allTypes")}
               required
             />
 
             <FormSelect
-              label="Color"
+              label={t("createPostPage.form.color")}
               value={form.color}
               onChange={(value) => updateField("color", value)}
               options={itemColorOptions}
-              placeholder="Select color"
+              placeholder={t("common.allColors")}
               required
             />
 
             <FormInput
-              label="Location"
+              label={t("createPostPage.form.location")}
               value={form.location}
               onChange={(value) => updateField("location", value)}
-              placeholder="Example: 28 May metro station"
+              placeholder={t("createPostPage.form.locationPlaceholder")}
               required
             />
 
             <FormInput
-              label="Event Date"
+              label={t("createPostPage.form.eventDate")}
               type="datetime-local"
               value={form.eventDate}
               onChange={(value) => updateField("eventDate", value)}
@@ -315,11 +314,11 @@ export default function CreatePostPage() {
 
             <div className="md:col-span-2">
               <FormSelect
-                label="Category"
+                label={t("createPostPage.form.category")}
                 value={form.categoryId}
                 onChange={(value) => updateField("categoryId", value)}
                 options={categoryOptions}
-                placeholder="Select category"
+                placeholder={t("common.allCategories")}
                 required
               />
             </div>
@@ -337,14 +336,14 @@ export default function CreatePostPage() {
               disabled={isSubmitting}
               className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isSubmitting ? "Creating post..." : "Create Post"}
+              {isSubmitting ? t("createPostPage.submitting") : t("createPostPage.submit")}
             </button>
 
             <Link
               to="/dashboard"
               className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-50"
             >
-              Cancel
+              {t("createPostPage.cancel")}
             </Link>
           </div>
         </section>
@@ -353,10 +352,10 @@ export default function CreatePostPage() {
           <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
             <div className="border-b border-slate-200 pb-5">
               <h2 className="text-xl font-semibold tracking-tight text-slate-900">
-                Images
+                {t("createPostPage.section.images")}
               </h2>
               <p className="mt-1 text-sm text-slate-600">
-                Add supporting images to make the item easier to identify.
+                {t("createPostPage.section.imagesSubtitle")}
               </p>
             </div>
 
@@ -372,20 +371,12 @@ export default function CreatePostPage() {
 
           <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <h2 className="text-lg font-semibold tracking-tight text-slate-900">
-              Publishing notes
+              {t("createPostPage.section.notes")}
             </h2>
             <div className="mt-4 space-y-3 text-sm leading-6 text-slate-600">
-              <p>
-                Use a specific title and description so other users can identify the item more
-                easily.
-              </p>
-              <p>
-                Add the correct location, date, and category to improve match quality.
-              </p>
-              <p>
-                You can manage the post later, upload more images, change status, or edit
-                details from the post page.
-              </p>
+              <p>{t("createPostPage.section.note1")}</p>
+              <p>{t("createPostPage.section.note2")}</p>
+              <p>{t("createPostPage.section.note3")}</p>
             </div>
           </section>
         </div>
