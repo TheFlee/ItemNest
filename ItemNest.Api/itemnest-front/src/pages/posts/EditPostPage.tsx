@@ -52,7 +52,7 @@ export default function EditPostPage() {
   useEffect(() => {
     async function loadData() {
       if (!id) {
-        setErrorMessage("Post id was not provided.");
+        setErrorMessage(t("postDetails.errors.postIdMissing"));
         setIsLoading(false);
         return;
       }
@@ -64,7 +64,7 @@ export default function EditPostPage() {
         const [post, categoryData] = await Promise.all([getPostById(id), getCategories()]);
 
         if (!post.isOwner) {
-          setErrorMessage("You are not allowed to edit this post.");
+          setErrorMessage(t("postDetails.errors.postIdMissing"));
           setIsLoading(false);
           return;
         }
@@ -116,42 +116,42 @@ export default function EditPostPage() {
     setErrorMessage("");
 
     if (!id) {
-      setErrorMessage("Post id was not provided.");
+      setErrorMessage(t("postDetails.errors.postIdMissing"));
       return;
     }
 
     if (!form.title.trim()) {
-      setErrorMessage("Title is required.");
+      setErrorMessage(t("editPostPage.form.titleRequired"));
       return;
     }
 
     if (!form.description.trim()) {
-      setErrorMessage("Description is required.");
+      setErrorMessage(t("editPostPage.form.descriptionRequired"));
       return;
     }
 
     if (form.color === "") {
-      setErrorMessage("Color is required.");
+      setErrorMessage(t("editPostPage.form.colorRequired"));
       return;
     }
 
     if (!form.location.trim()) {
-      setErrorMessage("Location is required.");
+      setErrorMessage(t("editPostPage.form.locationRequired"));
       return;
     }
 
     if (!form.eventDate) {
-      setErrorMessage("Event date is required.");
+      setErrorMessage(t("editPostPage.form.eventDateRequired"));
       return;
     }
 
     if (form.categoryId === "") {
-      setErrorMessage("Category is required.");
+      setErrorMessage(t("editPostPage.form.categoryRequired"));
       return;
     }
 
     if (form.status === "") {
-      setErrorMessage("Status is required.");
+      setErrorMessage(t("editPostPage.form.statusRequired"));
       return;
     }
 
@@ -173,7 +173,7 @@ export default function EditPostPage() {
       navigate(`/posts/${id}`, {
         replace: true,
         state: {
-          successMessage: "Post was updated successfully.",
+          successMessage: t("editPostPage.successMessage"),
         },
       });
     } catch (error: any) {
@@ -194,7 +194,7 @@ export default function EditPostPage() {
           to={`/posts/${id}`}
           className="text-sm font-medium text-slate-600 hover:text-slate-900"
         >
-          ← Back to post details
+          {t("editPostPage.backToPost")}
         </Link>
       </div>
 
@@ -202,31 +202,42 @@ export default function EditPostPage() {
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-              Post management
+              {t("editPostPage.badge")}
             </p>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900 sm:text-[2rem]">
-              Edit Post
+              {t("editPostPage.title")}
             </h1>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600 sm:text-base">
-              Update the main details of your post while keeping the information clear,
-              accurate, and easy to review.
+              {t("editPostPage.description")}
             </p>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-3">
             <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
-              <p className="text-sm font-medium text-slate-500">Editable fields</p>
-              <p className="mt-2 text-lg font-semibold text-slate-900">Core post data</p>
+              <p className="text-sm font-medium text-slate-500">
+                {t("editPostPage.cards.editableFields")}
+              </p>
+              <p className="mt-2 text-lg font-semibold text-slate-900">
+                {t("editPostPage.cards.editableFieldsValue")}
+              </p>
             </div>
 
             <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
-              <p className="text-sm font-medium text-slate-500">Status options</p>
-              <p className="mt-2 text-lg font-semibold text-slate-900">Open / Returned / Closed</p>
+              <p className="text-sm font-medium text-slate-500">
+                {t("editPostPage.cards.statusOptions")}
+              </p>
+              <p className="mt-2 text-lg font-semibold text-slate-900">
+                {t("editPostPage.cards.statusOptionsValue")}
+              </p>
             </div>
 
             <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
-              <p className="text-sm font-medium text-slate-500">Next step</p>
-              <p className="mt-2 text-lg font-semibold text-slate-900">Save changes</p>
+              <p className="text-sm font-medium text-slate-500">
+                {t("editPostPage.cards.nextStep")}
+              </p>
+              <p className="mt-2 text-lg font-semibold text-slate-900">
+                {t("editPostPage.cards.nextStepValue")}
+              </p>
             </div>
           </div>
         </div>
@@ -236,66 +247,66 @@ export default function EditPostPage() {
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
           <div className="border-b border-slate-200 pb-5">
             <h2 className="text-xl font-semibold tracking-tight text-slate-900">
-              Edit information
+              {t("editPostPage.section.editInfo")}
             </h2>
             <p className="mt-1 text-sm text-slate-600">
-              Keep the post title, description, location, category, and status up to date.
+              {t("editPostPage.section.editInfoSubtitle")}
             </p>
           </div>
 
           <div className="mt-6 grid gap-5 md:grid-cols-2">
             <div className="md:col-span-2">
               <FormInput
-                label="Title"
+                label={t("editPostPage.form.title")}
                 value={form.title}
                 onChange={(value) => updateField("title", value)}
-                placeholder="Example: Lost black wallet near 28 May metro"
+                placeholder={t("editPostPage.form.titlePlaceholder")}
                 required
               />
             </div>
 
             <div className="md:col-span-2">
               <FormTextarea
-                label="Description"
+                label={t("editPostPage.form.description")}
                 value={form.description}
                 onChange={(value) => updateField("description", value)}
-                placeholder="Describe the item clearly, including any important details."
+                placeholder={t("editPostPage.form.descriptionPlaceholder")}
                 required
                 rows={6}
               />
             </div>
 
             <FormSelect
-              label="Color"
+              label={t("editPostPage.form.color")}
               value={form.color}
               onChange={(value) => updateField("color", value)}
               options={itemColorOptions}
-              placeholder="Select color"
+              placeholder={t("common.allColors")}
               required
             />
 
             <FormSelect
-              label="Status"
+              label={t("editPostPage.form.status")}
               value={form.status}
               onChange={(value) => updateField("status", value)}
               options={postStatusOptions}
-              placeholder="Select status"
+              placeholder={t("common.allStatuses")}
               required
             />
 
             <div className="md:col-span-2">
               <FormInput
-                label="Location"
+                label={t("editPostPage.form.location")}
                 value={form.location}
                 onChange={(value) => updateField("location", value)}
-                placeholder="Example: 28 May metro station"
+                placeholder={t("editPostPage.form.locationPlaceholder")}
                 required
               />
             </div>
 
             <div>
               <label className="mb-1.5 block text-sm font-medium text-slate-700">
-                Event Date
+                {t("editPostPage.form.eventDate")}
               </label>
               <input
                 type="datetime-local"
@@ -307,11 +318,11 @@ export default function EditPostPage() {
             </div>
 
             <FormSelect
-              label="Category"
+              label={t("editPostPage.form.category")}
               value={form.categoryId}
               onChange={(value) => updateField("categoryId", value)}
               options={categoryOptions}
-              placeholder="Select category"
+              placeholder={t("common.allCategories")}
               required
             />
           </div>
@@ -328,14 +339,14 @@ export default function EditPostPage() {
               disabled={isSubmitting}
               className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isSubmitting ? "Saving..." : "Save Changes"}
+              {isSubmitting ? t("editPostPage.submitting") : t("editPostPage.submit")}
             </button>
 
             <Link
               to={`/posts/${id}`}
               className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-50"
             >
-              Cancel
+              {t("editPostPage.cancel")}
             </Link>
           </div>
         </section>
@@ -343,12 +354,18 @@ export default function EditPostPage() {
         <div className="space-y-6">
           <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <h2 className="text-lg font-semibold tracking-tight text-slate-900">
-              Status guidance
+              {t("editPostPage.statusGuidance.title")}
             </h2>
 
             <div className="mt-4 space-y-3">
               {postStatusOptions.map((option) => {
                 const isSelected = Number(form.status) === option.value;
+                const descKey =
+                  option.value === 0
+                    ? "editPostPage.statusGuidance.openDesc"
+                    : option.value === 1
+                      ? "editPostPage.statusGuidance.returnedDesc"
+                      : "editPostPage.statusGuidance.closedDesc";
 
                 return (
                   <div
@@ -362,14 +379,7 @@ export default function EditPostPage() {
                     <p className="text-sm font-semibold text-slate-900">
                       {getPostStatusLabel(option.value)}
                     </p>
-                    <p className="mt-1 text-sm leading-6 text-slate-600">
-                      {option.value === 0 &&
-                        "Keep the post active and visible for continued review and matching."}
-                      {option.value === 1 &&
-                        "Use this when the item has been successfully returned or claimed."}
-                      {option.value === 2 &&
-                        "Use this when the post should no longer remain active in normal workflow."}
-                    </p>
+                    <p className="mt-1 text-sm leading-6 text-slate-600">{t(descKey)}</p>
                   </div>
                 );
               })}
@@ -378,12 +388,12 @@ export default function EditPostPage() {
 
           <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <h2 className="text-lg font-semibold tracking-tight text-slate-900">
-              Editing notes
+              {t("editPostPage.section.notes")}
             </h2>
             <div className="mt-4 space-y-3 text-sm leading-6 text-slate-600">
-              <p>Keep the title specific so the post is still easy to identify in lists.</p>
-              <p>Update the description when new information becomes available.</p>
-              <p>Use the correct status so the post reflects the real current situation.</p>
+              <p>{t("editPostPage.section.note1")}</p>
+              <p>{t("editPostPage.section.note2")}</p>
+              <p>{t("editPostPage.section.note3")}</p>
             </div>
           </section>
         </div>

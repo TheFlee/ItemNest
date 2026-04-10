@@ -1,9 +1,13 @@
-﻿using Bogus;
+﻿using System.Net.Http.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using Bogus;
 using ItemNest.Domain.Entities;
 using ItemNest.Domain.Enums;
 using ItemNest.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace ItemNest.Infrastructure.Seed;
 
@@ -12,57 +16,35 @@ public class TestDataSeeder
     private readonly ItemNestDbContext _context;
     private readonly UserManager<AppUser> _userManager;
     private readonly RoleManager<IdentityRole<Guid>> _roleManager;
+    private readonly string? _unsplashKey;
 
-    private static readonly Dictionary<string, string[]> CategoryImageUrls = new(StringComparer.OrdinalIgnoreCase)
+    private static readonly Dictionary<string, string> CategorySearchQueries = new(StringComparer.OrdinalIgnoreCase)
     {
-        ["Wallet"] =
-        [
-            "https://images.unsplash.com/photo-1627384113710-424c9181ebbb?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1548531244-bc0d11d58f3c?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1601597111158-2fceff292cdc?auto=format&fit=crop&w=800&q=80",
-        ],
-        ["Phone"] =
-        [
-            "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1592899667939-3236c5e0d8e5?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1580910051074-3eb694886505?auto=format&fit=crop&w=800&q=80",
-        ],
-        ["Keys"] =
-        [
-            "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1633265486064-086b219458ec?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1582139312050-41b18d70a1de?auto=format&fit=crop&w=800&q=80",
-        ],
-        ["Bag"] =
-        [
-            "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1622560480654-d96214fdc887?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1491637639811-60e2756cc1c7?auto=format&fit=crop&w=800&q=80",
-        ],
-        ["Documents"] =
-        [
-            "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1586953208448-b95a79798f07?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=800&q=80",
-        ],
-        ["Watch"] =
-        [
-            "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1547996160-81dfa63595aa?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?auto=format&fit=crop&w=800&q=80",
-        ],
-        ["Jewelry"] =
-        [
-            "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1602173574767-37ac01994b2a?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1611652022419-a9419f74343d?auto=format&fit=crop&w=800&q=80",
-        ],
-        ["Other"] =
-        [
-            "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1572635196237-14b3f281503f?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1585386959984-a4155224a1ad?auto=format&fit=crop&w=800&q=80",
-        ],
+        ["Wallet"]    = "leather wallet",
+        ["Phone"]     = "smartphone mobile",
+        ["Keys"]      = "keys keychain",
+        ["Bag"]       = "backpack bag",
+        ["Documents"] = "documents passport",
+        ["Watch"]     = "wristwatch luxury",
+        ["Jewelry"]   = "jewelry ring necklace",
+        ["Other"]     = "lost item accessories",
+    };
+
+    private static readonly Dictionary<ItemColor, string> AzColorNames = new()
+    {
+        [ItemColor.Black] = "qara",
+        [ItemColor.White] = "ağ",
+        [ItemColor.Gray] = "boz",
+        [ItemColor.Blue] = "mavi",
+        [ItemColor.Red] = "qırmızı",
+        [ItemColor.Green] = "yaşıl",
+        [ItemColor.Yellow] = "sarı",
+        [ItemColor.Brown] = "qəhvəyi",
+        [ItemColor.Pink] = "çəhrayı",
+        [ItemColor.Purple] = "bənövşəyi",
+        [ItemColor.Orange] = "narıncı",
+        [ItemColor.Silver] = "gümüşü",
+        [ItemColor.Gold] = "qızılı",
     };
 
     private sealed class PostScenario
@@ -87,11 +69,13 @@ public class TestDataSeeder
     public TestDataSeeder(
         ItemNestDbContext context,
         UserManager<AppUser> userManager,
-        RoleManager<IdentityRole<Guid>> roleManager)
+        RoleManager<IdentityRole<Guid>> roleManager,
+        IConfiguration configuration)
     {
         _context = context;
         _userManager = userManager;
         _roleManager = roleManager;
+        _unsplashKey = configuration["Unsplash:AccessKey"];
     }
 
     public async Task SeedAsync()
@@ -103,6 +87,7 @@ public class TestDataSeeder
 
         var users = await EnsureUsersAsync();
         var categories = await _context.Categories.AsNoTracking().ToListAsync();
+        var categoryImages = await FetchAllCategoryImagesAsync();
 
         if (categories.Count == 0)
             throw new InvalidOperationException("Categories were not found. Seed categories first.");
@@ -171,7 +156,7 @@ public class TestDataSeeder
         await _context.ItemPosts.AddRangeAsync(generatedPostSeeds.Select(x => x.Post));
         await _context.SaveChangesAsync();
 
-        var images = await CreateImagesAsync(generatedPostSeeds);
+        var images = CreateImages(generatedPostSeeds, categoryImages);
         await _context.ItemImages.AddRangeAsync(images);
         await _context.SaveChangesAsync();
     }
@@ -313,30 +298,30 @@ public class TestDataSeeder
                 CategoryName = "Wallet",
                 ItemNames =
                 [
-                    "leather wallet",
-                    "brown card holder",
-                    "black bifold wallet",
-                    "small coin wallet"
+                    "dəri cüzdan",
+                    "qəhvəyi kart qabı",
+                    "qara ikiqat cüzdan",
+                    "kiçik sikkə cüzdanı"
                 ],
                 Colors = [ItemColor.Black, ItemColor.Brown, ItemColor.Gray],
                 Locations =
                 [
                     "28 May metro",
-                    "Ganjlik Mall",
-                    "Nizami Street",
-                    "Baku Boulevard"
+                    "Gənclik Mall",
+                    "Nizami küçəsi",
+                    "Bulvar"
                 ],
                 LostDetails =
                 [
-                    "It contains personal cards and some cash.",
-                    "The wallet has bank cards and an ID inside.",
-                    "There are several cards and a small amount of money inside."
+                    "İçərisində şəxsi kartlar və nağd pul var.",
+                    "Cüzdanın içərisində bank kartları və şəxsiyyət vəsiqəsi var.",
+                    "İçərisində bir neçə kart və az miqdarda pul var."
                 ],
                 FoundDetails =
                 [
-                    "It was found near the walking area and kept safely.",
-                    "The item was picked up and stored to return to the owner.",
-                    "It was noticed on the ground and taken for safekeeping."
+                    "Gəzinti zonasında tapıldı, təhlükəsiz saxlanıldı.",
+                    "Sahibinə qaytarmaq üçün götürülüb, mühafizə edilir.",
+                    "Yerdə görülüb, saxlanmaq üçün götürülüb."
                 ]
             },
             new PostScenario
@@ -345,29 +330,29 @@ public class TestDataSeeder
                 ItemNames =
                 [
                     "iPhone 13",
-                    "Samsung Galaxy phone",
-                    "Xiaomi Redmi phone",
-                    "black smartphone"
+                    "Samsung Galaxy telefon",
+                    "Xiaomi Redmi telefon",
+                    "qara smartfon"
                 ],
                 Colors = [ItemColor.Black, ItemColor.Blue, ItemColor.White, ItemColor.Red],
                 Locations =
                 [
                     "Narimanov metro",
-                    "Azadliq Avenue",
-                    "Ganjlik metro",
-                    "Khatai Park"
+                    "Əhmədli metro",
+                    "Gənclik metro",
+                    "Xətai metro"
                 ],
                 LostDetails =
                 [
-                    "The phone has a protective case and important personal data.",
-                    "The device was likely left in a taxi or on a bench.",
-                    "There is a lock screen photo that can help identify it."
+                    "Telefonun qoruyucu qabı var, vacib şəxsi məlumatlar içindədir.",
+                    "Cihaz yəqin ki, taksidə və ya oturacaqda unudulub.",
+                    "Kilid ekranındakı foto onu tanımağa kömək edə bilər."
                 ],
                 FoundDetails =
                 [
-                    "The phone was found switched off and kept safe.",
-                    "It was found near public transport and not handed to anyone else.",
-                    "The device is currently charged and stored carefully."
+                    "Telefon söndürülmüş vəziyyətdə tapıldı, mühafizə edilir.",
+                    "İctimai nəqliyyat yaxınlığında tapıldı, başqasına verilməyib.",
+                    "Cihaz hal-hazırda dolu vəziyyətdə diqqətlə saxlanılır."
                 ]
             },
             new PostScenario
@@ -375,30 +360,30 @@ public class TestDataSeeder
                 CategoryName = "Keys",
                 ItemNames =
                 [
-                    "house keys",
-                    "car key set",
-                    "silver keychain",
-                    "office keys"
+                    "ev açarları",
+                    "avtomobil açar dəsti",
+                    "gümüşü açar zənciricik",
+                    "ofis açarları"
                 ],
                 Colors = [ItemColor.Silver, ItemColor.Black, ItemColor.Gray],
                 Locations =
                 [
-                    "Ahmadli metro",
-                    "Yasamal district",
-                    "Elmler metro",
-                    "Bina shopping center"
+                    "Əhmədli metro",
+                    "Yasamal qəsəbəsi",
+                    "Elmlər metro",
+                    "Bina ticarət mərkəzi"
                 ],
                 LostDetails =
                 [
-                    "The keys are attached to a small keychain.",
-                    "The set includes several keys and one main key.",
-                    "The key set may have been dropped while walking."
+                    "Açarlar kiçik açar zənciriciyinə bağlıdır.",
+                    "Dəstdə bir neçə açar var, biri əsas açardır.",
+                    "Açar dəsti yəqin ki, gəzərkən düşüb."
                 ],
                 FoundDetails =
                 [
-                    "The key set was found on the pavement and collected safely.",
-                    "It was found near the entrance area and kept to return.",
-                    "The keys were discovered in a visible public place."
+                    "Açar dəsti yolda tapıldı, mühafizə edilir.",
+                    "Giriş qapısı yanında tapıldı, qaytarmaq üçün saxlanılır.",
+                    "Açıq ictimai yerdə tapıldı, götürülüb."
                 ]
             },
             new PostScenario
@@ -406,30 +391,30 @@ public class TestDataSeeder
                 CategoryName = "Bag",
                 ItemNames =
                 [
-                    "black backpack",
-                    "laptop bag",
-                    "small shoulder bag",
-                    "travel bag"
+                    "qara kürək çantası",
+                    "noutbuk çantası",
+                    "kiçik çiyin çantası",
+                    "yol çantası"
                 ],
                 Colors = [ItemColor.Black, ItemColor.Blue, ItemColor.Gray, ItemColor.Brown],
                 Locations =
                 [
-                    "Baku Bus Terminal",
+                    "Bakı Avtovağzalı",
                     "28 Mall",
-                    "Khirdalan station",
-                    "Ganjlik Mall"
+                    "Koroğlu metro",
+                    "Gənclik Mall"
                 ],
                 LostDetails =
                 [
-                    "It contains personal belongings and daily essentials.",
-                    "The bag may include documents, chargers, and small accessories.",
-                    "It was likely left near a seating area."
+                    "İçərisində şəxsi əşyalar və gündəlik lazımlıqlar var.",
+                    "Çantada sənədlər, zaryadlayıcılar və kiçik aksesuarlar ola bilər.",
+                    "Yəqin ki, oturma yerinin yanında unudulub."
                 ],
                 FoundDetails =
                 [
-                    "The bag was found unattended and kept in safe condition.",
-                    "It was collected immediately to help identify the owner.",
-                    "The item was found indoors and protected from damage."
+                    "Çanta sahibsiz tapıldı, salamat vəziyyətdə saxlanılır.",
+                    "Sahibini tapmaq üçün dərhal götürüldü.",
+                    "Bina içindəki açıq yerdə tapıldı, qorunub."
                 ]
             },
             new PostScenario
@@ -437,30 +422,30 @@ public class TestDataSeeder
                 CategoryName = "Documents",
                 ItemNames =
                 [
-                    "document folder",
-                    "passport cover",
-                    "student documents",
-                    "clear file holder"
+                    "sənəd qovluğu",
+                    "pasport qabı",
+                    "tələbə sənədləri",
+                    "şəffaf sənəd qabı"
                 ],
                 Colors = [ItemColor.Blue, ItemColor.Black, ItemColor.Gray, ItemColor.Red],
                 Locations =
                 [
-                    "ASAN Service center area",
+                    "ASAN xidmət mərkəzi",
                     "Sahil metro",
                     "Nizami metro",
-                    "university campus"
+                    "Bakı Dövlət Universiteti"
                 ],
                 LostDetails =
                 [
-                    "The folder contains important identification or academic papers.",
-                    "These documents are personally important and urgently needed.",
-                    "The papers were likely left after a meeting or appointment."
+                    "Qovluqda mühüm şəxsi və ya tədris sənədləri var.",
+                    "Bu sənədlər şəxsən vacibdir, təcili lazımdır.",
+                    "Sənədlər yəqin ki, görüş və ya qəbuldan sonra unudulub."
                 ],
                 FoundDetails =
                 [
-                    "The documents were found together and kept dry and safe.",
-                    "They were collected from a public place to return to the owner.",
-                    "The folder was noticed quickly and preserved carefully."
+                    "Sənədlər bir yerdə tapıldı, quru və salamat saxlanılır.",
+                    "İctimai yerdən götürüldü, sahibinə qaytarmaq üçün mühafizə edilir.",
+                    "Qovluq tez fərq edildi, diqqətlə qorunub."
                 ]
             },
             new PostScenario
@@ -468,30 +453,30 @@ public class TestDataSeeder
                 CategoryName = "Watch",
                 ItemNames =
                 [
-                    "silver wristwatch",
-                    "black digital watch",
-                    "classic analog watch",
-                    "sport watch"
+                    "gümüşü qol saatı",
+                    "qara rəqəmsal saat",
+                    "klassik analog saat",
+                    "idman saatı"
                 ],
                 Colors = [ItemColor.Black, ItemColor.Silver, ItemColor.Gold, ItemColor.Blue],
                 Locations =
                 [
                     "Deniz Mall",
-                    "Baku Boulevard",
-                    "Narimanov district",
-                    "fitness center locker room"
+                    "Bulvar",
+                    "Narimanov qəsəbəsi",
+                    "idman mərkəzinin soyunma otağı"
                 ],
                 LostDetails =
                 [
-                    "The watch has sentimental value for the owner.",
-                    "It may have been removed and forgotten during the day.",
-                    "The watch was likely lost during movement or exercise."
+                    "Saatın sahibi üçün emosional dəyəri var.",
+                    "Gün ərzində çıxarılıb unudula bilərdi.",
+                    "Hərəkət və ya idman zamanı itirilmiş ola bilər."
                 ],
                 FoundDetails =
                 [
-                    "The watch was found intact and kept safely.",
-                    "It was noticed quickly and taken to a secure place.",
-                    "The item was found in good condition and preserved."
+                    "Saat bütöv vəziyyətdə tapıldı, mühafizə edilir.",
+                    "Tez fərq edildi, etibarlı yerə götürüldü.",
+                    "Yaxşı vəziyyətdə tapıldı, qorunub."
                 ]
             },
             new PostScenario
@@ -499,30 +484,30 @@ public class TestDataSeeder
                 CategoryName = "Jewelry",
                 ItemNames =
                 [
-                    "gold ring",
-                    "silver bracelet",
-                    "small necklace",
-                    "earring set"
+                    "qızıl üzük",
+                    "gümüşü qolbaq",
+                    "kiçik boyunbağı",
+                    "sırğa dəsti"
                 ],
                 Colors = [ItemColor.Gold, ItemColor.Silver, ItemColor.Pink],
                 Locations =
                 [
-                    "wedding hall parking area",
-                    "Nizami Street",
-                    "shopping center restroom",
-                    "beauty salon entrance"
+                    "toy salonu yanındakı dayanacaq",
+                    "Nizami küçəsi",
+                    "ticarət mərkəzi tualet otağı",
+                    "gözəllik salonu girişi"
                 ],
                 LostDetails =
                 [
-                    "The item has high personal and emotional value.",
-                    "It may have slipped off without being noticed immediately.",
-                    "The jewelry piece is small and easy to miss."
+                    "Əşyanın yüksək şəxsi və emosional dəyəri var.",
+                    "Fərq edilmədən düşmüş ola bilər.",
+                    "Zinət əşyası kiçikdir, asan nəzərdən qaçır."
                 ],
                 FoundDetails =
                 [
-                    "The jewelry item was found and protected from being lost again.",
-                    "It was collected carefully and stored safely.",
-                    "The item was found in a clean indoor area."
+                    "Zinət əşyası tapıldı, itirməmək üçün mühafizə edildi.",
+                    "Diqqətlə götürüldü, təhlükəsiz saxlanılır.",
+                    "Təmiz qapalı yerdə tapıldı."
                 ]
             },
             new PostScenario
@@ -530,30 +515,30 @@ public class TestDataSeeder
                 CategoryName = "Other",
                 ItemNames =
                 [
-                    "wireless earbuds case",
-                    "power bank",
-                    "sunglasses",
-                    "USB flash drive"
+                    "simsiz qulaqlıq qutusu",
+                    "güc bankı",
+                    "günəş eynəyi",
+                    "USB flaş kart"
                 ],
                 Colors = [ItemColor.Black, ItemColor.White, ItemColor.Blue, ItemColor.Gray],
                 Locations =
                 [
-                    "coffee shop near Fountain Square",
-                    "metro underpass",
-                    "office building lobby",
-                    "city bus route stop"
+                    "Fontan Meydanı yanındakı kafe",
+                    "metro keçidi",
+                    "ofis binasının lobbisi",
+                    "şəhər avtobusu dayanacağı"
                 ],
                 LostDetails =
                 [
-                    "The item is used daily and the owner is actively looking for it.",
-                    "It may have been left on a table or seat.",
-                    "The item was likely misplaced during a short stop."
+                    "Əşya gündəlik istifadə üçündür, sahibi aktiv axtarır.",
+                    "Masada və ya oturacaqda unudulmuş ola bilər.",
+                    "Qısa dayanacaq zamanı yerini dəyişib."
                 ],
                 FoundDetails =
                 [
-                    "The item was found shortly after being left behind.",
-                    "It was picked up and stored carefully for return.",
-                    "The item was found in a public space and kept safe."
+                    "Əşya qoyulduqdan qısa müddət sonra tapıldı.",
+                    "Sahibinə qaytarmaq üçün diqqətlə götürüldü.",
+                    "İctimai yerdə tapıldı, qorunub."
                 ]
             }
         ];
@@ -565,11 +550,21 @@ public class TestDataSeeder
         string itemName,
         string location)
     {
-        var colorText = color == ItemColor.Unknown ? string.Empty : $"{color.ToString().ToLower()} ";
+        string subject;
+
+        if (color != ItemColor.Unknown && AzColorNames.TryGetValue(color, out var azColor))
+        {
+            var raw = $"{azColor} {itemName}";
+            subject = char.ToUpper(raw[0]) + raw[1..];
+        }
+        else
+        {
+            subject = char.ToUpper(itemName[0]) + itemName[1..];
+        }
 
         return type == PostType.Lost
-            ? $"Lost {colorText}{itemName} near {location}"
-            : $"Found {colorText}{itemName} near {location}";
+            ? $"{subject} itirildi — {location} yaxınlığında"
+            : $"{subject} tapıldı — {location} yaxınlığında";
     }
 
     private static string BuildDescription(
@@ -581,32 +576,40 @@ public class TestDataSeeder
         string location)
     {
         var opening = type == PostType.Lost
-            ? $"I lost my {itemName} around {location}."
-            : $"I found a {itemName} around {location}.";
+            ? $"{location} ətrafında {itemName} itirdim."
+            : $"{location} ətrafında {itemName} tapdım.";
 
-        var colorPart = color == ItemColor.Unknown
-            ? "The exact color is not fully confirmed."
-            : $"Its color is {color.ToString().ToLower()}.";
+        var colorPart = color == ItemColor.Unknown || !AzColorNames.TryGetValue(color, out var azColor)
+            ? "Rəngi dəqiq bilinmir."
+            : $"Rəngi {azColor}dir.";
 
         var detail = type == PostType.Lost
             ? faker.PickRandom(scenario.LostDetails)
             : faker.PickRandom(scenario.FoundDetails);
 
         var closing = type == PostType.Lost
-            ? "Please contact me if you have any information."
-            : "Please contact me if you believe this item belongs to you.";
+            ? "Məlumatınız varsa, əlaqə saxlayın."
+            : "Bu əşyanın sizə aid olduğunu düşünürsünüzsə, əlaqə saxlayın.";
 
         return $"{opening} {colorPart} {detail} {closing}";
     }
 
-    private static Task<List<ItemImage>> CreateImagesAsync(List<GeneratedPostSeed> generatedPostSeeds)
+    private static List<ItemImage> CreateImages(
+        List<GeneratedPostSeed> generatedPostSeeds,
+        Dictionary<string, string[]> categoryImages)
     {
         var faker = new Faker();
         var images = new List<ItemImage>();
 
         foreach (var seed in generatedPostSeeds)
         {
-            var urls = GetImageUrlsForCategory(seed.CategoryName);
+            var urls = categoryImages.TryGetValue(seed.CategoryName, out var u) ? u
+                : categoryImages.TryGetValue("Other", out var fallback) ? fallback
+                : [];
+
+            if (urls.Length == 0)
+                continue;
+
             var primaryUrl = faker.PickRandom(urls);
 
             images.Add(new ItemImage
@@ -638,13 +641,49 @@ public class TestDataSeeder
             }
         }
 
-        return Task.FromResult(images);
+        return images;
     }
 
-    private static string[] GetImageUrlsForCategory(string categoryName)
+    private async Task<Dictionary<string, string[]>> FetchAllCategoryImagesAsync()
     {
-        return CategoryImageUrls.TryGetValue(categoryName, out var urls)
-            ? urls
-            : CategoryImageUrls["Other"];
+        var result = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
+
+        if (string.IsNullOrWhiteSpace(_unsplashKey))
+        {
+            foreach (var category in CategorySearchQueries.Keys)
+                result[category] = [];
+
+            return result;
+        }
+
+        using var http = new HttpClient();
+        http.DefaultRequestHeaders.Add("Authorization", $"Client-ID {_unsplashKey}");
+        http.DefaultRequestHeaders.Add("Accept-Version", "v1");
+
+        foreach (var (category, query) in CategorySearchQueries)
+        {
+            try
+            {
+                var url = $"https://api.unsplash.com/photos/random?query={Uri.EscapeDataString(query)}&count=3&orientation=landscape";
+                var photos = await http.GetFromJsonAsync<UnsplashPhoto[]>(url);
+
+                result[category] = photos?
+                    .Select(p => p.Urls.Regular)
+                    .Where(u => !string.IsNullOrEmpty(u))
+                    .ToArray() ?? [];
+            }
+            catch
+            {
+                result[category] = [];
+            }
+        }
+
+        return result;
     }
+
+    private sealed record UnsplashPhoto(
+        [property: JsonPropertyName("urls")] UnsplashPhotoUrls Urls);
+
+    private sealed record UnsplashPhotoUrls(
+        [property: JsonPropertyName("regular")] string Regular);
 }
