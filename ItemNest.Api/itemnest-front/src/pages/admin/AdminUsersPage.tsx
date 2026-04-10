@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import {
   getAdminUsers,
@@ -13,6 +14,7 @@ import { formatDateTime } from "../../utils/format";
 import { useAuth } from "../../context/AuthContext";
 
 export default function AdminUsersPage() {
+  const { t } = useTranslation();
   const { user: currentUser, refreshUser, logout } = useAuth();
 
   const [users, setUsers] = useState<AdminUserItem[]>([]);
@@ -56,7 +58,7 @@ export default function AdminUsersPage() {
         await refreshUser();
       }
 
-      setSuccessMessage("User role was updated successfully.");
+      setSuccessMessage(t("adminPages.users.successRoleUpdated"));
     } catch (error: any) {
       setErrorMessage(getApiErrorMessage(error));
     } finally {
@@ -66,8 +68,8 @@ export default function AdminUsersPage() {
 
   async function handleBlockStatusChange(userId: string, isBlocked: boolean) {
     const confirmationMessage = isBlocked
-      ? "Are you sure you want to block this user? A blocked user will not be able to log in or continue using protected API requests."
-      : "Are you sure you want to unblock this user?";
+      ? t("adminPages.users.confirmBlock")
+      : t("adminPages.users.confirmUnblock");
 
     if (!window.confirm(confirmationMessage)) {
       return;
@@ -95,8 +97,8 @@ export default function AdminUsersPage() {
 
       setSuccessMessage(
         isBlocked
-          ? "User was blocked successfully."
-          : "User was unblocked successfully."
+          ? t("adminPages.users.successBlocked")
+          : t("adminPages.users.successUnblocked")
       );
     } catch (error: any) {
       setErrorMessage(getApiErrorMessage(error));
@@ -147,7 +149,7 @@ export default function AdminUsersPage() {
           isLoading={isLoading}
           errorMessage={errorMessage}
           isEmpty={!isLoading && !errorMessage && users.length === 0}
-          emptyMessage="There are no users in the system."
+          emptyMessage={t("adminPages.users.emptyMessage")}
         />
       </div>
     );
@@ -159,13 +161,13 @@ export default function AdminUsersPage() {
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-              User management
+              {t("adminPages.users.badge")}
             </p>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900 sm:text-[2rem]">
-              Admin Users
+              {t("adminPages.users.title")}
             </h1>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600 sm:text-base">
-              Review registered accounts, search by name or email, inspect roles, and manage both admin access and blocked status.
+              {t("adminPages.users.description")}
             </p>
           </div>
 
@@ -174,51 +176,51 @@ export default function AdminUsersPage() {
               to="/admin/dashboard"
               className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800"
             >
-              Back to Admin Dashboard
+              {t("adminPages.users.backToDashboard")}
             </Link>
 
             <Link
               to="/admin/reports"
               className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-50"
             >
-              Open Reports
+              {t("adminPages.users.openReports")}
             </Link>
           </div>
         </div>
 
         <div className="mt-6 grid gap-4 md:grid-cols-5">
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">Total users</p>
+            <p className="text-sm font-medium text-slate-500">{t("adminPages.users.totalUsers")}</p>
             <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
               {metrics.total}
             </p>
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">Admins</p>
+            <p className="text-sm font-medium text-slate-500">{t("adminPages.users.admins")}</p>
             <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
               {metrics.admins}
             </p>
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">Standard users</p>
+            <p className="text-sm font-medium text-slate-500">{t("adminPages.users.standardUsers")}</p>
             <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
               {metrics.standardUsers}
             </p>
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">Blocked users</p>
+            <p className="text-sm font-medium text-slate-500">{t("adminPages.users.blockedUsers")}</p>
             <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
               {metrics.blocked}
             </p>
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">Your admin access</p>
+            <p className="text-sm font-medium text-slate-500">{t("adminPages.users.yourAdminAccess")}</p>
             <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
-              {metrics.currentAccountIsAdmin ? "Yes" : "No"}
+              {metrics.currentAccountIsAdmin ? t("common.yes") : t("common.no")}
             </p>
           </div>
         </div>
@@ -234,19 +236,19 @@ export default function AdminUsersPage() {
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <h2 className="text-xl font-semibold tracking-tight text-slate-900">
-              Registered accounts
+              {t("adminPages.users.registeredAccounts")}
             </h2>
             <p className="mt-1 text-sm text-slate-600">
-              Search by full name or email and take direct moderation actions below.
+              {t("adminPages.users.registeredDescription")}
             </p>
           </div>
 
           <div className="w-full max-w-md">
             <FormInput
-              label="Search users"
+              label={t("adminPages.users.searchLabel")}
               value={searchTerm}
               onChange={setSearchTerm}
-              placeholder="Search by name or email"
+              placeholder={t("adminPages.users.searchPlaceholder")}
             />
           </div>
         </div>
@@ -258,7 +260,7 @@ export default function AdminUsersPage() {
             isLoading={false}
             errorMessage=""
             isEmpty
-            emptyMessage="No users matched your current search."
+            emptyMessage={t("adminPages.users.noMatch")}
           />
         ) : (
           filteredUsers.map((user) => {
@@ -283,19 +285,19 @@ export default function AdminUsersPage() {
 
                       {isSelf && (
                         <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700">
-                          Your Account
+                          {t("adminPages.users.yourAccount")}
                         </span>
                       )}
 
                       {user.isBlocked && (
                         <span className="rounded-full bg-red-100 px-3 py-1 text-sm font-medium text-red-700">
-                          Blocked
+                          {t("adminPages.users.blockedBadge")}
                         </span>
                       )}
                     </div>
 
                     <p className="mt-2 text-sm leading-6 text-slate-600">
-                      Registered platform account with role and access management available from this admin panel.
+                      {t("adminPages.users.cardDescription")}
                     </p>
                   </div>
 
@@ -313,21 +315,21 @@ export default function AdminUsersPage() {
                 <div className="mt-5 grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm md:grid-cols-2 xl:grid-cols-4">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                      Email
+                      {t("adminPages.users.email")}
                     </p>
                     <p className="mt-1 font-medium text-slate-700">{user.email}</p>
                   </div>
 
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                      Current Role
+                      {t("adminPages.users.currentRole")}
                     </p>
                     <p className="mt-1 font-medium text-slate-700">{primaryRole}</p>
                   </div>
 
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                      Created At
+                      {t("adminPages.users.createdAt")}
                     </p>
                     <p className="mt-1 font-medium text-slate-700">
                       {formatDateTime(user.createdAt)}
@@ -336,27 +338,25 @@ export default function AdminUsersPage() {
 
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                      Access Status
+                      {t("adminPages.users.accessStatus")}
                     </p>
                     <p className="mt-1 font-medium text-slate-700">
-                      {user.isBlocked ? "Blocked from platform access" : "Active"}
+                      {user.isBlocked ? t("adminPages.users.blockedStatus") : t("adminPages.users.active")}
                     </p>
                   </div>
                 </div>
 
-                
-                  {isSelf && primaryRole === "Admin" && (
-                    <p className="mt-3 ml-1 text-sm text-blue-700">
-                      Your current admin account cannot be downgraded from this screen while it is the active account.
-                    </p>
-                  )}
+                {isSelf && primaryRole === "Admin" && (
+                  <p className="mt-3 ml-1 text-sm text-blue-700">
+                    {t("adminPages.users.yourAdminNote")}
+                  </p>
+                )}
 
-                  {isSelf && (
-                    <p className="mt-2 ml-1 text-sm text-blue-700">
-                      Your own account cannot be blocked from this screen.
-                    </p>
-                  )}
-                
+                {isSelf && (
+                  <p className="mt-2 ml-1 text-sm text-blue-700">
+                    {t("adminPages.users.yourBlockNote")}
+                  </p>
+                )}
 
                 <div className="mt-6 flex flex-wrap gap-3">
                   <button
@@ -365,7 +365,7 @@ export default function AdminUsersPage() {
                     disabled={disableSetUser}
                     className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    {isProcessing ? "Processing..." : "Set as User"}
+                    {isProcessing ? t("adminPages.users.processing") : t("adminPages.users.setAsUser")}
                   </button>
 
                   <button
@@ -374,7 +374,7 @@ export default function AdminUsersPage() {
                     disabled={isProcessing}
                     className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    {isProcessing ? "Processing..." : "Set as Admin"}
+                    {isProcessing ? t("adminPages.users.processing") : t("adminPages.users.setAsAdmin")}
                   </button>
 
                   {user.isBlocked ? (
@@ -384,7 +384,7 @@ export default function AdminUsersPage() {
                       disabled={disableBlock}
                       className="inline-flex items-center justify-center rounded-xl border border-emerald-200 bg-white px-4 py-2.5 text-sm font-semibold text-emerald-700 hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                      {isProcessing ? "Processing..." : "Unblock User"}
+                      {isProcessing ? t("adminPages.users.processing") : t("adminPages.users.unblockUser")}
                     </button>
                   ) : (
                     <button
@@ -393,7 +393,7 @@ export default function AdminUsersPage() {
                       disabled={disableBlock}
                       className="inline-flex items-center justify-center rounded-xl border border-red-200 bg-white px-4 py-2.5 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                      {isProcessing ? "Processing..." : "Block User"}
+                      {isProcessing ? t("adminPages.users.processing") : t("adminPages.users.blockUser")}
                     </button>
                   )}
                 </div>

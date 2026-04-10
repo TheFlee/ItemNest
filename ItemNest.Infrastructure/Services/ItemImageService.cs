@@ -1,18 +1,23 @@
-﻿using AutoMapper;
+using Amazon.S3;
+using Amazon.S3.Model;
+using Amazon.S3.Transfer;
+using AutoMapper;
+using ItemNest.Application.Configurations;
 using ItemNest.Application.DTOs;
 using ItemNest.Application.Exceptions;
 using ItemNest.Application.Interfaces;
 using ItemNest.Domain.Entities;
 using ItemNest.Infrastructure.Data;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace ItemNest.Infrastructure.Services;
 
 public class ItemImageService : IItemImageService
 {
     private readonly ItemNestDbContext _context;
-    private readonly IWebHostEnvironment _environment;
+    private readonly IAmazonS3 _s3Client;
+    private readonly AwsSettings _awsSettings;
     private readonly IMapper _mapper;
 
     private static readonly string[] AllowedContentTypes =
@@ -35,11 +40,13 @@ public class ItemImageService : IItemImageService
 
     public ItemImageService(
         ItemNestDbContext context,
-        IWebHostEnvironment environment,
+        IAmazonS3 s3Client,
+        IOptions<AwsSettings> awsSettings,
         IMapper mapper)
     {
         _context = context;
-        _environment = environment;
+        _s3Client = s3Client;
+        _awsSettings = awsSettings.Value;
         _mapper = mapper;
     }
 
@@ -87,29 +94,29 @@ public class ItemImageService : IItemImageService
         if (post.Images.Count >= MaxImageCountPerPost)
             throw new InvalidOperationException("A post can have a maximum of 5 images.");
 
-        var webRootPath = _environment.WebRootPath;
-        if (string.IsNullOrWhiteSpace(webRootPath))
-        {
-            webRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
-        }
-
-        var uploadFolder = Path.Combine(webRootPath, "uploads", "itemposts");
-        Directory.CreateDirectory(uploadFolder);
-
         var storedFileName = $"{Guid.NewGuid()}{extension}";
-        var fullPath = Path.Combine(uploadFolder, storedFileName);
+        var s3Key = $"uploads/itemposts/{storedFileName}";
 
-        await using (var fileStream = new FileStream(fullPath, FileMode.Create))
+        var uploadRequest = new TransferUtilityUploadRequest
         {
-            await stream.CopyToAsync(fileStream, cancellationToken);
-        }
+            BucketName = _awsSettings.BucketName,
+            Key = s3Key,
+            InputStream = stream,
+            ContentType = contentType,
+            AutoCloseStream = false,
+        };
+
+        var transferUtility = new TransferUtility(_s3Client);
+        await transferUtility.UploadAsync(uploadRequest, cancellationToken);
+
+        var imageUrl = $"https://{_awsSettings.BucketName}.s3.{_awsSettings.Region}.amazonaws.com/{s3Key}";
 
         var image = new ItemImage
         {
             Id = Guid.NewGuid(),
             ItemPostId = itemPostId,
-            ImageUrl = $"/uploads/itemposts/{storedFileName}",
-            StoredFileName = storedFileName,
+            ImageUrl = imageUrl,
+            StoredFileName = s3Key,
             ContentType = contentType,
             FileSize = length,
             CreatedAt = DateTimeOffset.UtcNow
@@ -155,18 +162,13 @@ public class ItemImageService : IItemImageService
         if (image.ItemPost.UserId != userId)
             throw new ForbiddenException("You are not allowed to delete this image.");
 
-        var webRootPath = _environment.WebRootPath;
-        if (string.IsNullOrWhiteSpace(webRootPath))
+        var deleteRequest = new DeleteObjectRequest
         {
-            webRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
-        }
+            BucketName = _awsSettings.BucketName,
+            Key = image.StoredFileName
+        };
 
-        var fullPath = Path.Combine(webRootPath, "uploads", "itemposts", image.StoredFileName);
-
-        if (File.Exists(fullPath))
-        {
-            File.Delete(fullPath);
-        }
+        await _s3Client.DeleteObjectAsync(deleteRequest, cancellationToken);
 
         _context.ItemImages.Remove(image);
         await _context.SaveChangesAsync(cancellationToken);

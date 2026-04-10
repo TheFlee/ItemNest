@@ -1,5 +1,7 @@
+import i18n from "../i18n";
+
 export function getPostTypeLabel(type: number): string {
-  return type === 0 ? "Lost" : "Found";
+  return type === 0 ? i18n.t("post.lost") : i18n.t("post.found");
 }
 
 export function getPostTypeClassName(type: number): string {
@@ -11,13 +13,13 @@ export function getPostTypeClassName(type: number): string {
 export function getPostStatusLabel(status: number): string {
   switch (status) {
     case 0:
-      return "Open";
+      return i18n.t("post.open");
     case 1:
-      return "Returned";
+      return i18n.t("post.returned");
     case 2:
-      return "Closed";
+      return i18n.t("post.closed");
     default:
-      return "Unknown";
+      return i18n.t("common.unknown");
   }
 }
 
@@ -37,34 +39,34 @@ export function getPostStatusClassName(status: number): string {
 export function getItemColorLabel(color: number): string {
   switch (color) {
     case 0:
-      return "Unknown";
+      return i18n.t("common.unknown");
     case 1:
-      return "Black";
+      return i18n.t("post.black");
     case 2:
-      return "White";
+      return i18n.t("post.white");
     case 3:
-      return "Gray";
+      return i18n.t("post.gray");
     case 4:
-      return "Blue";
+      return i18n.t("post.blue");
     case 5:
-      return "Red";
+      return i18n.t("post.red");
     case 6:
-      return "Green";
+      return i18n.t("post.green");
     case 7:
-      return "Yellow";
+      return i18n.t("post.yellow");
     case 8:
-      return "Brown";
+      return i18n.t("post.brown");
     case 9:
-      return "Pink";
+      return i18n.t("post.pink");
     case 10:
-      return "Purple";
+      return i18n.t("post.purple");
     case 11:
-      return "Orange";
+      return i18n.t("post.orange");
     case 12:
-      return "Silver";
+      return i18n.t("post.silver");
     case 13:
-      return "Gold";
+      return i18n.t("post.gold");
     default:
-      return "Unknown";
+      return i18n.t("common.unknown");
   }
 }

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { createContactRequest } from "../../api/contactRequestApi";
 import { addFavorite, removeFavorite } from "../../api/favoriteApi";
@@ -19,7 +20,7 @@ import type { ItemPost, MatchedItemPost, UpdatePostRequest } from "../../types/p
 import { buildFileUrl } from "../../utils/api";
 import { getApiErrorMessage } from "../../utils/error";
 import { formatDate, formatDateTime } from "../../utils/format";
-import { reportReasonOptions } from "../../utils/options";
+import { getReportReasonOptions } from "../../utils/options";
 import {
   getItemColorLabel,
   getPostStatusLabel,
@@ -36,6 +37,7 @@ function getMatchScoreWidth(score: number) {
 }
 
 export default function PostDetailsPage() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
@@ -60,10 +62,12 @@ export default function PostDetailsPage() {
   const [showContactForm, setShowContactForm] = useState(false);
   const [showReportForm, setShowReportForm] = useState(false);
 
+  const reportReasonOptions = useMemo(() => getReportReasonOptions(), [t]);
+
   useEffect(() => {
     async function loadPost() {
       if (!id) {
-        setErrorMessage("Post id was not provided.");
+        setErrorMessage(t("postDetails.errors.postIdMissing"));
         setIsLoading(false);
         return;
       }
@@ -83,7 +87,7 @@ export default function PostDetailsPage() {
     }
 
     void loadPost();
-  }, [id]);
+  }, [id, t]);
 
   useEffect(() => {
     async function loadMatches() {
@@ -157,7 +161,7 @@ export default function PostDetailsPage() {
               }
             : prev
         );
-        setSuccessMessage("Post was removed from favorites.");
+        setSuccessMessage(t("postDetails.messages.removedFromFavorites"));
       } else {
         await addFavorite(post.id);
         setPost((prev) =>
@@ -168,7 +172,7 @@ export default function PostDetailsPage() {
               }
             : prev
         );
-        setSuccessMessage("Post was added to favorites.");
+        setSuccessMessage(t("postDetails.messages.addedToFavorites"));
       }
     } catch (error: any) {
       setErrorMessage(getApiErrorMessage(error));
@@ -194,7 +198,7 @@ export default function PostDetailsPage() {
 
       setContactMessage("");
       setShowContactForm(false);
-      setSuccessMessage("Contact request was sent successfully.");
+      setSuccessMessage(t("postDetails.messages.contactRequestSent"));
     } catch (error: any) {
       setErrorMessage(getApiErrorMessage(error));
     } finally {
@@ -221,7 +225,7 @@ export default function PostDetailsPage() {
       setReportDescription("");
       setReportReason(1);
       setShowReportForm(false);
-      setSuccessMessage("Report was submitted successfully.");
+      setSuccessMessage(t("postDetails.messages.reportSubmitted"));
     } catch (error: any) {
       setErrorMessage(getApiErrorMessage(error));
     } finally {
@@ -241,8 +245,8 @@ export default function PostDetailsPage() {
 
     const confirmMessage =
       nextStatus === 1
-        ? "Are you sure you want to mark this post as returned?"
-        : "Are you sure you want to close this post?";
+        ? t("postDetails.confirmations.markReturned")
+        : t("postDetails.confirmations.closePost");
 
     if (!window.confirm(confirmMessage)) {
       return;
@@ -257,8 +261,8 @@ export default function PostDetailsPage() {
       setPost(updatedPost);
       setSuccessMessage(
         nextStatus === 1
-          ? "Post was marked as returned successfully."
-          : "Post was closed successfully."
+          ? t("postDetails.messages.markedReturned")
+          : t("postDetails.messages.closed")
       );
     } catch (error: any) {
       setErrorMessage(getApiErrorMessage(error));
@@ -272,9 +276,7 @@ export default function PostDetailsPage() {
       return;
     }
 
-    const isConfirmed = window.confirm(
-      "Are you sure you want to delete this post? This action cannot be undone."
-    );
+    const isConfirmed = window.confirm(t("postDetails.confirmations.deletePost"));
 
     if (!isConfirmed) {
       return;
@@ -290,7 +292,7 @@ export default function PostDetailsPage() {
       navigate("/my-posts", {
         replace: true,
         state: {
-          successMessage: "Post was deleted successfully.",
+          successMessage: t("postDetails.messages.deleted"),
         },
       });
     } catch (error: any) {
@@ -302,9 +304,9 @@ export default function PostDetailsPage() {
   const reportReasonLabel = useMemo(() => {
     return (
       reportReasonOptions.find((option) => option.value === reportReason)?.label ??
-      "Unknown"
+      t("common.unknown")
     );
-  }, [reportReason]);
+  }, [reportReason, reportReasonOptions, t]);
 
   if (isLoading || errorMessage || !post) {
     return (
@@ -312,7 +314,7 @@ export default function PostDetailsPage() {
         isLoading={isLoading}
         errorMessage={errorMessage}
         isEmpty={!isLoading && !errorMessage && !post}
-        emptyMessage="Post not found."
+        emptyMessage={t("postDetails.empty.postNotFound")}
       />
     );
   }
@@ -325,7 +327,7 @@ export default function PostDetailsPage() {
     <div className="space-y-8">
       <div>
         <Link to="/" className="text-sm font-medium text-slate-600 hover:text-slate-900">
-          ← Back to posts
+          {t("postDetails.backToPosts")}
         </Link>
       </div>
 
@@ -351,7 +353,7 @@ export default function PostDetailsPage() {
         <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-              Post details
+              {t("postDetails.header.eyebrow")}
             </p>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900 sm:text-[2rem]">
               {post.title}
@@ -374,20 +376,19 @@ export default function PostDetailsPage() {
 
               {post.isOwner && (
                 <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700">
-                  My Post
+                  {t("postDetails.badges.myPost")}
                 </span>
               )}
 
               {post.isFavorited && !post.isOwner && (
                 <span className="rounded-full bg-amber-100 px-3 py-1 text-sm font-medium text-amber-700">
-                  Favorited
+                  {t("postDetails.badges.favorited")}
                 </span>
               )}
             </div>
 
             <p className="mt-4 max-w-3xl text-sm leading-6 text-slate-600 sm:text-base">
-              Review the full post information, related images, possible matches, and
-              available actions.
+              {t("postDetails.header.description")}
             </p>
           </div>
 
@@ -403,10 +404,10 @@ export default function PostDetailsPage() {
               }`}
             >
               {isFavoriteSubmitting
-                ? "Saving..."
+                ? t("common.saving")
                 : post.isFavorited
-                ? "Remove Favorite"
-                : "Add to Favorites"}
+                ? t("postDetails.actions.removeFavorite")
+                : t("postDetails.actions.addToFavorites")}
             </button>
           )}
         </div>
@@ -419,10 +420,10 @@ export default function PostDetailsPage() {
           <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="border-b border-slate-200 pb-5">
               <h2 className="text-xl font-semibold tracking-tight text-slate-900">
-                Description
+                {t("postDetails.sections.description.title")}
               </h2>
               <p className="mt-1 text-sm text-slate-600">
-                Main information shared by the post owner.
+                {t("postDetails.sections.description.subtitle")}
               </p>
             </div>
 
@@ -434,22 +435,37 @@ export default function PostDetailsPage() {
           <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="border-b border-slate-200 pb-5">
               <h2 className="text-xl font-semibold tracking-tight text-slate-900">
-                Post information
+                {t("postDetails.sections.information.title")}
               </h2>
               <p className="mt-1 text-sm text-slate-600">
-                Structured item details and timeline information.
+                {t("postDetails.sections.information.subtitle")}
               </p>
             </div>
 
             <div className="mt-4">
-              <DetailRow label="Category" value={post.categoryName} />
-              <DetailRow label="Location" value={post.location} />
-              <DetailRow label="Color" value={getItemColorLabel(post.color)} />
-              <DetailRow label="Event Date" value={formatDate(post.eventDate)} />
-              <DetailRow label="Posted By" value={post.userFullName} />
-              <DetailRow label="Created At" value={formatDateTime(post.createdAt)} />
+              <DetailRow label={t("postDetails.fields.category")} value={post.categoryName} />
+              <DetailRow label={t("postDetails.fields.location")} value={post.location} />
+              <DetailRow
+                label={t("postDetails.fields.color")}
+                value={getItemColorLabel(post.color)}
+              />
+              <DetailRow
+                label={t("postDetails.fields.eventDate")}
+                value={formatDate(post.eventDate)}
+              />
+              <DetailRow
+                label={t("postDetails.fields.postedBy")}
+                value={post.userFullName}
+              />
+              <DetailRow
+                label={t("postDetails.fields.createdAt")}
+                value={formatDateTime(post.createdAt)}
+              />
               {post.updatedAt && (
-                <DetailRow label="Updated At" value={formatDateTime(post.updatedAt)} />
+                <DetailRow
+                  label={t("postDetails.fields.updatedAt")}
+                  value={formatDateTime(post.updatedAt)}
+                />
               )}
             </div>
           </section>
@@ -458,10 +474,10 @@ export default function PostDetailsPage() {
             <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
               <div className="border-b border-slate-200 pb-5">
                 <h2 className="text-xl font-semibold tracking-tight text-slate-900">
-                  Owner actions
+                  {t("postDetails.sections.ownerActions.title")}
                 </h2>
                 <p className="mt-1 text-sm text-slate-600">
-                  Manage this post, update its status, or remove it.
+                  {t("postDetails.sections.ownerActions.subtitle")}
                 </p>
               </div>
 
@@ -470,7 +486,7 @@ export default function PostDetailsPage() {
                   to={`/posts/${post.id}/edit`}
                   className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700"
                 >
-                  Edit Post
+                  {t("postDetails.actions.editPost")}
                 </Link>
 
                 {canMarkReturned && (
@@ -480,7 +496,9 @@ export default function PostDetailsPage() {
                     disabled={isOwnerActionBusy}
                     className="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    {statusSubmittingTo === 1 ? "Saving..." : "Mark as Returned"}
+                    {statusSubmittingTo === 1
+                      ? t("common.saving")
+                      : t("postDetails.actions.markAsReturned")}
                   </button>
                 )}
 
@@ -491,7 +509,9 @@ export default function PostDetailsPage() {
                     disabled={isOwnerActionBusy}
                     className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    {statusSubmittingTo === 2 ? "Saving..." : "Close Post"}
+                    {statusSubmittingTo === 2
+                      ? t("common.saving")
+                      : t("postDetails.actions.closePost")}
                   </button>
                 )}
 
@@ -501,7 +521,9 @@ export default function PostDetailsPage() {
                   disabled={isOwnerActionBusy}
                   className="inline-flex items-center justify-center rounded-xl border border-red-200 bg-white px-4 py-2.5 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {isDeletingPost ? "Deleting..." : "Delete Post"}
+                  {isDeletingPost
+                    ? t("common.deleting")
+                    : t("postDetails.actions.deletePost")}
                 </button>
               </div>
             </section>
@@ -511,10 +533,10 @@ export default function PostDetailsPage() {
             <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
               <div className="border-b border-slate-200 pb-5">
                 <h2 className="text-xl font-semibold tracking-tight text-slate-900">
-                  Actions
+                  {t("postDetails.sections.actions.title")}
                 </h2>
                 <p className="mt-1 text-sm text-slate-600">
-                  Contact the owner or report this post if necessary.
+                  {t("postDetails.sections.actions.subtitle")}
                 </p>
               </div>
 
@@ -529,7 +551,9 @@ export default function PostDetailsPage() {
                   }}
                   className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700"
                 >
-                  {showContactForm ? "Close Contact Form" : "Send Contact Request"}
+                  {showContactForm
+                    ? t("postDetails.actions.closeContactForm")
+                    : t("postDetails.actions.sendContactRequest")}
                 </button>
 
                 <button
@@ -542,26 +566,27 @@ export default function PostDetailsPage() {
                   }}
                   className="inline-flex items-center justify-center rounded-xl border border-red-200 bg-white px-4 py-2.5 text-sm font-semibold text-red-700 hover:bg-red-50"
                 >
-                  {showReportForm ? "Close Report Form" : "Report Post"}
+                  {showReportForm
+                    ? t("postDetails.actions.closeReportForm")
+                    : t("postDetails.actions.reportPost")}
                 </button>
               </div>
 
               {showContactForm && (
                 <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-5">
                   <h3 className="text-lg font-semibold tracking-tight text-slate-900">
-                    Contact Request
+                    {t("postDetails.contactForm.title")}
                   </h3>
                   <p className="mt-1 text-sm leading-6 text-slate-600">
-                    Send a short message to the post owner. Contact details become
-                    visible only after the request is accepted.
+                    {t("postDetails.contactForm.subtitle")}
                   </p>
 
                   <div className="mt-5">
                     <FormTextarea
-                      label="Message"
+                      label={t("postDetails.contactForm.messageLabel")}
                       value={contactMessage}
                       onChange={setContactMessage}
-                      placeholder="Write a short message for the post owner"
+                      placeholder={t("postDetails.contactForm.messagePlaceholder")}
                       rows={4}
                     />
                   </div>
@@ -573,7 +598,9 @@ export default function PostDetailsPage() {
                       disabled={isContactSubmitting}
                       className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                      {isContactSubmitting ? "Sending..." : "Submit Contact Request"}
+                      {isContactSubmitting
+                        ? t("common.sending")
+                        : t("postDetails.contactForm.submit")}
                     </button>
                   </div>
                 </div>
@@ -582,12 +609,12 @@ export default function PostDetailsPage() {
               {showReportForm && (
                 <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-5">
                   <h3 className="text-lg font-semibold tracking-tight text-slate-900">
-                    Report Post
+                    {t("postDetails.reportForm.title")}
                   </h3>
 
                   <div className="mt-5">
                     <label className="mb-1.5 block text-sm font-medium text-slate-700">
-                      Reason
+                      {t("postDetails.reportForm.reasonLabel")}
                     </label>
                     <select
                       value={reportReason}
@@ -601,16 +628,18 @@ export default function PostDetailsPage() {
                       ))}
                     </select>
                     <p className="mt-2 text-xs text-slate-500">
-                      Selected reason: {reportReasonLabel}
+                      {t("postDetails.reportForm.selectedReason", {
+                        reason: reportReasonLabel,
+                      })}
                     </p>
                   </div>
 
                   <div className="mt-5">
                     <FormTextarea
-                      label="Description"
+                      label={t("postDetails.reportForm.descriptionLabel")}
                       value={reportDescription}
                       onChange={setReportDescription}
-                      placeholder="Add more details if needed"
+                      placeholder={t("postDetails.reportForm.descriptionPlaceholder")}
                       rows={4}
                     />
                   </div>
@@ -622,7 +651,9 @@ export default function PostDetailsPage() {
                       disabled={isReportSubmitting}
                       className="inline-flex items-center justify-center rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                      {isReportSubmitting ? "Submitting..." : "Submit Report"}
+                      {isReportSubmitting
+                        ? t("common.submitting")
+                        : t("postDetails.reportForm.submit")}
                     </button>
                   </div>
                 </div>
@@ -645,21 +676,21 @@ export default function PostDetailsPage() {
           <div className="flex flex-col gap-2 border-b border-slate-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <h2 className="text-xl font-semibold tracking-tight text-slate-900">
-                Possible Matches
+                {t("postDetails.matches.title")}
               </h2>
               <p className="mt-1 text-sm text-slate-600">
-                Similar posts based on category, timing, location, color, and title.
+                {t("postDetails.matches.subtitle")}
               </p>
             </div>
           </div>
 
           {isMatchesLoading ? (
             <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
-              Loading matches...
+              {t("postDetails.matches.loading")}
             </div>
           ) : matches.length === 0 ? (
             <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
-              No matches found for this post yet.
+              {t("postDetails.matches.empty")}
             </div>
           ) : (
             <div className="mt-6 grid gap-4 lg:grid-cols-2">
@@ -677,7 +708,7 @@ export default function PostDetailsPage() {
                       />
                     ) : (
                       <div className="flex h-full items-center justify-center text-sm text-slate-500">
-                        No image
+                        {t("common.noImage")}
                       </div>
                     )}
                   </div>
@@ -695,7 +726,7 @@ export default function PostDetailsPage() {
 
                       <div className="shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-right">
                         <p className="text-xs font-medium uppercase tracking-[0.14em] text-slate-500">
-                          Score
+                          {t("postDetails.matches.score")}
                         </p>
                         <p className="mt-1 text-sm font-semibold text-slate-900">
                           {Math.round(match.matchScore)}%
@@ -713,21 +744,21 @@ export default function PostDetailsPage() {
                     <div className="mt-5 grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 text-sm">
                       <div>
                         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                          Category
+                          {t("postDetails.fields.category")}
                         </p>
                         <p className="mt-1 font-medium text-slate-700">{match.categoryName}</p>
                       </div>
 
                       <div>
                         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                          Location
+                          {t("postDetails.fields.location")}
                         </p>
                         <p className="mt-1 font-medium text-slate-700">{match.location}</p>
                       </div>
 
                       <div>
                         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                          Event Date
+                          {t("postDetails.fields.eventDate")}
                         </p>
                         <p className="mt-1 font-medium text-slate-700">
                           {formatDate(match.eventDate)}
@@ -737,7 +768,9 @@ export default function PostDetailsPage() {
 
                     {match.matchReasons.length > 0 && (
                       <div className="mt-5">
-                        <p className="text-sm font-medium text-slate-800">Match reasons</p>
+                        <p className="text-sm font-medium text-slate-800">
+                          {t("postDetails.matches.matchReasons")}
+                        </p>
                         <div className="mt-3 flex flex-wrap gap-2">
                           {match.matchReasons.map((reason, index) => (
                             <span
@@ -756,7 +789,7 @@ export default function PostDetailsPage() {
                         to={`/posts/${match.id}`}
                         className="text-sm font-semibold text-slate-900 hover:text-slate-700"
                       >
-                        View matched post →
+                        {t("postDetails.matches.viewMatchedPost")}
                       </Link>
                     </div>
                   </div>

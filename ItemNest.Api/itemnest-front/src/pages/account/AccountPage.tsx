@@ -1,19 +1,21 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import PageState from "../../components/common/PageState";
 import FormInput from "../../components/forms/FormInput";
 import { useAuth } from "../../context/AuthContext";
 import { changeMyPassword, updateMyEmail } from "../../api/userApi";
 import { getApiErrorMessage } from "../../utils/error";
 
-function getRoleLabel(roles: string[]) {
+function getRoleLabel(roles: string[], fallback: string) {
   if (roles.length === 0) {
-    return "Member";
+    return fallback;
   }
 
   return roles.join(", ");
 }
 
 export default function AccountPage() {
+  const { t } = useTranslation();
   const { user, isLoading, updateAuth } = useAuth();
 
   const [newEmail, setNewEmail] = useState(user?.email ?? "");
@@ -34,7 +36,7 @@ export default function AccountPage() {
         isLoading={isLoading}
         errorMessage=""
         isEmpty={!isLoading && !user}
-        emptyMessage="User information could not be loaded."
+        emptyMessage={t("accountPage.empty")}
       />
     );
   }
@@ -45,12 +47,12 @@ export default function AccountPage() {
     setEmailSuccessMessage("");
 
     if (!newEmail.trim()) {
-      setEmailErrorMessage("New email is required.");
+      setEmailErrorMessage(t("accountPage.emailSection.requiredNewEmail"));
       return;
     }
 
     if (!emailCurrentPassword.trim()) {
-      setEmailErrorMessage("Current password is required to update your email.");
+      setEmailErrorMessage(t("accountPage.emailSection.requiredPassword"));
       return;
     }
 
@@ -65,7 +67,7 @@ export default function AccountPage() {
       await updateAuth(response);
       setNewEmail(response.email);
       setEmailCurrentPassword("");
-      setEmailSuccessMessage("Your email address was updated successfully.");
+      setEmailSuccessMessage(t("accountPage.emailSection.success"));
     } catch (error: any) {
       setEmailErrorMessage(getApiErrorMessage(error));
     } finally {
@@ -79,22 +81,22 @@ export default function AccountPage() {
     setPasswordSuccessMessage("");
 
     if (!currentPassword.trim()) {
-      setPasswordErrorMessage("Current password is required.");
+      setPasswordErrorMessage(t("accountPage.passwordSection.requiredCurrentPassword"));
       return;
     }
 
     if (!newPassword.trim()) {
-      setPasswordErrorMessage("New password is required.");
+      setPasswordErrorMessage(t("accountPage.passwordSection.requiredNewPassword"));
       return;
     }
 
     if (newPassword.length < 6) {
-      setPasswordErrorMessage("New password must be at least 6 characters long.");
+      setPasswordErrorMessage(t("accountPage.passwordSection.minLength"));
       return;
     }
 
     if (newPassword !== confirmNewPassword) {
-      setPasswordErrorMessage("New password and confirmation do not match.");
+      setPasswordErrorMessage(t("accountPage.passwordSection.mismatch"));
       return;
     }
 
@@ -109,7 +111,7 @@ export default function AccountPage() {
       setCurrentPassword("");
       setNewPassword("");
       setConfirmNewPassword("");
-      setPasswordSuccessMessage("Your password was updated successfully.");
+      setPasswordSuccessMessage(t("accountPage.passwordSection.success"));
     } catch (error: any) {
       setPasswordErrorMessage(getApiErrorMessage(error));
     } finally {
@@ -123,45 +125,53 @@ export default function AccountPage() {
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-              User cabinet
+              {t("accountPage.badge")}
             </p>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900 sm:text-[2rem]">
-              Account settings
+              {t("accountPage.title")}
             </h1>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600 sm:text-base">
-              Review your profile information and securely manage your email address and password.
+              {t("accountPage.description")}
             </p>
           </div>
         </div>
 
         <div className="mt-6 grid gap-4 md:grid-cols-3">
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">Full name</p>
+            <p className="text-sm font-medium text-slate-500">
+              {t("accountPage.cards.fullName")}
+            </p>
             <p className="mt-2 text-xl font-semibold tracking-tight text-slate-900">
               {user.fullName}
             </p>
             <p className="mt-3 text-sm leading-6 text-slate-600">
-              This is the name currently assigned to your ItemNest account.
+              {t("accountPage.cards.fullNameDescription")}
             </p>
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">Email address</p>
+            <p className="text-sm font-medium text-slate-500">
+              {t("accountPage.cards.emailAddress")}
+            </p>
             <p className="mt-2 break-all text-xl font-semibold tracking-tight text-slate-900">
               {user.email}
             </p>
             <p className="mt-3 text-sm leading-6 text-slate-600">
-              Your sign-in email used for account access and platform identity.
+              {t("accountPage.cards.emailDescription")}
             </p>
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">Account role</p>
+            <p className="text-sm font-medium text-slate-500">
+              {t("accountPage.cards.accountRole")}
+            </p>
             <p className="mt-2 text-xl font-semibold tracking-tight text-slate-900">
-              {getRoleLabel(user.roles)}
+              {getRoleLabel(user.roles, t("accountPage.roleMember"))}
             </p>
             <p className="mt-3 text-sm leading-6 text-slate-600">
-              Member since {new Date(user.createdAt).toLocaleDateString()}.
+              {t("accountPage.cards.memberSince", {
+                date: new Date(user.createdAt).toLocaleDateString(),
+              })}
             </p>
           </div>
         </div>
@@ -171,29 +181,29 @@ export default function AccountPage() {
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <div>
             <h2 className="text-xl font-semibold tracking-tight text-slate-900">
-              Change email
+              {t("accountPage.emailSection.title")}
             </h2>
             <p className="mt-1 text-sm text-slate-600">
-              Update the email address used for your ItemNest account.
+              {t("accountPage.emailSection.description")}
             </p>
           </div>
 
           <form className="mt-6 space-y-4" onSubmit={handleEmailSubmit}>
             <FormInput
-              label="New email"
+              label={t("accountPage.emailSection.newEmail")}
               type="email"
               value={newEmail}
               onChange={setNewEmail}
-              placeholder="Enter your new email"
+              placeholder={t("accountPage.emailSection.newEmailPlaceholder")}
               required
             />
 
             <FormInput
-              label="Current password"
+              label={t("accountPage.emailSection.currentPassword")}
               type="password"
               value={emailCurrentPassword}
               onChange={setEmailCurrentPassword}
-              placeholder="Enter your current password"
+              placeholder={t("accountPage.emailSection.currentPasswordPlaceholder")}
               required
             />
 
@@ -214,7 +224,9 @@ export default function AccountPage() {
               disabled={isUpdatingEmail}
               className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isUpdatingEmail ? "Updating Email..." : "Update Email"}
+              {isUpdatingEmail
+                ? t("accountPage.emailSection.updating")
+                : t("accountPage.emailSection.update")}
             </button>
           </form>
         </section>
@@ -222,38 +234,38 @@ export default function AccountPage() {
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <div>
             <h2 className="text-xl font-semibold tracking-tight text-slate-900">
-              Change password
+              {t("accountPage.passwordSection.title")}
             </h2>
             <p className="mt-1 text-sm text-slate-600">
-              Keep your account secure by setting a new password.
+              {t("accountPage.passwordSection.description")}
             </p>
           </div>
 
           <form className="mt-6 space-y-4" onSubmit={handlePasswordSubmit}>
             <FormInput
-              label="Current password"
+              label={t("accountPage.passwordSection.currentPassword")}
               type="password"
               value={currentPassword}
               onChange={setCurrentPassword}
-              placeholder="Enter your current password"
+              placeholder={t("accountPage.passwordSection.currentPasswordPlaceholder")}
               required
             />
 
             <FormInput
-              label="New password"
+              label={t("accountPage.passwordSection.newPassword")}
               type="password"
               value={newPassword}
               onChange={setNewPassword}
-              placeholder="Enter your new password"
+              placeholder={t("accountPage.passwordSection.newPasswordPlaceholder")}
               required
             />
 
             <FormInput
-              label="Confirm new password"
+              label={t("accountPage.passwordSection.confirmNewPassword")}
               type="password"
               value={confirmNewPassword}
               onChange={setConfirmNewPassword}
-              placeholder="Repeat your new password"
+              placeholder={t("accountPage.passwordSection.confirmNewPasswordPlaceholder")}
               required
             />
 
@@ -274,7 +286,9 @@ export default function AccountPage() {
               disabled={isUpdatingPassword}
               className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isUpdatingPassword ? "Updating Password..." : "Update Password"}
+              {isUpdatingPassword
+                ? t("accountPage.passwordSection.updating")
+                : t("accountPage.passwordSection.update")}
             </button>
           </form>
         </section>

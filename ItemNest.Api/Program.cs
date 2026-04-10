@@ -1,3 +1,5 @@
+using Amazon;
+using Amazon.S3;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using ItemNest.Api.Middlewares;
@@ -123,6 +125,14 @@ builder.Services.AddValidatorsFromAssemblyContaining<RegisterDtoValidator>();
 
 builder.Services.Configure<AdminSeedSettings>(builder.Configuration.GetSection(AdminSeedSettings.SectionName));
 builder.Services.Configure<GoogleAuthSettings>(builder.Configuration.GetSection(GoogleAuthSettings.SectionName));
+builder.Services.Configure<AwsSettings>(builder.Configuration.GetSection(AwsSettings.SectionName));
+
+var awsSection = builder.Configuration.GetSection(AwsSettings.SectionName);
+builder.Services.AddSingleton<IAmazonS3>(_ =>
+    new AmazonS3Client(
+        awsSection["AccessKeyId"],
+        awsSection["SecretAccessKey"],
+        RegionEndpoint.GetBySystemName(awsSection["Region"] ?? "us-east-1")));
 
 builder.Services.AddScoped<AdminUserSeeder>();
 

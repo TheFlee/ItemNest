@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import { getCategories } from "../../api/categoryApi";
 import { uploadImages } from "../../api/itemImageApi";
@@ -9,7 +10,7 @@ import FormSelect from "../../components/forms/FormSelect";
 import FormTextarea from "../../components/forms/FormTextarea";
 import type { Category } from "../../types/category";
 import { getApiErrorMessage } from "../../utils/error";
-import { itemColorOptions, postTypeOptions } from "../../utils/options";
+import { getItemColorOptions, getPostTypeOptions } from "../../utils/options";
 
 interface CreatePostFormState {
   title: string;
@@ -25,6 +26,7 @@ const MAX_IMAGE_COUNT = 5;
 const MAX_FILE_SIZE_MB = 5;
 
 export default function CreatePostPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const [categories, setCategories] = useState<Category[]>([]);
@@ -60,6 +62,9 @@ export default function CreatePostPage() {
 
     void loadCategories();
   }, []);
+
+  const postTypeOptions = useMemo(() => getPostTypeOptions(), [t]);
+  const itemColorOptions = useMemo(() => getItemColorOptions(), [t]);
 
   const categoryOptions = useMemo(
     () =>

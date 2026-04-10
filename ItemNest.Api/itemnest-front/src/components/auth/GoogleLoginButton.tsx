@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 
 interface GoogleLoginButtonProps {
   text?: "signin_with" | "signup_with" | "continue_with";
@@ -11,6 +12,7 @@ export default function GoogleLoginButton({
   isDisabled = false,
   onCredential,
 }: GoogleLoginButtonProps) {
+  const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
@@ -53,7 +55,7 @@ export default function GoogleLoginButton({
   if (!clientId) {
     return (
       <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-        Google login is not configured yet.
+        {t("auth.googleNotConfigured")}
       </div>
     );
   }

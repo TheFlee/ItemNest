@@ -1,5 +1,7 @@
 import { Link, NavLink } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../../context/AuthContext";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 function navLinkClass(isActive: boolean) {
   return [
@@ -19,24 +21,25 @@ function renderLink(to: string, label: string) {
 }
 
 export default function Navbar() {
+  const { t } = useTranslation();
   const { isAuthenticated, user, logout } = useAuth();
   const isAdmin = user?.roles.includes("Admin") ?? false;
 
   const memberLinks = [
-    { to: "/", label: "Home" },
-    { to: "/dashboard", label: "Dashboard" },
-    { to: "/my-posts", label: "My Posts" },
-    { to: "/favorites", label: "Favorites" },
-    { to: "/contact-requests/sent", label: "Sent Requests" },
-    { to: "/contact-requests/received", label: "Received Requests" },
-    { to: "/my-reports", label: "My Reports" },
+    { to: "/", label: t("nav.home") },
+    { to: "/dashboard", label: t("nav.dashboard") },
+    { to: "/my-posts", label: t("nav.myPosts") },
+    { to: "/favorites", label: t("nav.favorites") },
+    { to: "/contact-requests/sent", label: t("nav.sentRequests") },
+    { to: "/contact-requests/received", label: t("nav.receivedRequests") },
+    { to: "/my-reports", label: t("nav.myReports") },
   ];
 
   const adminLinks = [
-    { to: "/admin/dashboard", label: "Admin Dashboard" },
-    { to: "/admin/posts", label: "Admin Posts" },
-    { to: "/admin/reports", label: "Admin Reports" },
-    { to: "/admin/users", label: "Admin Users" },
+    { to: "/admin/dashboard", label: t("nav.adminDashboard") },
+    { to: "/admin/posts", label: t("nav.adminPosts") },
+    { to: "/admin/reports", label: t("nav.adminReports") },
+    { to: "/admin/users", label: t("nav.adminUsers") },
   ];
 
   return (
@@ -53,62 +56,64 @@ export default function Navbar() {
 
                   <div>
                     <p className="text-lg font-semibold tracking-tight text-slate-900">
-                      ItemNest
+                      {t("brand.name")}
                     </p>
-                    <p className="text-sm text-slate-500">
-                      Lost and found platform
-                    </p>
+                    <p className="text-sm text-slate-500">{t("brand.tagline")}</p>
                   </div>
                 </Link>
               </div>
 
-              {isAuthenticated ? (
-                <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
-                  <Link
-                    to="/account"
-                    className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 transition hover:border-slate-300 hover:bg-slate-100"
-                  >
-                    <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-500">
-                      Account
-                    </p>
-                    <p className="mt-1 text-sm font-semibold text-slate-800">
-                      {user?.fullName}
-                    </p>
-                  </Link>
+              <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
+                <LanguageSwitcher />
 
-                  <div className="flex flex-wrap gap-3">
+                {isAuthenticated ? (
+                  <>
                     <Link
-                      to="/create-post"
-                      className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800"
+                      to="/account"
+                      className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 transition hover:border-slate-300 hover:bg-slate-100"
                     >
-                      Create Post
+                      <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-500">
+                        {t("nav.account")}
+                      </p>
+                      <p className="mt-1 text-sm font-semibold text-slate-800">
+                        {user?.fullName}
+                      </p>
                     </Link>
 
-                    <button
-                      onClick={logout}
+                    <div className="flex flex-wrap gap-3">
+                      <Link
+                        to="/create-post"
+                        className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800"
+                      >
+                        {t("nav.createPost")}
+                      </Link>
+
+                      <button
+                        onClick={logout}
+                        className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-50"
+                      >
+                        {t("nav.logout")}
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex flex-wrap items-center gap-3">
+                    <Link
+                      to="/login"
                       className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-50"
                     >
-                      Logout
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex flex-wrap items-center gap-3">
-                  <Link
-                    to="/login"
-                    className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-50"
-                  >
-                    Login
-                  </Link>
+                      {t("nav.login")}
+                    </Link>
 
-                  <Link
-                    to="/register"
-                    className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800"
-                  >
-                    Register
-                  </Link>
-                </div>
-              )}
+                    <Link
+                      to="/register"
+                      className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800"
+                    >
+                      {t("nav.register")}
+                    </Link>
+                  </div>
+                )}
+              </div>
             </div>
 
             {isAuthenticated && (

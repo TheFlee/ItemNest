@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { getCategories } from "../../api/categoryApi";
 import {
@@ -7,6 +8,7 @@ import {
   updateAdminPostStatus,
 } from "../../api/adminPostApi";
 import PageState from "../../components/common/PageState";
+import Pagination from "../../components/common/Pagination";
 import FormInput from "../../components/forms/FormInput";
 import FormSelect from "../../components/forms/FormSelect";
 import type { Category } from "../../types/category";
@@ -14,27 +16,17 @@ import type { ItemPost } from "../../types/post";
 import { buildFileUrl } from "../../utils/api";
 import { getApiErrorMessage } from "../../utils/error";
 import { formatDateTime } from "../../utils/format";
-import { itemColorOptions, postTypeOptions } from "../../utils/options";
+import {
+  getItemColorOptions,
+  getPostStatusOptions,
+  getPostTypeOptions,
+} from "../../utils/options";
 import { getPostStatusLabel, getPostTypeLabel } from "../../utils/post";
 
-const postStatusOptions = [
-  { label: "Open", value: 0 },
-  { label: "Returned", value: 1 },
-  { label: "Closed", value: 2 },
-];
-
-const sortByOptions = [
-  { label: "Newest", value: "createdAt-desc" },
-  { label: "Oldest", value: "createdAt-asc" },
-  { label: "Event Date (Newest)", value: "eventDate-desc" },
-  { label: "Event Date (Oldest)", value: "eventDate-asc" },
-  { label: "Title (A-Z)", value: "title-asc" },
-  { label: "Title (Z-A)", value: "title-desc" },
-  { label: "Owner (A-Z)", value: "owner-asc" },
-  { label: "Owner (Z-A)", value: "owner-desc" },
-];
+const PAGE_SIZE = 15;
 
 export default function AdminPostsPage() {
+  const { t } = useTranslation();
   const [posts, setPosts] = useState<ItemPost[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -45,11 +37,26 @@ export default function AdminPostsPage() {
   const [color, setColor] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [sortValue, setSortValue] = useState("createdAt-desc");
+  const [pageNumber, setPageNumber] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const [categoryErrorMessage, setCategoryErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [processingId, setProcessingId] = useState<string | null>(null);
+
+  const sortByOptions = useMemo(
+    () => [
+      { label: t("common.newest"), value: "createdAt-desc" },
+      { label: t("common.oldest"), value: "createdAt-asc" },
+      { label: t("common.eventDateNewest"), value: "eventDate-desc" },
+      { label: t("common.eventDateOldest"), value: "eventDate-asc" },
+      { label: t("common.titleAsc"), value: "title-asc" },
+      { label: t("common.titleDesc"), value: "title-desc" },
+      { label: t("adminPages.posts.ownerAsc"), value: "owner-asc" },
+      { label: t("adminPages.posts.ownerDesc"), value: "owner-desc" },
+    ],
+    [t]
+  );
 
   useEffect(() => {
     async function loadData() {
@@ -85,7 +92,7 @@ export default function AdminPostsPage() {
     try {
       const updatedPost = await updateAdminPostStatus(postId, { status: nextStatus });
       setPosts((prev) => prev.map((post) => (post.id === postId ? updatedPost : post)));
-      setSuccessMessage("Post status was updated successfully.");
+      setSuccessMessage(t("adminPages.posts.successStatusUpdated"));
     } catch (error: any) {
       setErrorMessage(getApiErrorMessage(error));
     } finally {
@@ -94,9 +101,7 @@ export default function AdminPostsPage() {
   }
 
   async function handleDelete(postId: string) {
-    const isConfirmed = window.confirm(
-      "Are you sure you want to delete this post? This action cannot be undone."
-    );
+    const isConfirmed = window.confirm(t("adminPages.posts.deleteConfirm"));
 
     if (!isConfirmed) {
       return;
@@ -109,7 +114,7 @@ export default function AdminPostsPage() {
     try {
       await deleteAdminPost(postId);
       setPosts((prev) => prev.filter((post) => post.id !== postId));
-      setSuccessMessage("Post was deleted successfully.");
+      setSuccessMessage(t("adminPages.posts.successDeleted"));
     } catch (error: any) {
       setErrorMessage(getApiErrorMessage(error));
     } finally {
@@ -126,6 +131,7 @@ export default function AdminPostsPage() {
     setColor("");
     setCategoryId("");
     setSortValue("createdAt-desc");
+    setPageNumber(1);
   }
 
   const filteredPosts = useMemo(() => {
@@ -186,6 +192,23 @@ export default function AdminPostsPage() {
     return result;
   }, [posts, searchTerm, ownerSearch, location, type, status, color, categoryId, sortValue]);
 
+  const totalPages = Math.max(1, Math.ceil(filteredPosts.length / PAGE_SIZE));
+
+  useEffect(() => {
+    setPageNumber(1);
+  }, [searchTerm, ownerSearch, location, type, status, color, categoryId, sortValue]);
+
+  useEffect(() => {
+    if (pageNumber > totalPages) {
+      setPageNumber(totalPages);
+    }
+  }, [pageNumber, totalPages]);
+
+  const paginatedPosts = useMemo(() => {
+    const startIndex = (pageNumber - 1) * PAGE_SIZE;
+    return filteredPosts.slice(startIndex, startIndex + PAGE_SIZE);
+  }, [filteredPosts, pageNumber]);
+
   const metrics = useMemo(() => {
     return {
       total: posts.length,
@@ -205,6 +228,10 @@ export default function AdminPostsPage() {
     categoryId !== "" ||
     sortValue !== "createdAt-desc";
 
+  const postTypeOptions = useMemo(() => getPostTypeOptions(), [t]);
+  const postStatusOptions = useMemo(() => getPostStatusOptions(), [t]);
+  const itemColorOptions = useMemo(() => getItemColorOptions(), [t]);
+
   const categoryOptions = categories.map((category) => ({
     label: category.name,
     value: category.id,
@@ -223,7 +250,7 @@ export default function AdminPostsPage() {
           isLoading={isLoading}
           errorMessage={errorMessage}
           isEmpty={!isLoading && !errorMessage && posts.length === 0}
-          emptyMessage="There are no posts in the system."
+          emptyMessage={t("adminPages.posts.emptyMessage")}
         />
       </div>
     );
@@ -235,13 +262,13 @@ export default function AdminPostsPage() {
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-              Moderation
+              {t("adminPages.posts.badge")}
             </p>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900 sm:text-[2rem]">
-              Admin Posts
+              {t("adminPages.posts.title")}
             </h1>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600 sm:text-base">
-              Review posts across the platform, inspect ownership and metadata, filter results, update status, and delete invalid content when needed.
+              {t("adminPages.posts.description")}
             </p>
           </div>
 
@@ -250,41 +277,41 @@ export default function AdminPostsPage() {
               to="/admin/dashboard"
               className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800"
             >
-              Back to Admin Dashboard
+              {t("adminPages.posts.backToDashboard")}
             </Link>
             <Link
               to="/admin/reports"
               className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-50"
             >
-              Open Reports
+              {t("adminPages.posts.openReports")}
             </Link>
           </div>
         </div>
 
         <div className="mt-6 grid gap-4 md:grid-cols-4">
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">Total posts</p>
+            <p className="text-sm font-medium text-slate-500">{t("adminPages.posts.totalPosts")}</p>
             <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
               {metrics.total}
             </p>
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">Open</p>
+            <p className="text-sm font-medium text-slate-500">{t("adminPages.posts.open")}</p>
             <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
               {metrics.open}
             </p>
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">Returned</p>
+            <p className="text-sm font-medium text-slate-500">{t("adminPages.posts.returned")}</p>
             <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
               {metrics.returned}
             </p>
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">Closed</p>
+            <p className="text-sm font-medium text-slate-500">{t("adminPages.posts.closed")}</p>
             <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
               {metrics.closed}
             </p>
@@ -295,16 +322,16 @@ export default function AdminPostsPage() {
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div>
               <h2 className="text-xl font-semibold tracking-tight text-slate-900">
-                Filters and sorting
+                {t("adminPages.posts.filtersTitle")}
               </h2>
               <p className="mt-1 text-sm text-slate-600">
-                Narrow the moderation list directly from the top section.
+                {t("adminPages.posts.filtersDescription")}
               </p>
             </div>
 
             <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-right">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                Results
+                {t("adminPages.posts.results")}
               </p>
               <p className="mt-1 text-sm font-semibold text-slate-900">
                 {filteredPosts.length}
@@ -314,62 +341,62 @@ export default function AdminPostsPage() {
 
           <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             <FormInput
-              label="Search"
+              label={t("adminPages.posts.searchLabel")}
               value={searchTerm}
               onChange={setSearchTerm}
-              placeholder="Title or description"
+              placeholder={t("adminPages.posts.searchPlaceholder")}
             />
 
             <FormInput
-              label="Owner"
+              label={t("adminPages.posts.ownerLabel")}
               value={ownerSearch}
               onChange={setOwnerSearch}
-              placeholder="Owner name"
+              placeholder={t("adminPages.posts.ownerPlaceholder")}
             />
 
             <FormInput
-              label="Location"
+              label={t("adminPages.posts.locationLabel")}
               value={location}
               onChange={setLocation}
-              placeholder="City, district, place"
+              placeholder={t("adminPages.posts.locationPlaceholder")}
             />
 
             <FormSelect
-              label="Type"
+              label={t("common.type")}
               value={type}
               onChange={setType}
               options={postTypeOptions}
-              placeholder="All types"
+              placeholder={t("common.allTypes")}
             />
           </div>
 
           <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             <FormSelect
-              label="Status"
+              label={t("common.status")}
               value={status}
               onChange={setStatus}
               options={postStatusOptions}
-              placeholder="All statuses"
+              placeholder={t("common.allStatuses")}
             />
 
             <FormSelect
-              label="Category"
+              label={t("common.category")}
               value={categoryId}
               onChange={setCategoryId}
               options={categoryOptions}
-              placeholder="All categories"
+              placeholder={t("common.allCategories")}
             />
 
             <FormSelect
-              label="Color"
+              label={t("common.color")}
               value={color}
               onChange={setColor}
               options={itemColorOptions}
-              placeholder="All colors"
+              placeholder={t("common.allColors")}
             />
 
             <FormSelect
-              label="Sort By"
+              label={t("common.sortBy")}
               value={sortValue}
               onChange={setSortValue}
               options={sortByOptions}
@@ -382,17 +409,17 @@ export default function AdminPostsPage() {
               onClick={handleClearFilters}
               className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-50"
             >
-              Clear Filters
+              {t("adminPages.posts.clearFilters")}
             </button>
 
             {hasAnyFilter && (
-              <p className="text-sm text-slate-500">Custom filters are active.</p>
+              <p className="text-sm text-slate-500">{t("adminPages.posts.filtersActive")}</p>
             )}
           </div>
 
           {categoryErrorMessage && (
             <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs text-amber-800">
-              Categories could not be loaded right now.
+              {t("adminPages.posts.categoriesLoadFailed")}
             </div>
           )}
         </section>
@@ -410,21 +437,21 @@ export default function AdminPostsPage() {
             isLoading={false}
             errorMessage=""
             isEmpty
-            emptyMessage="No posts matched your current filters."
+            emptyMessage={t("adminPages.posts.noMatch")}
           />
         ) : (
           <>
             <section className="flex flex-col gap-2">
               <h2 className="text-xl font-semibold tracking-tight text-slate-900">
-                Platform posts
+                {t("adminPages.posts.platformPosts")}
               </h2>
               <p className="text-sm text-slate-600">
-                Open any post for full details, or use direct admin actions below for moderation.
+                {t("adminPages.posts.platformPostsDescription")}
               </p>
             </section>
 
             <section className="grid gap-4">
-              {filteredPosts.map((post) => (
+              {paginatedPosts.map((post) => (
                 <article
                   key={post.id}
                   className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
@@ -439,7 +466,7 @@ export default function AdminPostsPage() {
                         />
                       ) : (
                         <div className="flex h-full min-h-56 items-center justify-center text-sm text-slate-500">
-                          No image
+                          {t("adminPages.posts.noImage")}
                         </div>
                       )}
                     </div>
@@ -452,7 +479,7 @@ export default function AdminPostsPage() {
                               {post.title}
                             </h2>
                             <p className="mt-2 text-sm leading-6 text-slate-600">
-                              Review owner information, timeline, status, and post content before taking moderation action.
+                              {t("adminPages.posts.cardSubtitle")}
                             </p>
                           </div>
 
@@ -476,28 +503,28 @@ export default function AdminPostsPage() {
                         <div className="mt-5 grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm md:grid-cols-2 xl:grid-cols-4">
                           <div>
                             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                              Owner
+                              {t("adminPages.posts.owner")}
                             </p>
                             <p className="mt-1 font-medium text-slate-700">{post.userFullName}</p>
                           </div>
 
                           <div>
                             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                              Category
+                              {t("adminPages.posts.category")}
                             </p>
                             <p className="mt-1 font-medium text-slate-700">{post.categoryName}</p>
                           </div>
 
                           <div>
                             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                              Location
+                              {t("adminPages.posts.location")}
                             </p>
                             <p className="mt-1 font-medium text-slate-700">{post.location}</p>
                           </div>
 
                           <div>
                             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                              Created At
+                              {t("adminPages.posts.createdAt")}
                             </p>
                             <p className="mt-1 font-medium text-slate-700">
                               {formatDateTime(post.createdAt)}
@@ -507,7 +534,7 @@ export default function AdminPostsPage() {
 
                         <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-5">
                           <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-slate-500">
-                            Description
+                            {t("adminPages.posts.descriptionTitle")}
                           </h3>
                           <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-700">
                             {post.description}
@@ -520,7 +547,7 @@ export default function AdminPostsPage() {
                           to={`/posts/${post.id}`}
                           className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800"
                         >
-                          View Post
+                          {t("adminPages.posts.viewPost")}
                         </Link>
 
                         <button
@@ -529,7 +556,9 @@ export default function AdminPostsPage() {
                           disabled={processingId === post.id}
                           className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                          {processingId === post.id && post.status !== 0 ? "Processing..." : "Mark Open"}
+                          {processingId === post.id && post.status !== 0
+                            ? t("adminPages.posts.processing")
+                            : t("adminPages.posts.markOpen")}
                         </button>
 
                         <button
@@ -539,8 +568,8 @@ export default function AdminPostsPage() {
                           className="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           {processingId === post.id && post.status !== 1
-                            ? "Processing..."
-                            : "Mark Returned"}
+                            ? t("adminPages.posts.processing")
+                            : t("adminPages.posts.markReturned")}
                         </button>
 
                         <button
@@ -550,8 +579,8 @@ export default function AdminPostsPage() {
                           className="inline-flex items-center justify-center rounded-xl border border-amber-200 bg-white px-4 py-2.5 text-sm font-semibold text-amber-700 hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           {processingId === post.id && post.status !== 2
-                            ? "Processing..."
-                            : "Mark Closed"}
+                            ? t("adminPages.posts.processing")
+                            : t("adminPages.posts.markClosed")}
                         </button>
 
                         <button
@@ -560,7 +589,9 @@ export default function AdminPostsPage() {
                           disabled={processingId === post.id}
                           className="inline-flex items-center justify-center rounded-xl border border-red-200 bg-white px-4 py-2.5 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                          {processingId === post.id ? "Processing..." : "Delete Post"}
+                          {processingId === post.id
+                            ? t("adminPages.posts.processing")
+                            : t("adminPages.posts.deletePost")}
                         </button>
                       </div>
                     </div>
@@ -568,6 +599,12 @@ export default function AdminPostsPage() {
                 </article>
               ))}
             </section>
+
+            <Pagination
+              pageNumber={pageNumber}
+              totalPages={totalPages}
+              onPageChange={setPageNumber}
+            />
           </>
         )}
       </div>

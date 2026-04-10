@@ -1,40 +1,50 @@
+import i18n from "../i18n";
+
 export interface SelectOption<T extends string | number> {
   label: string;
   value: T;
 }
 
-export const postTypeOptions: SelectOption<number>[] = [
-  { label: "Lost", value: 0 },
-  { label: "Found", value: 1 },
-];
+export function getPostTypeOptions(): SelectOption<number>[] {
+  return [
+    { label: i18n.t("post.lost"), value: 0 },
+    { label: i18n.t("post.found"), value: 1 },
+  ];
+}
 
-export const postStatusOptions: SelectOption<number>[] = [
-  { label: "Open", value: 0 },
-  { label: "Returned", value: 1 },
-  { label: "Closed", value: 2 },
-];
+export function getPostStatusOptions(): SelectOption<number>[] {
+  return [
+    { label: i18n.t("post.open"), value: 0 },
+    { label: i18n.t("post.returned"), value: 1 },
+    { label: i18n.t("post.closed"), value: 2 },
+  ];
+}
 
-export const itemColorOptions: SelectOption<number>[] = [
-  { label: "Unknown", value: 0 },
-  { label: "Black", value: 1 },
-  { label: "White", value: 2 },
-  { label: "Gray", value: 3 },
-  { label: "Blue", value: 4 },
-  { label: "Red", value: 5 },
-  { label: "Green", value: 6 },
-  { label: "Yellow", value: 7 },
-  { label: "Brown", value: 8 },
-  { label: "Pink", value: 9 },
-  { label: "Purple", value: 10 },
-  { label: "Orange", value: 11 },
-  { label: "Silver", value: 12 },
-  { label: "Gold", value: 13 },
-];
+export function getItemColorOptions(): SelectOption<number>[] {
+  return [
+    { label: i18n.t("common.unknown"), value: 0 },
+    { label: i18n.t("post.black"), value: 1 },
+    { label: i18n.t("post.white"), value: 2 },
+    { label: i18n.t("post.gray"), value: 3 },
+    { label: i18n.t("post.blue"), value: 4 },
+    { label: i18n.t("post.red"), value: 5 },
+    { label: i18n.t("post.green"), value: 6 },
+    { label: i18n.t("post.yellow"), value: 7 },
+    { label: i18n.t("post.brown"), value: 8 },
+    { label: i18n.t("post.pink"), value: 9 },
+    { label: i18n.t("post.purple"), value: 10 },
+    { label: i18n.t("post.orange"), value: 11 },
+    { label: i18n.t("post.silver"), value: 12 },
+    { label: i18n.t("post.gold"), value: 13 },
+  ];
+}
 
-export const reportReasonOptions: SelectOption<number>[] = [
-  { label: "Spam", value: 1 },
-  { label: "Fake Post", value: 2 },
-  { label: "Offensive Content", value: 3 },
-  { label: "Wrong Category", value: 4 },
-  { label: "Other", value: 5 },
-];
+export function getReportReasonOptions(): SelectOption<number>[] {
+  return [
+    { label: i18n.t("report.spam"), value: 1 },
+    { label: i18n.t("report.fakePost"), value: 2 },
+    { label: i18n.t("report.offensiveContent"), value: 3 },
+    { label: i18n.t("report.wrongCategory"), value: 4 },
+    { label: i18n.t("report.other"), value: 5 },
+  ];
+}

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { getMyReports } from "../../api/reportApi";
 import PageState from "../../components/common/PageState";
 import type { ReportItem } from "../../types/report";
@@ -12,6 +13,7 @@ import {
 } from "../../utils/report";
 
 export default function MyReportsPage() {
+  const { t } = useTranslation();
   const [reports, setReports] = useState<ReportItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
@@ -48,7 +50,7 @@ export default function MyReportsPage() {
         isLoading={isLoading}
         errorMessage={errorMessage}
         isEmpty={!isLoading && !errorMessage && reports.length === 0}
-        emptyMessage="You have not submitted any reports yet."
+        emptyMessage={t("myReportsPage.empty")}
       />
     );
   }
@@ -59,13 +61,13 @@ export default function MyReportsPage() {
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-              Reporting history
+              {t("myReportsPage.badge")}
             </p>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900 sm:text-[2rem]">
-              My Reports
+              {t("myReportsPage.title")}
             </h1>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600 sm:text-base">
-              Review the reports you submitted, monitor moderation progress, and reopen the related posts when needed.
+              {t("myReportsPage.description")}
             </p>
           </div>
 
@@ -74,46 +76,52 @@ export default function MyReportsPage() {
               to="/dashboard"
               className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800"
             >
-              Back to Dashboard
+              {t("myReportsPage.actions.backToDashboard")}
             </Link>
 
             <Link
               to="/"
               className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-50"
             >
-              Browse Posts
+              {t("myReportsPage.actions.browsePosts")}
             </Link>
           </div>
         </div>
 
         <div className="mt-6 grid gap-4 md:grid-cols-3">
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">Total reports</p>
+            <p className="text-sm font-medium text-slate-500">
+              {t("myReportsPage.metrics.totalReports")}
+            </p>
             <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
               {metrics.total}
             </p>
             <p className="mt-3 text-sm leading-6 text-slate-600">
-              All reports submitted from your account.
+              {t("myReportsPage.metrics.totalReportsDescription")}
             </p>
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">Pending review</p>
+            <p className="text-sm font-medium text-slate-500">
+              {t("myReportsPage.metrics.pendingReview")}
+            </p>
             <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
               {metrics.pending}
             </p>
             <p className="mt-3 text-sm leading-6 text-slate-600">
-              Reports that are still waiting for moderation.
+              {t("myReportsPage.metrics.pendingReviewDescription")}
             </p>
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">Reviewed</p>
+            <p className="text-sm font-medium text-slate-500">
+              {t("myReportsPage.metrics.reviewed")}
+            </p>
             <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
               {metrics.reviewed}
             </p>
             <p className="mt-3 text-sm leading-6 text-slate-600">
-              Reports that already received moderation attention.
+              {t("myReportsPage.metrics.reviewedDescription")}
             </p>
           </div>
         </div>
@@ -121,10 +129,10 @@ export default function MyReportsPage() {
 
       <section className="flex flex-col gap-2">
         <h2 className="text-xl font-semibold tracking-tight text-slate-900">
-          Submitted reports
+          {t("myReportsPage.list.title")}
         </h2>
         <p className="text-sm text-slate-600">
-          Each entry includes the reported post, reason, moderation status, and review timing.
+          {t("myReportsPage.list.description")}
         </p>
       </section>
 
@@ -140,7 +148,7 @@ export default function MyReportsPage() {
                   {report.itemPostTitle}
                 </h2>
                 <p className="mt-2 text-sm leading-6 text-slate-600">
-                  Report submitted for moderation review.
+                  {t("myReportsPage.list.cardDescription")}
                 </p>
               </div>
 
@@ -156,7 +164,7 @@ export default function MyReportsPage() {
             <div className="mt-5 grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm md:grid-cols-2 xl:grid-cols-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                  Reason
+                  {t("myReportsPage.list.reason")}
                 </p>
                 <p className="mt-1 font-medium text-slate-700">
                   {getReportReasonLabel(report.reason)}
@@ -165,7 +173,7 @@ export default function MyReportsPage() {
 
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                  Created At
+                  {t("myReportsPage.list.createdAt")}
                 </p>
                 <p className="mt-1 font-medium text-slate-700">
                   {formatDateTime(report.createdAt)}
@@ -174,7 +182,7 @@ export default function MyReportsPage() {
 
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                  Reviewed At
+                  {t("myReportsPage.list.reviewedAt")}
                 </p>
                 <p className="mt-1 font-medium text-slate-700">
                   {report.reviewedAt ? formatDateTime(report.reviewedAt) : "-"}
@@ -183,7 +191,7 @@ export default function MyReportsPage() {
 
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                  Status
+                  {t("myReportsPage.list.status")}
                 </p>
                 <p className="mt-1 font-medium text-slate-700">
                   {getReportStatusLabel(report.status)}
@@ -193,10 +201,10 @@ export default function MyReportsPage() {
 
             <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-5">
               <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-slate-500">
-                Description
+                {t("myReportsPage.list.descriptionTitle")}
               </h3>
               <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-700">
-                {report.description || "No additional description was provided."}
+                {report.description || t("myReportsPage.list.noDescription")}
               </p>
             </div>
 
@@ -205,7 +213,7 @@ export default function MyReportsPage() {
                 to={`/posts/${report.itemPostId}`}
                 className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800"
               >
-                View Post
+                {t("myReportsPage.actions.viewPost")}
               </Link>
             </div>
           </article>
