@@ -1,26 +1,26 @@
-﻿using AutoMapper;
+using AutoMapper;
 using ItemNest.Application.DTOs;
 using ItemNest.Application.Interfaces;
+using ItemNest.Application.Interfaces.Repositories;
 using ItemNest.Domain.Entities;
-using ItemNest.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace ItemNest.Infrastructure.Services;
 
 public class CategoryService : ICategoryService
 {
-    private readonly ItemNestDbContext _context;
+    private readonly ICategoryRepository _categoryRepository;
     private readonly IMapper _mapper;
 
-    public CategoryService(ItemNestDbContext context, IMapper mapper)
+    public CategoryService(ICategoryRepository categoryRepository, IMapper mapper)
     {
-        _context = context;
+        _categoryRepository = categoryRepository;
         _mapper = mapper;
     }
 
     public async Task<IReadOnlyList<CategoryDto>> GetAllAsync()
     {
-        var categories = await _context.Categories
+        var categories = await _categoryRepository.Query()
             .AsNoTracking()
             .OrderBy(x => x.Name)
             .ToListAsync();
@@ -30,7 +30,7 @@ public class CategoryService : ICategoryService
 
     public async Task<CategoryDto> GetByIdAsync(int id)
     {
-        var category = await _context.Categories
+        var category = await _categoryRepository.Query()
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == id);
 
@@ -45,18 +45,13 @@ public class CategoryService : ICategoryService
         if (string.IsNullOrWhiteSpace(dto.Name))
             throw new ArgumentException("Category name cannot be empty.");
 
-        var normalizedName = dto.Name.Trim();
-
-        var exists = await _context.Categories
-            .AnyAsync(x => x.Name.ToLower() == normalizedName.ToLower());
-
-        if (exists)
+        if (await _categoryRepository.IsNameTakenAsync(dto.Name))
             throw new InvalidOperationException("This category already exists.");
 
         var category = _mapper.Map<Category>(dto);
 
-        _context.Categories.Add(category);
-        await _context.SaveChangesAsync();
+        await _categoryRepository.AddAsync(category);
+        await _categoryRepository.SaveChangesAsync();
 
         return _mapper.Map<CategoryDto>(category);
     }
@@ -66,39 +61,32 @@ public class CategoryService : ICategoryService
         if (string.IsNullOrWhiteSpace(dto.Name))
             throw new ArgumentException("Category name cannot be empty.");
 
-        var category = await _context.Categories.FirstOrDefaultAsync(x => x.Id == id);
+        var category = await _categoryRepository.FindAsync(id);
 
         if (category is null)
             throw new KeyNotFoundException("Category not found.");
 
-        var normalizedName = dto.Name.Trim();
-
-        var exists = await _context.Categories
-            .AnyAsync(x => x.Id != id && x.Name.ToLower() == normalizedName.ToLower());
-
-        if (exists)
+        if (await _categoryRepository.IsNameTakenAsync(dto.Name, excludeId: id))
             throw new InvalidOperationException("This category already exists.");
 
-        category.Name = normalizedName;
+        category.Name = dto.Name.Trim();
 
-        await _context.SaveChangesAsync();
+        await _categoryRepository.SaveChangesAsync();
 
         return _mapper.Map<CategoryDto>(category);
     }
 
     public async Task DeleteAsync(int id)
     {
-        var category = await _context.Categories.FindAsync(id);
+        var category = await _categoryRepository.FindAsync(id);
 
         if (category is null)
             throw new KeyNotFoundException("Category not found.");
 
-        var isUsed = await _context.ItemPosts.AnyAsync(x => x.CategoryId == id);
-
-        if (isUsed)
+        if (await _categoryRepository.IsUsedByPostsAsync(id))
             throw new InvalidOperationException("This category cannot be deleted because it is in use.");
 
-        _context.Categories.Remove(category);
-        await _context.SaveChangesAsync();
+        _categoryRepository.Delete(category);
+        await _categoryRepository.SaveChangesAsync();
     }
 }

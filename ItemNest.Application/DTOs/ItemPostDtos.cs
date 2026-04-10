@@ -188,9 +188,28 @@ public class ItemPostDto
     public string UserFullName { get; set; } = string.Empty;
 
     /// <summary>
+    /// URL of the primary image attached to the post.
+    /// </summary>
+    /// <example>/uploads/itemposts/2c276912-318f-4526-ae59-2d3d704f5571.webp</example>
+    public string PrimaryImageUrl { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Indicates whether the current authenticated user owns this post.
+    /// </summary>
+    /// <example>false</example>
+    public bool IsOwner { get; set; }
+
+    /// <summary>
+    /// Indicates whether the current authenticated user has favorited this post.
+    /// </summary>
+    /// <example>true</example>
+    public bool IsFavorited { get; set; }
+
+    /// <summary>
     /// List of images attached to the post.
     /// </summary>
     public List<ItemImageDto> Images { get; set; } = new();
+
 }
 
 /// <summary>
