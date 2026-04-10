@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { getMyPosts } from "../../api/itemPostApi";
 import PageState from "../../components/common/PageState";
 import PostCard from "../../components/posts/PostCard";
@@ -8,6 +9,7 @@ import { getApiErrorMessage } from "../../utils/error";
 import { getPostStatusLabel, getPostTypeLabel } from "../../utils/post";
 
 export default function MyPostsPage() {
+  const { t } = useTranslation();
   const location = useLocation();
   const routeSuccessMessage = location.state?.successMessage as string | undefined;
 
@@ -63,7 +65,7 @@ export default function MyPostsPage() {
           isLoading={isLoading}
           errorMessage={errorMessage}
           isEmpty={!isLoading && !errorMessage && posts.length === 0}
-          emptyMessage="You have not created any posts yet."
+          emptyMessage={t("myPostsPage.empty")}
         />
       </div>
     );
@@ -75,13 +77,13 @@ export default function MyPostsPage() {
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-              Personal content
+              {t("myPostsPage.badge")}
             </p>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900 sm:text-[2rem]">
-              My Posts
+              {t("myPostsPage.title")}
             </h1>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600 sm:text-base">
-              Manage the posts you created, review their current status, and open any post for editing, status changes, matches, images, and owner actions.
+              {t("myPostsPage.description")}
             </p>
           </div>
 
@@ -90,20 +92,20 @@ export default function MyPostsPage() {
               to="/create-post"
               className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800"
             >
-              Create Post
+              {t("myPostsPage.actions.createPost")}
             </Link>
             <Link
               to="/dashboard"
               className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-50"
             >
-              Back to Dashboard
+              {t("myPostsPage.actions.backToDashboard")}
             </Link>
           </div>
         </div>
 
         <div className="mt-6 grid gap-4 md:grid-cols-3 xl:grid-cols-6">
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">Total</p>
+            <p className="text-sm font-medium text-slate-500">{t("myPostsPage.metrics.total")}</p>
             <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
               {metrics.total}
             </p>
@@ -154,10 +156,10 @@ export default function MyPostsPage() {
 
       <section className="flex flex-col gap-2">
         <h2 className="text-xl font-semibold tracking-tight text-slate-900">
-          All created posts
+          {t("myPostsPage.list.title")}
         </h2>
         <p className="text-sm text-slate-600">
-          Open any card to update details, manage images, check matches, or change status.
+          {t("myPostsPage.list.description")}
         </p>
       </section>
 

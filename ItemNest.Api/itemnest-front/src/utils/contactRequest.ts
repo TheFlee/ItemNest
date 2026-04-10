@@ -1,15 +1,17 @@
+import i18n from "../i18n";
+
 export function getContactRequestStatusLabel(status: number): string {
   switch (status) {
     case 1:
-      return "Pending";
+      return i18n.t("contactRequest.pending");
     case 2:
-      return "Accepted";
+      return i18n.t("contactRequest.accepted");
     case 3:
-      return "Rejected";
+      return i18n.t("contactRequest.rejected");
     case 4:
-      return "Cancelled";
+      return i18n.t("contactRequest.cancelled");
     default:
-      return "Unknown";
+      return i18n.t("common.unknown");
   }
 }
 

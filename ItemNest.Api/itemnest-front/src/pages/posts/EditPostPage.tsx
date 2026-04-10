@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { getCategories } from "../../api/categoryApi";
 import { getPostById, updatePost } from "../../api/itemPostApi";
@@ -9,7 +10,7 @@ import FormTextarea from "../../components/forms/FormTextarea";
 import type { Category } from "../../types/category";
 import type { UpdatePostRequest } from "../../types/post";
 import { getApiErrorMessage } from "../../utils/error";
-import { itemColorOptions } from "../../utils/options";
+import { getItemColorOptions, getPostStatusOptions } from "../../utils/options";
 import { getPostStatusLabel } from "../../utils/post";
 
 interface EditPostFormState {
@@ -22,12 +23,6 @@ interface EditPostFormState {
   status: string;
 }
 
-const postStatusOptions = [
-  { label: "Open", value: 0 },
-  { label: "Returned", value: 1 },
-  { label: "Closed", value: 2 },
-];
-
 function toDateTimeLocalValue(value: string): string {
   const date = new Date(value);
   const timezoneOffset = date.getTimezoneOffset() * 60000;
@@ -35,6 +30,7 @@ function toDateTimeLocalValue(value: string): string {
 }
 
 export default function EditPostPage() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -92,6 +88,9 @@ export default function EditPostPage() {
 
     void loadData();
   }, [id]);
+
+  const postStatusOptions = useMemo(() => getPostStatusOptions(), [t]);
+  const itemColorOptions = useMemo(() => getItemColorOptions(), [t]);
 
   const categoryOptions = useMemo(
     () =>

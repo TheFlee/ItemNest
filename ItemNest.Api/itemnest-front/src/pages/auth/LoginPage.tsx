@@ -1,10 +1,12 @@
 import { useCallback, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import GoogleLoginButton from "../../components/auth/GoogleLoginButton";
 import { useAuth } from "../../context/AuthContext";
 import { getApiErrorMessage } from "../../utils/error";
 
 export default function LoginPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { login, googleLogin } = useAuth();
 
@@ -52,13 +54,13 @@ export default function LoginPage() {
     <div>
       <div className="border-b border-slate-200 pb-5">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-          Account access
+          {t("auth.login.badge")}
         </p>
         <h1 className="mt-2 text-2xl font-semibold tracking-tight text-slate-900">
-          Login
+          {t("auth.login.title")}
         </h1>
         <p className="mt-2 text-sm leading-6 text-slate-600">
-          Sign in to manage your posts, requests, favorites, matches, and reports.
+          {t("auth.login.description")}
         </p>
       </div>
 
@@ -72,7 +74,7 @@ export default function LoginPage() {
         <div className="flex items-center gap-3">
           <div className="h-px flex-1 bg-slate-200" />
           <span className="text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
-            Or continue with email
+            {t("auth.login.orContinueWithEmail")}
           </span>
           <div className="h-px flex-1 bg-slate-200" />
         </div>
@@ -81,14 +83,14 @@ export default function LoginPage() {
       <form onSubmit={handleSubmit} className="mt-6 space-y-5">
         <div>
           <label className="mb-1.5 block text-sm font-medium text-slate-700">
-            Email
+            {t("auth.login.email")}
           </label>
           <input
             type="email"
             value={form.email}
             onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
             className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-500"
-            placeholder="Enter your email"
+            placeholder={t("auth.login.emailPlaceholder")}
             required
           />
         </div>
@@ -96,7 +98,7 @@ export default function LoginPage() {
         <div>
           <div className="mb-1.5 flex items-center justify-between">
             <label className="block text-sm font-medium text-slate-700">
-              Password
+              {t("auth.login.password")}
             </label>
           </div>
 
@@ -105,7 +107,7 @@ export default function LoginPage() {
             value={form.password}
             onChange={(e) => setForm((prev) => ({ ...prev, password: e.target.value }))}
             className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-500"
-            placeholder="Enter your password"
+            placeholder={t("auth.login.passwordPlaceholder")}
             required
           />
         </div>
@@ -121,15 +123,15 @@ export default function LoginPage() {
           disabled={isSubmitting}
           className="inline-flex w-full items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isSubmitting ? "Logging in..." : "Login"}
+          {isSubmitting ? t("auth.login.submitting") : t("auth.login.submit")}
         </button>
       </form>
 
       <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
         <p className="text-sm text-slate-600">
-          Do not have an account?{" "}
+          {t("auth.login.noAccount")} {" "}
           <Link to="/register" className="font-semibold text-slate-900 hover:underline">
-            Register
+            {t("auth.login.register")}
           </Link>
         </p>
       </div>

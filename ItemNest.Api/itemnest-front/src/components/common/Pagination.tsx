@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 interface PaginationProps {
   pageNumber: number;
   totalPages: number;
@@ -36,6 +38,8 @@ export default function Pagination({
   totalPages,
   onPageChange,
 }: PaginationProps) {
+  const { t } = useTranslation();
+
   if (totalPages <= 1) {
     return null;
   }
@@ -67,7 +71,7 @@ export default function Pagination({
           disabled={pageNumber === 1}
           className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:border-slate-400 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          Previous
+          {t("common.previous")}
         </button>
 
         {showFirstPageShortcut && (
@@ -121,12 +125,12 @@ export default function Pagination({
           disabled={pageNumber === totalPages}
           className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:border-slate-400 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          Next
+          {t("common.next")}
         </button>
       </div>
 
       <p className="text-center text-sm text-slate-500">
-        Page {pageNumber} of {totalPages}
+        {t("common.pageOf", { page: pageNumber, total: totalPages })}
       </p>
     </div>
   );

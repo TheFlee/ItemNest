@@ -1,9 +1,11 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { getMyDashboard } from "../../api/dashboardApi";
 import PageState from "../../components/common/PageState";
 import type { MyDashboard } from "../../types/dashboard";
 import { getApiErrorMessage } from "../../utils/error";
+import { getPostStatusLabel } from "../../utils/post";
 
 interface DashboardCard {
   title: string;
@@ -21,6 +23,7 @@ function getPercentage(value: number, total: number) {
 }
 
 export default function DashboardPage() {
+  const { t } = useTranslation();
   const [dashboard, setDashboard] = useState<MyDashboard | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -49,75 +52,75 @@ export default function DashboardPage() {
         isLoading={isLoading}
         errorMessage={errorMessage}
         isEmpty={!isLoading && !errorMessage && !dashboard}
-        emptyMessage="Dashboard data was not found."
+        emptyMessage={t("dashboardPage.empty")}
       />
     );
   }
 
   const cards: DashboardCard[] = [
     {
-      title: "My Posts",
+      title: t("dashboardPage.quickAccess.myPosts"),
       value: dashboard.myPostsCount,
-      description: "All posts you created on the platform.",
+      description: t("dashboardPage.quickAccess.myPostsDescription"),
       to: "/my-posts",
     },
     {
-      title: "Open Posts",
+      title: t("dashboardPage.quickAccess.openPosts"),
       value: dashboard.openPostsCount,
-      description: "Posts that are still active and visible.",
+      description: t("dashboardPage.quickAccess.openPostsDescription"),
       to: "/my-posts",
     },
     {
-      title: "Returned Posts",
+      title: t("dashboardPage.quickAccess.returnedPosts"),
       value: dashboard.returnedPostsCount,
-      description: "Posts marked as successfully returned.",
+      description: t("dashboardPage.quickAccess.returnedPostsDescription"),
       to: "/my-posts",
     },
     {
-      title: "Closed Posts",
+      title: t("dashboardPage.quickAccess.closedPosts"),
       value: dashboard.closedPostsCount,
-      description: "Posts that are no longer active.",
+      description: t("dashboardPage.quickAccess.closedPostsDescription"),
       to: "/my-posts",
     },
     {
-      title: "Favorites",
+      title: t("dashboardPage.quickAccess.favorites"),
       value: dashboard.favoritesCount,
-      description: "Posts you saved for later review.",
+      description: t("dashboardPage.quickAccess.favoritesDescription"),
       to: "/favorites",
     },
     {
-      title: "Pending Received Requests",
+      title: t("dashboardPage.quickAccess.pendingReceivedRequests"),
       value: dashboard.pendingReceivedContactRequestsCount,
-      description: "Contact requests waiting for your response.",
+      description: t("dashboardPage.quickAccess.pendingReceivedRequestsDescription"),
       to: "/contact-requests/received",
     },
     {
-      title: "Pending Sent Requests",
+      title: t("dashboardPage.quickAccess.pendingSentRequests"),
       value: dashboard.pendingSentContactRequestsCount,
-      description: "Requests you sent and still waiting on.",
+      description: t("dashboardPage.quickAccess.pendingSentRequestsDescription"),
       to: "/contact-requests/sent",
     },
     {
-      title: "My Reports",
+      title: t("dashboardPage.quickAccess.myReports"),
       value: dashboard.myReportsCount,
-      description: "Reports you submitted for posts.",
+      description: t("dashboardPage.quickAccess.myReportsDescription"),
       to: "/my-reports",
     },
   ];
 
   const summaryRows = [
     {
-      label: "Open",
+      label: getPostStatusLabel(0),
       value: dashboard.openPostsCount,
       percentage: getPercentage(dashboard.openPostsCount, dashboard.myPostsCount),
     },
     {
-      label: "Returned",
+      label: getPostStatusLabel(1),
       value: dashboard.returnedPostsCount,
       percentage: getPercentage(dashboard.returnedPostsCount, dashboard.myPostsCount),
     },
     {
-      label: "Closed",
+      label: getPostStatusLabel(2),
       value: dashboard.closedPostsCount,
       percentage: getPercentage(dashboard.closedPostsCount, dashboard.myPostsCount),
     },
@@ -129,13 +132,13 @@ export default function DashboardPage() {
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-              Account overview
+              {t("dashboardPage.badge")}
             </p>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900 sm:text-[2rem]">
-              Dashboard
+              {t("dashboardPage.title")}
             </h1>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600 sm:text-base">
-              Review your activity, monitor post status, and move quickly to the areas that need attention.
+              {t("dashboardPage.description")}
             </p>
           </div>
 
@@ -144,45 +147,51 @@ export default function DashboardPage() {
               to="/create-post"
               className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800"
             >
-              Create Post
+              {t("dashboardPage.actions.createPost")}
             </Link>
             <Link
               to="/my-posts"
               className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-50"
             >
-              Manage My Posts
+              {t("dashboardPage.actions.manageMyPosts")}
             </Link>
           </div>
         </div>
 
         <div className="mt-6 grid gap-4 md:grid-cols-3">
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">Total posts</p>
+            <p className="text-sm font-medium text-slate-500">
+              {t("dashboardPage.highlights.totalPosts")}
+            </p>
             <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
               {dashboard.myPostsCount}
             </p>
             <p className="mt-3 text-sm leading-6 text-slate-600">
-              All item posts currently created under your account.
+              {t("dashboardPage.highlights.totalPostsDescription")}
             </p>
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">Requests waiting</p>
+            <p className="text-sm font-medium text-slate-500">
+              {t("dashboardPage.highlights.requestsWaiting")}
+            </p>
             <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
               {dashboard.pendingReceivedContactRequestsCount}
             </p>
             <p className="mt-3 text-sm leading-6 text-slate-600">
-              Pending received requests that still need your decision.
+              {t("dashboardPage.highlights.requestsWaitingDescription")}
             </p>
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">Saved and tracked</p>
+            <p className="text-sm font-medium text-slate-500">
+              {t("dashboardPage.highlights.savedAndTracked")}
+            </p>
             <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
               {dashboard.favoritesCount}
             </p>
             <p className="mt-3 text-sm leading-6 text-slate-600">
-              Favorite posts saved for later review and follow-up.
+              {t("dashboardPage.highlights.savedAndTrackedDescription")}
             </p>
           </div>
         </div>
@@ -191,10 +200,10 @@ export default function DashboardPage() {
       <section>
         <div className="mb-4">
           <h2 className="text-xl font-semibold tracking-tight text-slate-900">
-            Quick access
+            {t("dashboardPage.quickAccess.title")}
           </h2>
           <p className="mt-1 text-sm text-slate-600">
-            Open the main areas of your account with a cleaner overview.
+            {t("dashboardPage.quickAccess.description")}
           </p>
         </div>
 
@@ -210,7 +219,9 @@ export default function DashboardPage() {
                 {card.value}
               </p>
               <p className="mt-3 text-sm leading-6 text-slate-600">{card.description}</p>
-              <p className="mt-5 text-sm font-medium text-slate-900">Open section</p>
+              <p className="mt-5 text-sm font-medium text-slate-900">
+                {t("dashboardPage.actions.openSection")}
+              </p>
             </Link>
           ))}
         </div>
@@ -221,19 +232,21 @@ export default function DashboardPage() {
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <h2 className="text-xl font-semibold tracking-tight text-slate-900">
-                Post status summary
+                {t("dashboardPage.summary.title")}
               </h2>
               <p className="mt-1 text-sm text-slate-600">
-                Distribution of your current post statuses.
+                {t("dashboardPage.summary.description")}
               </p>
             </div>
 
             <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2">
               <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-500">
-                Base total
+                {t("dashboardPage.summary.baseTotal")}
               </p>
               <p className="mt-1 text-sm font-semibold text-slate-900">
-                {dashboard.myPostsCount} posts
+                {t("dashboardPage.summary.baseTotalValue", {
+                  count: dashboard.myPostsCount,
+                })}
               </p>
             </div>
           </div>
@@ -244,7 +257,11 @@ export default function DashboardPage() {
                 <div className="mb-2 flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-slate-800">{row.label}</p>
-                    <p className="text-xs text-slate-500">{row.percentage}% of all posts</p>
+                    <p className="text-xs text-slate-500">
+                      {t("dashboardPage.summary.ofAllPosts", {
+                        percentage: row.percentage,
+                      })}
+                    </p>
                   </div>
                   <p className="text-sm font-semibold text-slate-900">{row.value}</p>
                 </div>
@@ -257,49 +274,6 @@ export default function DashboardPage() {
                 </div>
               </div>
             ))}
-          </div>
-        </div>
-
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-semibold tracking-tight text-slate-900">
-            Actions
-          </h2>
-          <p className="mt-1 text-sm text-slate-600">
-            Common account tasks with direct access.
-          </p>
-
-          <div className="mt-5 space-y-3">
-            <Link
-              to="/contact-requests/received"
-              className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-800 hover:border-slate-300 hover:bg-slate-100"
-            >
-              <span>Review received requests</span>
-              <span>{dashboard.pendingReceivedContactRequestsCount}</span>
-            </Link>
-
-            <Link
-              to="/contact-requests/sent"
-              className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-800 hover:border-slate-300 hover:bg-slate-100"
-            >
-              <span>Check sent requests</span>
-              <span>{dashboard.pendingSentContactRequestsCount}</span>
-            </Link>
-
-            <Link
-              to="/favorites"
-              className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-800 hover:border-slate-300 hover:bg-slate-100"
-            >
-              <span>Open favorites</span>
-              <span>{dashboard.favoritesCount}</span>
-            </Link>
-
-            <Link
-              to="/my-reports"
-              className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-800 hover:border-slate-300 hover:bg-slate-100"
-            >
-              <span>Open my reports</span>
-              <span>{dashboard.myReportsCount}</span>
-            </Link>
           </div>
         </div>
       </section>

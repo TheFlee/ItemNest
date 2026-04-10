@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { getCategories } from "../../api/categoryApi";
 import { getPosts } from "../../api/itemPostApi";
 import PageState from "../../components/common/PageState";
@@ -11,22 +12,6 @@ import { useAuth } from "../../context/AuthContext";
 import type { Category } from "../../types/category";
 import type { ItemPost, PostFilterParams } from "../../types/post";
 import { getApiErrorMessage } from "../../utils/error";
-import { itemColorOptions, postTypeOptions } from "../../utils/options";
-
-const sortByOptions = [
-  { label: "Newest", value: "createdAt-desc" },
-  { label: "Oldest", value: "createdAt-asc" },
-  { label: "Event Date (Newest)", value: "eventDate-desc" },
-  { label: "Event Date (Oldest)", value: "eventDate-asc" },
-  { label: "Title (A-Z)", value: "title-asc" },
-  { label: "Title (Z-A)", value: "title-desc" },
-];
-
-const postStatusOptions = [
-  { label: "Open", value: 0 },
-  { label: "Returned", value: 1 },
-  { label: "Closed", value: 2 },
-];
 
 function parseOptionalNumber(value: string | null): number | undefined {
   if (!value) {
@@ -42,9 +27,7 @@ function createFilterState(searchParams: URLSearchParams, canManageStatuses: boo
     searchTerm: searchParams.get("search") ?? "",
     location: searchParams.get("location") ?? "",
     type: parseOptionalNumber(searchParams.get("type")),
-    status: canManageStatuses
-      ? parseOptionalNumber(searchParams.get("status"))
-      : undefined,
+    status: canManageStatuses ? parseOptionalNumber(searchParams.get("status")) : undefined,
     color: parseOptionalNumber(searchParams.get("color")),
     categoryId: parseOptionalNumber(searchParams.get("categoryId")),
     sortValue: searchParams.get("sort") ?? "createdAt-desc",
@@ -52,6 +35,7 @@ function createFilterState(searchParams: URLSearchParams, canManageStatuses: boo
 }
 
 export default function HomePage() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -67,7 +51,7 @@ export default function HomePage() {
   const [pageNumber, setPageNumber] = useState(
     Math.max(1, parseOptionalNumber(searchParams.get("page")) ?? 1)
   );
-  const [pageSize] = useState(6);
+  const [pageSize] = useState(9);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -202,6 +186,43 @@ export default function HomePage() {
     value: category.id,
   }));
 
+  const postTypeOptions = [
+    { label: t("post.lost"), value: 0 },
+    { label: t("post.found"), value: 1 },
+  ];
+
+  const postStatusOptions = [
+    { label: t("post.open"), value: 0 },
+    { label: t("post.returned"), value: 1 },
+    { label: t("post.closed"), value: 2 },
+  ];
+
+  const itemColorOptions = [
+    { label: t("common.unknown"), value: 0 },
+    { label: t("post.black"), value: 1 },
+    { label: t("post.white"), value: 2 },
+    { label: t("post.gray"), value: 3 },
+    { label: t("post.blue"), value: 4 },
+    { label: t("post.red"), value: 5 },
+    { label: t("post.green"), value: 6 },
+    { label: t("post.yellow"), value: 7 },
+    { label: t("post.brown"), value: 8 },
+    { label: t("post.pink"), value: 9 },
+    { label: t("post.purple"), value: 10 },
+    { label: t("post.orange"), value: 11 },
+    { label: t("post.silver"), value: 12 },
+    { label: t("post.gold"), value: 13 },
+  ];
+
+  const sortByOptions = [
+    { label: t("common.newest"), value: "createdAt-desc" },
+    { label: t("common.oldest"), value: "createdAt-asc" },
+    { label: t("common.eventDateNewest"), value: "eventDate-desc" },
+    { label: t("common.eventDateOldest"), value: "eventDate-asc" },
+    { label: t("common.titleAsc"), value: "title-asc" },
+    { label: t("common.titleDesc"), value: "title-desc" },
+  ];
+
   const hasAnyFilter =
     Boolean(filters.searchTerm) ||
     Boolean(filters.location) ||
@@ -215,11 +236,10 @@ export default function HomePage() {
     <div className="space-y-6">
       <section className="flex flex-col gap-2">
         <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
-          Browse posts
+          {t("home.title")}
         </h1>
         <p className="max-w-3xl text-sm leading-6 text-slate-600">
-          Search across lost and found posts using practical filters for item type,
-          category, color, and location.
+          {t("home.description")}
         </p>
       </section>
 
@@ -228,45 +248,43 @@ export default function HomePage() {
           <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
             <div className="mb-4 flex items-start justify-between gap-3">
               <div>
-                <h2 className="text-base font-semibold text-slate-900">Filters</h2>
+                <h2 className="text-base font-semibold text-slate-900">
+                  {t("common.filters")}
+                </h2>
                 <p className="mt-1 text-xs leading-5 text-slate-500">
-                  {isAdmin
-                    ? "Admins can also filter by post status."
-                    : "Public browsing shows open posts only."}
+                  {isAdmin ? t("home.adminStatusHint") : t("home.publicStatusHint")}
                 </p>
               </div>
 
               <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-right">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                  Results
+                  {t("common.results")}
                 </p>
-                <p className="mt-1 text-sm font-semibold text-slate-900">
-                  {totalCount}
-                </p>
+                <p className="mt-1 text-sm font-semibold text-slate-900">{totalCount}</p>
               </div>
             </div>
 
             <form className="space-y-4" onSubmit={handleApplyFilters}>
               <FormInput
-                label="Search"
+                label={t("common.search")}
                 value={filters.searchTerm}
                 onChange={(value) =>
                   setFilters((current) => ({ ...current, searchTerm: value }))
                 }
-                placeholder="Title or description"
+                placeholder={t("home.searchPlaceholder")}
               />
 
               <FormInput
-                label="Location"
+                label={t("common.location")}
                 value={filters.location}
                 onChange={(value) =>
                   setFilters((current) => ({ ...current, location: value }))
                 }
-                placeholder="City, district, place"
+                placeholder={t("home.locationPlaceholder")}
               />
 
               <FormSelect
-                label="Type"
+                label={t("common.type")}
                 value={filters.type ?? ""}
                 onChange={(value) =>
                   setFilters((current) => ({
@@ -275,12 +293,12 @@ export default function HomePage() {
                   }))
                 }
                 options={postTypeOptions}
-                placeholder="All types"
+                placeholder={t("common.allTypes")}
               />
 
               {isAdmin && (
                 <FormSelect
-                  label="Status"
+                  label={t("common.status")}
                   value={filters.status ?? ""}
                   onChange={(value) =>
                     setFilters((current) => ({
@@ -289,12 +307,12 @@ export default function HomePage() {
                     }))
                   }
                   options={postStatusOptions}
-                  placeholder="All statuses"
+                  placeholder={t("common.allStatuses")}
                 />
               )}
 
               <FormSelect
-                label="Category"
+                label={t("common.category")}
                 value={filters.categoryId ?? ""}
                 onChange={(value) =>
                   setFilters((current) => ({
@@ -303,11 +321,11 @@ export default function HomePage() {
                   }))
                 }
                 options={categoryOptions}
-                placeholder="All categories"
+                placeholder={t("common.allCategories")}
               />
 
               <FormSelect
-                label="Color"
+                label={t("common.color")}
                 value={filters.color ?? ""}
                 onChange={(value) =>
                   setFilters((current) => ({
@@ -316,30 +334,27 @@ export default function HomePage() {
                   }))
                 }
                 options={itemColorOptions}
-                placeholder="All colors"
+                placeholder={t("common.allColors")}
               />
 
               <FormSelect
-                label="Sort By"
+                label={t("common.sortBy")}
                 value={filters.sortValue}
                 onChange={(value) =>
-                  setFilters((current) => ({ ...current, sortValue: value }))
+                  setFilters((current) => ({
+                    ...current,
+                    sortValue: value,
+                  }))
                 }
                 options={sortByOptions}
               />
 
-              {categoryErrorMessage && (
-                <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs text-amber-800">
-                  Categories could not be loaded right now. You can still browse posts.
-                </div>
-              )}
-
-              <div className="flex flex-col gap-2 pt-1">
+              <div className="flex flex-col gap-2 pt-2">
                 <button
                   type="submit"
                   className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800"
                 >
-                  Apply Filters
+                  {t("common.applyFilters")}
                 </button>
 
                 <button
@@ -347,38 +362,40 @@ export default function HomePage() {
                   onClick={handleClearFilters}
                   className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-50"
                 >
-                  Clear Filters
+                  {t("common.clearFilters")}
                 </button>
               </div>
-
-              {hasAnyFilter && (
-                <p className="text-xs leading-5 text-slate-500">
-                  Custom filters are active.
-                </p>
-              )}
             </form>
+
+            {categoryErrorMessage && (
+              <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs text-amber-800">
+                {t("home.categoriesLoadFailed")}
+              </div>
+            )}
           </section>
         </aside>
 
-        <div className="space-y-5">
-          {isLoading || errorMessage || posts.length === 0 ? (
-            <PageState
-              isLoading={isLoading}
-              errorMessage={errorMessage}
-              isEmpty={!isLoading && !errorMessage && posts.length === 0}
-              emptyMessage={
-                hasAnyFilter
-                  ? "No posts matched your current filters. Try broader criteria."
-                  : "No posts found."
-              }
-            />
-          ) : (
+        <section className="space-y-4">
+          {hasAnyFilter && (
+            <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+              {t("home.customFiltersActive")}
+            </div>
+          )}
+
+          <PageState
+            isLoading={isLoading}
+            errorMessage={errorMessage}
+            isEmpty={!isLoading && !errorMessage && posts.length === 0}
+            emptyMessage={hasAnyFilter ? t("home.noFilteredResults") : t("home.noPosts")}
+          />
+
+          {!isLoading && !errorMessage && posts.length > 0 && (
             <>
-              <section className="grid gap-5 sm:grid-cols-2 2xl:grid-cols-3">
+              <div className="grid gap-4 sm:grid-cols-2 2xl:grid-cols-3">
                 {posts.map((post) => (
                   <PostCard key={post.id} post={post} />
                 ))}
-              </section>
+              </div>
 
               <Pagination
                 pageNumber={pageNumber}
@@ -387,7 +404,7 @@ export default function HomePage() {
               />
             </>
           )}
-        </div>
+        </section>
       </div>
     </div>
   );

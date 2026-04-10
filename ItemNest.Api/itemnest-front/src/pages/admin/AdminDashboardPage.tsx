@@ -1,16 +1,10 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { getAdminDashboard } from "../../api/dashboardApi";
 import PageState from "../../components/common/PageState";
 import type { AdminDashboard } from "../../types/dashboard";
 import { getApiErrorMessage } from "../../utils/error";
-
-interface AdminDashboardCard {
-  title: string;
-  value: number;
-  description: string;
-  to?: string;
-}
 
 function getPercentage(value: number, total: number) {
   if (total <= 0) {
@@ -21,6 +15,7 @@ function getPercentage(value: number, total: number) {
 }
 
 export default function AdminDashboardPage() {
+  const { t } = useTranslation();
   const [dashboard, setDashboard] = useState<AdminDashboard | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -49,78 +44,78 @@ export default function AdminDashboardPage() {
         isLoading={isLoading}
         errorMessage={errorMessage}
         isEmpty={!isLoading && !errorMessage && !dashboard}
-        emptyMessage="Admin dashboard data was not found."
+        emptyMessage={t("adminPages.dashboard.emptyMessage")}
       />
     );
   }
 
-  const cards: AdminDashboardCard[] = [
+  const cards = [
     {
-      title: "Total Users",
+      title: t("adminPages.dashboard.cards.totalUsers"),
       value: dashboard.totalUsersCount,
-      description: "Registered users in the platform.",
+      description: t("adminPages.dashboard.cards.totalUsersDescription"),
       to: "/admin/users",
     },
     {
-      title: "Total Posts",
+      title: t("adminPages.dashboard.cards.totalPosts"),
       value: dashboard.totalPostsCount,
-      description: "All lost and found posts in the system.",
+      description: t("adminPages.dashboard.cards.totalPostsDescription"),
       to: "/admin/posts",
     },
     {
-      title: "Open Posts",
+      title: t("adminPages.dashboard.cards.openPosts"),
       value: dashboard.openPostsCount,
-      description: "Posts that are currently active.",
+      description: t("adminPages.dashboard.cards.openPostsDescription"),
       to: "/admin/posts",
     },
     {
-      title: "Returned Posts",
+      title: t("adminPages.dashboard.cards.returnedPosts"),
       value: dashboard.returnedPostsCount,
-      description: "Posts marked as returned.",
+      description: t("adminPages.dashboard.cards.returnedPostsDescription"),
       to: "/admin/posts",
     },
     {
-      title: "Closed Posts",
+      title: t("adminPages.dashboard.cards.closedPosts"),
       value: dashboard.closedPostsCount,
-      description: "Posts that are no longer active.",
+      description: t("adminPages.dashboard.cards.closedPostsDescription"),
       to: "/admin/posts",
     },
     {
-      title: "Categories",
+      title: t("adminPages.dashboard.cards.categories"),
       value: dashboard.totalCategoriesCount,
-      description: "Available item categories.",
+      description: t("adminPages.dashboard.cards.categoriesDescription"),
     },
     {
-      title: "Pending Reports",
+      title: t("adminPages.dashboard.cards.pendingReports"),
       value: dashboard.pendingReportsCount,
-      description: "Reports waiting for moderation.",
+      description: t("adminPages.dashboard.cards.pendingReportsDescription"),
       to: "/admin/reports",
     },
     {
-      title: "Pending Contact Requests",
+      title: t("adminPages.dashboard.cards.pendingContactRequests"),
       value: dashboard.pendingContactRequestsCount,
-      description: "Pending contact requests in the system.",
+      description: t("adminPages.dashboard.cards.pendingContactRequestsDescription"),
     },
   ];
 
   const moderationRows = [
     {
-      label: "Pending reports",
+      label: t("adminPages.dashboard.moderationRows.pendingReports"),
       value: dashboard.pendingReportsCount,
       percentage: getPercentage(dashboard.pendingReportsCount, dashboard.totalPostsCount),
     },
     {
-      label: "Open posts",
+      label: t("adminPages.dashboard.moderationRows.openPosts"),
       value: dashboard.openPostsCount,
       percentage: getPercentage(dashboard.openPostsCount, dashboard.totalPostsCount),
     },
     {
-      label: "Returned posts",
+      label: t("adminPages.dashboard.moderationRows.returnedPosts"),
       value: dashboard.returnedPostsCount,
       percentage: getPercentage(dashboard.returnedPostsCount, dashboard.totalPostsCount),
     },
     {
-      label: "Closed posts",
+      label: t("adminPages.dashboard.moderationRows.closedPosts"),
       value: dashboard.closedPostsCount,
       percentage: getPercentage(dashboard.closedPostsCount, dashboard.totalPostsCount),
     },
@@ -132,13 +127,13 @@ export default function AdminDashboardPage() {
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-              Administration
+              {t("adminPages.dashboard.badge")}
             </p>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900 sm:text-[2rem]">
-              Admin Dashboard
+              {t("adminPages.dashboard.title")}
             </h1>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600 sm:text-base">
-              Monitor platform activity, review moderation workload, and move quickly between admin management areas.
+              {t("adminPages.dashboard.description")}
             </p>
           </div>
 
@@ -147,45 +142,45 @@ export default function AdminDashboardPage() {
               to="/admin/reports"
               className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800"
             >
-              Review Reports
+              {t("adminPages.dashboard.reviewReports")}
             </Link>
             <Link
               to="/admin/posts"
               className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-50"
             >
-              Manage Posts
+              {t("adminPages.dashboard.managePosts")}
             </Link>
           </div>
         </div>
 
         <div className="mt-6 grid gap-4 md:grid-cols-3">
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">Users</p>
+            <p className="text-sm font-medium text-slate-500">{t("adminPages.dashboard.users")}</p>
             <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
               {dashboard.totalUsersCount}
             </p>
             <p className="mt-3 text-sm leading-6 text-slate-600">
-              Total registered accounts currently available in the system.
+              {t("adminPages.dashboard.usersDescription")}
             </p>
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">Posts</p>
+            <p className="text-sm font-medium text-slate-500">{t("adminPages.dashboard.posts")}</p>
             <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
               {dashboard.totalPostsCount}
             </p>
             <p className="mt-3 text-sm leading-6 text-slate-600">
-              Platform-wide post volume across lost and found activity.
+              {t("adminPages.dashboard.postsDescription")}
             </p>
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">Reports waiting</p>
+            <p className="text-sm font-medium text-slate-500">{t("adminPages.dashboard.reportsWaiting")}</p>
             <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
               {dashboard.pendingReportsCount}
             </p>
             <p className="mt-3 text-sm leading-6 text-slate-600">
-              Pending reports that still need admin moderation.
+              {t("adminPages.dashboard.reportsDescription")}
             </p>
           </div>
         </div>
@@ -194,10 +189,10 @@ export default function AdminDashboardPage() {
       <section>
         <div className="mb-4">
           <h2 className="text-xl font-semibold tracking-tight text-slate-900">
-            Admin overview
+            {t("adminPages.dashboard.adminOverview")}
           </h2>
           <p className="mt-1 text-sm text-slate-600">
-            Cleaner summary cards for the main moderation and platform metrics.
+            {t("adminPages.dashboard.adminOverviewDescription")}
           </p>
         </div>
 
@@ -214,7 +209,9 @@ export default function AdminDashboardPage() {
                   {card.value}
                 </p>
                 <p className="mt-3 text-sm leading-6 text-slate-600">{card.description}</p>
-                <p className="mt-5 text-sm font-medium text-slate-900">Open section</p>
+                <p className="mt-5 text-sm font-medium text-slate-900">
+                  {t("adminPages.dashboard.openSection")}
+                </p>
               </Link>
             ) : (
               <div
@@ -237,16 +234,16 @@ export default function AdminDashboardPage() {
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <h2 className="text-xl font-semibold tracking-tight text-slate-900">
-                Moderation summary
+                {t("adminPages.dashboard.moderationSummary")}
               </h2>
               <p className="mt-1 text-sm text-slate-600">
-                High-level distribution across reports and post statuses.
+                {t("adminPages.dashboard.moderationSummaryDescription")}
               </p>
             </div>
 
             <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2">
               <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-500">
-                Total posts
+                {t("adminPages.dashboard.totalPostsLabel")}
               </p>
               <p className="mt-1 text-sm font-semibold text-slate-900">
                 {dashboard.totalPostsCount}
@@ -260,7 +257,11 @@ export default function AdminDashboardPage() {
                 <div className="mb-2 flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-slate-800">{row.label}</p>
-                    <p className="text-xs text-slate-500">{row.percentage}% of post volume</p>
+                    <p className="text-xs text-slate-500">
+                      {t("adminPages.dashboard.moderationRows.ofPostVolume", {
+                        percentage: row.percentage,
+                      })}
+                    </p>
                   </div>
                   <p className="text-sm font-semibold text-slate-900">{row.value}</p>
                 </div>
@@ -278,10 +279,10 @@ export default function AdminDashboardPage() {
 
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="text-xl font-semibold tracking-tight text-slate-900">
-            Admin actions
+            {t("adminPages.dashboard.adminActions")}
           </h2>
           <p className="mt-1 text-sm text-slate-600">
-            Open the most common moderation areas directly.
+            {t("adminPages.dashboard.adminActionsDescription")}
           </p>
 
           <div className="mt-5 space-y-3">
@@ -289,7 +290,7 @@ export default function AdminDashboardPage() {
               to="/admin/reports"
               className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-800 hover:border-slate-300 hover:bg-slate-100"
             >
-              <span>Review reports</span>
+              <span>{t("adminPages.dashboard.actions.reviewReports")}</span>
               <span>{dashboard.pendingReportsCount}</span>
             </Link>
 
@@ -297,7 +298,7 @@ export default function AdminDashboardPage() {
               to="/admin/posts"
               className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-800 hover:border-slate-300 hover:bg-slate-100"
             >
-              <span>Manage posts</span>
+              <span>{t("adminPages.dashboard.actions.managePosts")}</span>
               <span>{dashboard.totalPostsCount}</span>
             </Link>
 
@@ -305,7 +306,7 @@ export default function AdminDashboardPage() {
               to="/admin/users"
               className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-800 hover:border-slate-300 hover:bg-slate-100"
             >
-              <span>Manage users</span>
+              <span>{t("adminPages.dashboard.actions.manageUsers")}</span>
               <span>{dashboard.totalUsersCount}</span>
             </Link>
 
@@ -313,8 +314,8 @@ export default function AdminDashboardPage() {
               to="/dashboard"
               className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-800 hover:border-slate-300 hover:bg-slate-100"
             >
-              <span>Open user dashboard</span>
-              <span>Go</span>
+              <span>{t("adminPages.dashboard.actions.openUserDashboard")}</span>
+              <span>{t("adminPages.dashboard.actions.go")}</span>
             </Link>
           </div>
         </div>

@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { getMyFavorites, removeFavorite } from "../../api/favoriteApi";
 import PageState from "../../components/common/PageState";
 import type { FavoriteItem } from "../../types/favorite";
@@ -8,6 +9,7 @@ import { formatDateTime } from "../../utils/format";
 import { getApiErrorMessage } from "../../utils/error";
 
 export default function FavoritesPage() {
+  const { t } = useTranslation();
   const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
@@ -40,7 +42,7 @@ export default function FavoritesPage() {
     try {
       await removeFavorite(itemPostId);
       setFavorites((prev) => prev.filter((x) => x.itemPostId !== itemPostId));
-      setSuccessMessage("Post was removed from favorites.");
+      setSuccessMessage(t("favoritesPage.messages.removed"));
     } catch (error: any) {
       setErrorMessage(getApiErrorMessage(error));
     } finally {
@@ -62,7 +64,7 @@ export default function FavoritesPage() {
         isLoading={isLoading}
         errorMessage={errorMessage}
         isEmpty={!isLoading && !errorMessage && favorites.length === 0}
-        emptyMessage="You do not have any favorite posts yet."
+        emptyMessage={t("favoritesPage.empty")}
       />
     );
   }
@@ -73,13 +75,13 @@ export default function FavoritesPage() {
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-              Saved posts
+              {t("favoritesPage.badge")}
             </p>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900 sm:text-[2rem]">
-              Favorites
+              {t("favoritesPage.title")}
             </h1>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600 sm:text-base">
-              Review posts you saved for later, reopen them quickly, and remove items you no longer want to track.
+              {t("favoritesPage.description")}
             </p>
           </div>
 
@@ -88,41 +90,49 @@ export default function FavoritesPage() {
               to="/"
               className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800"
             >
-              Browse Posts
+              {t("favoritesPage.actions.browsePosts")}
             </Link>
             <Link
               to="/dashboard"
               className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-50"
             >
-              Back to Dashboard
+              {t("favoritesPage.actions.backToDashboard")}
             </Link>
           </div>
         </div>
 
         <div className="mt-6 grid gap-4 md:grid-cols-3">
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">Saved posts</p>
+            <p className="text-sm font-medium text-slate-500">
+              {t("favoritesPage.cards.savedPosts")}
+            </p>
             <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
               {favorites.length}
             </p>
             <p className="mt-3 text-sm leading-6 text-slate-600">
-              Total posts currently saved in your account.
+              {t("favoritesPage.cards.savedPostsDescription")}
             </p>
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">Latest save</p>
+            <p className="text-sm font-medium text-slate-500">
+              {t("favoritesPage.cards.latestSave")}
+            </p>
             <p className="mt-2 text-lg font-semibold text-slate-900">{latestSavedAt}</p>
             <p className="mt-3 text-sm leading-6 text-slate-600">
-              Most recent time a post was added to your favorites list.
+              {t("favoritesPage.cards.latestSaveDescription")}
             </p>
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">Use case</p>
-            <p className="mt-2 text-lg font-semibold text-slate-900">Track and revisit</p>
+            <p className="text-sm font-medium text-slate-500">
+              {t("favoritesPage.cards.useCase")}
+            </p>
+            <p className="mt-2 text-lg font-semibold text-slate-900">
+              {t("favoritesPage.cards.useCaseValue")}
+            </p>
             <p className="mt-3 text-sm leading-6 text-slate-600">
-              Keep useful posts visible while comparing details or following updates.
+              {t("favoritesPage.cards.useCaseDescription")}
             </p>
           </div>
         </div>
@@ -136,10 +146,10 @@ export default function FavoritesPage() {
 
       <section className="flex flex-col gap-2">
         <h2 className="text-xl font-semibold tracking-tight text-slate-900">
-          Saved items
+          {t("favoritesPage.list.title")}
         </h2>
         <p className="text-sm text-slate-600">
-          Open a post to review details, send requests, or remove it from your saved list.
+          {t("favoritesPage.list.description")}
         </p>
       </section>
 
@@ -159,7 +169,7 @@ export default function FavoritesPage() {
                   />
                 ) : (
                   <div className="flex h-full min-h-52 items-center justify-center text-sm text-slate-500">
-                    No image
+                    {t("common.noImage")}
                   </div>
                 )}
               </div>
@@ -172,26 +182,26 @@ export default function FavoritesPage() {
                         {favorite.title}
                       </h2>
                       <p className="mt-2 text-sm leading-6 text-slate-600">
-                        This post is saved in your favorites and can be reopened any time.
+                        {t("favoritesPage.list.cardDescription")}
                       </p>
                     </div>
 
                     <span className="inline-flex rounded-full bg-amber-100 px-3 py-1 text-sm font-medium text-amber-700">
-                      Favorite
+                      {t("favoritesPage.list.savedBadge")}
                     </span>
                   </div>
 
                   <div className="mt-5 grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm md:grid-cols-2">
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                        Category
+                        {t("favoritesPage.list.category")}
                       </p>
                       <p className="mt-1 font-medium text-slate-700">{favorite.categoryName}</p>
                     </div>
 
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                        Saved At
+                        {t("favoritesPage.list.savedAt")}
                       </p>
                       <p className="mt-1 font-medium text-slate-700">
                         {formatDateTime(favorite.createdAt)}
@@ -205,7 +215,7 @@ export default function FavoritesPage() {
                     to={`/posts/${favorite.itemPostId}`}
                     className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800"
                   >
-                    View Post
+                    {t("favoritesPage.actions.viewPost")}
                   </Link>
 
                   <button
@@ -215,8 +225,8 @@ export default function FavoritesPage() {
                     className="inline-flex items-center justify-center rounded-xl border border-red-200 bg-white px-4 py-2.5 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {removingPostId === favorite.itemPostId
-                      ? "Removing..."
-                      : "Remove Favorite"}
+                      ? t("favoritesPage.actions.removing")
+                      : t("favoritesPage.actions.removeFavorite")}
                   </button>
                 </div>
               </div>

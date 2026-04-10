@@ -1,30 +1,32 @@
+import i18n from "../i18n";
+
 export function getReportReasonLabel(reason: number): string {
   switch (reason) {
     case 1:
-      return "Spam";
+      return i18n.t("report.spam");
     case 2:
-      return "Fake Post";
+      return i18n.t("report.fakePost");
     case 3:
-      return "Offensive Content";
+      return i18n.t("report.offensiveContent");
     case 4:
-      return "Wrong Category";
+      return i18n.t("report.wrongCategory");
     case 5:
-      return "Other";
+      return i18n.t("report.other");
     default:
-      return "Unknown";
+      return i18n.t("common.unknown");
   }
 }
 
 export function getReportStatusLabel(status: number): string {
   switch (status) {
     case 1:
-      return "Pending";
+      return i18n.t("report.pending");
     case 2:
-      return "Reviewed";
+      return i18n.t("report.reviewed");
     case 3:
-      return "Rejected";
+      return i18n.t("report.rejected");
     default:
-      return "Unknown";
+      return i18n.t("common.unknown");
   }
 }
 

@@ -1,10 +1,12 @@
 import { useCallback, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import GoogleLoginButton from "../../components/auth/GoogleLoginButton";
 import { useAuth } from "../../context/AuthContext";
 import { getApiErrorMessage } from "../../utils/error";
 
 export default function RegisterPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { register, googleLogin } = useAuth();
 
@@ -23,7 +25,7 @@ export default function RegisterPage() {
     setErrorMessage("");
 
     if (form.password !== form.confirmPassword) {
-      setErrorMessage("Passwords do not match.");
+      setErrorMessage(t("auth.register.passwordMismatch"));
       return;
     }
 
@@ -60,13 +62,13 @@ export default function RegisterPage() {
     <div>
       <div className="border-b border-slate-200 pb-5">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-          New account
+          {t("auth.register.badge")}
         </p>
         <h1 className="mt-2 text-2xl font-semibold tracking-tight text-slate-900">
-          Register
+          {t("auth.register.title")}
         </h1>
         <p className="mt-2 text-sm leading-6 text-slate-600">
-          Create your account to publish lost or found items and manage all related activity in one place.
+          {t("auth.register.description")}
         </p>
       </div>
 
@@ -80,7 +82,7 @@ export default function RegisterPage() {
         <div className="flex items-center gap-3">
           <div className="h-px flex-1 bg-slate-200" />
           <span className="text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
-            Or register with email
+            {t("auth.register.orRegisterWithEmail")}
           </span>
           <div className="h-px flex-1 bg-slate-200" />
         </div>
@@ -89,28 +91,28 @@ export default function RegisterPage() {
       <form onSubmit={handleSubmit} className="mt-6 space-y-5">
         <div>
           <label className="mb-1.5 block text-sm font-medium text-slate-700">
-            Full Name
+            {t("auth.register.fullName")}
           </label>
           <input
             type="text"
             value={form.fullName}
             onChange={(e) => setForm((prev) => ({ ...prev, fullName: e.target.value }))}
             className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-500"
-            placeholder="Enter your full name"
+            placeholder={t("auth.register.fullNamePlaceholder")}
             required
           />
         </div>
 
         <div>
           <label className="mb-1.5 block text-sm font-medium text-slate-700">
-            Email
+            {t("auth.register.email")}
           </label>
           <input
             type="email"
             value={form.email}
             onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
             className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-500"
-            placeholder="Enter your email"
+            placeholder={t("auth.register.emailPlaceholder")}
             required
           />
         </div>
@@ -118,21 +120,21 @@ export default function RegisterPage() {
         <div className="grid gap-5 sm:grid-cols-2">
           <div>
             <label className="mb-1.5 block text-sm font-medium text-slate-700">
-              Password
+              {t("auth.register.password")}
             </label>
             <input
               type="password"
               value={form.password}
               onChange={(e) => setForm((prev) => ({ ...prev, password: e.target.value }))}
               className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-500"
-              placeholder="Create password"
+              placeholder={t("auth.register.passwordPlaceholder")}
               required
             />
           </div>
 
           <div>
             <label className="mb-1.5 block text-sm font-medium text-slate-700">
-              Confirm Password
+              {t("auth.register.confirmPassword")}
             </label>
             <input
               type="password"
@@ -141,7 +143,7 @@ export default function RegisterPage() {
                 setForm((prev) => ({ ...prev, confirmPassword: e.target.value }))
               }
               className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-500"
-              placeholder="Repeat password"
+              placeholder={t("auth.register.confirmPasswordPlaceholder")}
               required
             />
           </div>
@@ -158,15 +160,15 @@ export default function RegisterPage() {
           disabled={isSubmitting}
           className="inline-flex w-full items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isSubmitting ? "Creating account..." : "Register"}
+          {isSubmitting ? t("auth.register.submitting") : t("auth.register.submit")}
         </button>
       </form>
 
       <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
         <p className="text-sm text-slate-600">
-          Already have an account?{" "}
+          {t("auth.register.alreadyHaveAccount")} {" "}
           <Link to="/login" className="font-semibold text-slate-900 hover:underline">
-            Login
+            {t("auth.register.login")}
           </Link>
         </p>
       </div>

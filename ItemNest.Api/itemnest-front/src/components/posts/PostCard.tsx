@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import type { ItemPost } from "../../types/post";
 import { buildFileUrl } from "../../utils/api";
 import { formatDate } from "../../utils/format";
@@ -18,6 +19,8 @@ export default function PostCard({
   post,
   showOwnerActions = false,
 }: PostCardProps) {
+  const { t } = useTranslation();
+
   return (
     <article className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-lg">
       <div className="relative h-56 w-full overflow-hidden bg-slate-100">
@@ -29,7 +32,7 @@ export default function PostCard({
           />
         ) : (
           <div className="flex h-full items-center justify-center text-sm text-slate-500">
-            No image
+            {t("post.noImage")}
           </div>
         )}
 
@@ -52,13 +55,13 @@ export default function PostCard({
 
           {post.isOwner && (
             <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700 shadow-sm">
-              My Post
+              {t("post.myPost")}
             </span>
           )}
 
           {post.isFavorited && (
             <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700 shadow-sm">
-              Favorited
+              {t("post.favorited")}
             </span>
           )}
         </div>
@@ -77,14 +80,14 @@ export default function PostCard({
         <div className="grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-              Category
+              {t("common.category")}
             </p>
             <p className="mt-1 font-medium text-slate-700">{post.categoryName}</p>
           </div>
 
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-              Location
+              {t("common.location")}
             </p>
             <p className="mt-1 font-medium text-slate-700">{post.location}</p>
           </div>
@@ -92,7 +95,7 @@ export default function PostCard({
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                Event Date
+                {t("post.eventDate")}
               </p>
               <p className="mt-1 font-medium text-slate-700">
                 {formatDate(post.eventDate)}
@@ -101,7 +104,7 @@ export default function PostCard({
 
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                Posted By
+                {t("post.postedBy")}
               </p>
               <p className="mt-1 font-medium text-slate-700">{post.userFullName}</p>
             </div>
@@ -113,18 +116,16 @@ export default function PostCard({
             to={`/posts/${post.id}`}
             className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800"
           >
-            View Details
+            {t("post.viewDetails")}
           </Link>
 
           {showOwnerActions && post.isOwner && (
-            <>
-              <Link
-                to={`/posts/${post.id}/edit`}
-                className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-50"
-              >
-                Edit
-              </Link>
-            </>
+            <Link
+              to={`/posts/${post.id}/edit`}
+              className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-50"
+            >
+              {t("post.edit")}
+            </Link>
           )}
         </div>
       </div>

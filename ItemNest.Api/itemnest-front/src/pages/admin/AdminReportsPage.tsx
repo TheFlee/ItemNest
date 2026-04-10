@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { getAllReports, reviewReport } from "../../api/reportApi";
 import PageState from "../../components/common/PageState";
@@ -12,19 +13,23 @@ import {
   getReportStatusLabel,
 } from "../../utils/report";
 
-const reportStatusFilterOptions = [
-  { label: "Pending", value: 1 },
-  { label: "Reviewed", value: 2 },
-  { label: "Rejected", value: 3 },
-];
-
 export default function AdminReportsPage() {
+  const { t } = useTranslation();
   const [reports, setReports] = useState<ReportItem[]>([]);
   const [statusFilter, setStatusFilter] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [processingId, setProcessingId] = useState<string | null>(null);
+
+  const reportStatusFilterOptions = useMemo(
+    () => [
+      { label: t("adminPages.reports.pending"), value: 1 },
+      { label: t("adminPages.reports.reviewed"), value: 2 },
+      { label: t("adminPages.reports.rejected"), value: 3 },
+    ],
+    [t]
+  );
 
   useEffect(() => {
     async function loadReports() {
@@ -58,8 +63,8 @@ export default function AdminReportsPage() {
 
       setSuccessMessage(
         status === 2
-          ? "Report was marked as reviewed successfully."
-          : "Report was rejected successfully."
+          ? t("adminPages.reports.successReviewed")
+          : t("adminPages.reports.successRejected")
       );
     } catch (error: any) {
       setErrorMessage(getApiErrorMessage(error));
@@ -98,7 +103,7 @@ export default function AdminReportsPage() {
           isLoading={isLoading}
           errorMessage={errorMessage}
           isEmpty={!isLoading && !errorMessage && reports.length === 0}
-          emptyMessage="There are no reports in the system."
+          emptyMessage={t("adminPages.reports.emptyMessage")}
         />
       </div>
     );
@@ -110,13 +115,13 @@ export default function AdminReportsPage() {
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-              Moderation queue
+              {t("adminPages.reports.badge")}
             </p>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900 sm:text-[2rem]">
-              Reports
+              {t("adminPages.reports.title")}
             </h1>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600 sm:text-base">
-              Review submitted reports, inspect the related post context, and decide whether each report should be reviewed or rejected.
+              {t("adminPages.reports.description")}
             </p>
           </div>
 
@@ -125,42 +130,42 @@ export default function AdminReportsPage() {
               to="/admin/dashboard"
               className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800"
             >
-              Back to Admin Dashboard
+              {t("adminPages.reports.backToDashboard")}
             </Link>
 
             <Link
               to="/admin/posts"
               className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-50"
             >
-              Open Posts
+              {t("adminPages.reports.openPosts")}
             </Link>
           </div>
         </div>
 
         <div className="mt-6 grid gap-4 md:grid-cols-4">
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">Total reports</p>
+            <p className="text-sm font-medium text-slate-500">{t("adminPages.reports.totalReports")}</p>
             <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
               {metrics.total}
             </p>
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">Pending</p>
+            <p className="text-sm font-medium text-slate-500">{t("adminPages.reports.pending")}</p>
             <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
               {metrics.pending}
             </p>
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">Reviewed</p>
+            <p className="text-sm font-medium text-slate-500">{t("adminPages.reports.reviewed")}</p>
             <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
               {metrics.reviewed}
             </p>
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">Rejected</p>
+            <p className="text-sm font-medium text-slate-500">{t("adminPages.reports.rejected")}</p>
             <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
               {metrics.rejected}
             </p>
@@ -171,20 +176,20 @@ export default function AdminReportsPage() {
           <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <h2 className="text-xl font-semibold tracking-tight text-slate-900">
-                Filter reports
+                {t("adminPages.reports.filterTitle")}
               </h2>
               <p className="mt-1 text-sm text-slate-600">
-                Narrow the list by moderation status.
+                {t("adminPages.reports.filterDescription")}
               </p>
             </div>
 
             <div className="w-full max-w-xs">
               <FormSelect
-                label="Status"
+                label={t("adminPages.reports.statusLabel")}
                 value={statusFilter}
                 onChange={setStatusFilter}
                 options={reportStatusFilterOptions}
-                placeholder="All reports"
+                placeholder={t("adminPages.reports.allReports")}
               />
             </div>
           </div>
@@ -195,11 +200,14 @@ export default function AdminReportsPage() {
               onClick={() => setStatusFilter("")}
               className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-50"
             >
-              Clear Filter
+              {t("adminPages.reports.clearFilter")}
             </button>
 
             <p className="text-sm text-slate-500">
-              Showing {filteredReports.length} of {reports.length} reports.
+              {t("adminPages.reports.showing", {
+                filtered: filteredReports.length,
+                total: reports.length,
+              })}
             </p>
           </div>
         </section>
@@ -213,10 +221,10 @@ export default function AdminReportsPage() {
 
       <section className="flex flex-col gap-2">
         <h2 className="text-xl font-semibold tracking-tight text-slate-900">
-          Submitted reports
+          {t("adminPages.reports.submittedReports")}
         </h2>
         <p className="text-sm text-slate-600">
-          Each report includes reporter details, reason, timing, description, and moderation status.
+          {t("adminPages.reports.submittedDescription")}
         </p>
       </section>
 
@@ -226,7 +234,7 @@ export default function AdminReportsPage() {
             isLoading={false}
             errorMessage=""
             isEmpty
-            emptyMessage="No reports matched the selected status."
+            emptyMessage={t("adminPages.reports.noMatch")}
           />
         ) : (
           filteredReports.map((report) => {
@@ -244,7 +252,7 @@ export default function AdminReportsPage() {
                       {report.itemPostTitle}
                     </h2>
                     <p className="mt-2 text-sm leading-6 text-slate-600">
-                      Report submitted for moderation review.
+                      {t("adminPages.reports.cardDescription")}
                     </p>
                   </div>
 
@@ -260,7 +268,7 @@ export default function AdminReportsPage() {
                 <div className="mt-5 grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm md:grid-cols-2 xl:grid-cols-4">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                      Reporter
+                      {t("adminPages.reports.reporter")}
                     </p>
                     <p className="mt-1 font-medium text-slate-700">
                       {report.reporterFullName}
@@ -269,7 +277,7 @@ export default function AdminReportsPage() {
 
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                      Reason
+                      {t("adminPages.reports.reason")}
                     </p>
                     <p className="mt-1 font-medium text-slate-700">
                       {getReportReasonLabel(report.reason)}
@@ -278,7 +286,7 @@ export default function AdminReportsPage() {
 
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                      Created At
+                      {t("adminPages.reports.createdAt")}
                     </p>
                     <p className="mt-1 font-medium text-slate-700">
                       {formatDateTime(report.createdAt)}
@@ -287,7 +295,7 @@ export default function AdminReportsPage() {
 
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                      Reviewed At
+                      {t("adminPages.reports.reviewedAt")}
                     </p>
                     <p className="mt-1 font-medium text-slate-700">
                       {report.reviewedAt ? formatDateTime(report.reviewedAt) : "-"}
@@ -297,10 +305,10 @@ export default function AdminReportsPage() {
 
                 <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-5">
                   <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-slate-500">
-                    Description
+                    {t("adminPages.reports.descriptionTitle")}
                   </h3>
                   <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-700">
-                    {report.description || "No additional description was provided."}
+                    {report.description || t("adminPages.reports.noDescription")}
                   </p>
                 </div>
 
@@ -309,7 +317,7 @@ export default function AdminReportsPage() {
                     to={`/posts/${report.itemPostId}`}
                     className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800"
                   >
-                    View Post
+                    {t("adminPages.reports.viewPost")}
                   </Link>
 
                   {isPending && (
@@ -320,7 +328,7 @@ export default function AdminReportsPage() {
                         disabled={isProcessing}
                         className="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
                       >
-                        {isProcessing ? "Processing..." : "Mark Reviewed"}
+                        {isProcessing ? t("adminPages.reports.processing") : t("adminPages.reports.markReviewed")}
                       </button>
 
                       <button
@@ -329,7 +337,7 @@ export default function AdminReportsPage() {
                         disabled={isProcessing}
                         className="inline-flex items-center justify-center rounded-xl border border-red-200 bg-white px-4 py-2.5 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
                       >
-                        {isProcessing ? "Processing..." : "Reject"}
+                        {isProcessing ? t("adminPages.reports.processing") : t("adminPages.reports.reject")}
                       </button>
                     </>
                   )}
