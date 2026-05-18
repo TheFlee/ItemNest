@@ -4,6 +4,7 @@ using ItemNest.Domain.Entities;
 using ItemNest.Infrastructure.Data;
 using ItemNest.Infrastructure.Seed;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +30,19 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
+if (app.Configuration.GetValue<bool>("Database:ApplyMigrations"))
+{
+    using var scope = app.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<ItemNestDbContext>();
+    await dbContext.Database.MigrateAsync();
+}
+
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
+    await RoleSeeder.SeedAsync(roleManager);
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -43,9 +57,6 @@ if (app.Environment.IsDevelopment())
     using var scope = app.Services.CreateScope();
     var services = scope.ServiceProvider;
 
-    var roleManager = services.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
-    await RoleSeeder.SeedAsync(roleManager);
-
     var adminUserSeeder = services.GetRequiredService<AdminUserSeeder>();
     await adminUserSeeder.SeedAsync();
 
@@ -55,7 +66,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsProduction())
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseCors("FrontendCorsPolicy");
 app.UseStaticFiles();
@@ -64,5 +78,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapFallbackToFile("index.html");
 
 app.Run();
