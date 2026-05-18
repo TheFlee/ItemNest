@@ -37,6 +37,12 @@ if (app.Configuration.GetValue<bool>("Database:ApplyMigrations"))
     await dbContext.Database.MigrateAsync();
 }
 
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
+    await RoleSeeder.SeedAsync(roleManager);
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -50,9 +56,6 @@ if (app.Environment.IsDevelopment())
 
     using var scope = app.Services.CreateScope();
     var services = scope.ServiceProvider;
-
-    var roleManager = services.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
-    await RoleSeeder.SeedAsync(roleManager);
 
     var adminUserSeeder = services.GetRequiredService<AdminUserSeeder>();
     await adminUserSeeder.SeedAsync();
