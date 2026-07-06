@@ -1,4 +1,3 @@
-using Amazon;
 using Amazon.S3;
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -42,7 +41,11 @@ public static class ApplicationServicesExtensions
             new AmazonS3Client(
                 awsSection["AccessKeyId"],
                 awsSection["SecretAccessKey"],
-                RegionEndpoint.GetBySystemName(awsSection["Region"] ?? "us-east-1")));
+                new AmazonS3Config
+                {
+                    ServiceURL = $"https://{awsSection["AccountId"]}.r2.cloudflarestorage.com",
+                    ForcePathStyle = true,
+                }));
 
         return services;
     }

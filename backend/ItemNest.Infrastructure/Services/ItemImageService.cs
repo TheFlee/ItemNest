@@ -1,6 +1,5 @@
 using Amazon.S3;
 using Amazon.S3.Model;
-using Amazon.S3.Transfer;
 using AutoMapper;
 using ItemNest.Application.Configurations;
 using ItemNest.Application.DTOs;
@@ -97,19 +96,19 @@ public class ItemImageService : IItemImageService
         var storedFileName = $"{Guid.NewGuid()}{extension}";
         var s3Key = $"uploads/itemposts/{storedFileName}";
 
-        var uploadRequest = new TransferUtilityUploadRequest
+        var uploadRequest = new PutObjectRequest
         {
             BucketName = _awsSettings.BucketName,
             Key = s3Key,
             InputStream = stream,
             ContentType = contentType,
             AutoCloseStream = false,
+            DisablePayloadSigning = true,
         };
 
-        var transferUtility = new TransferUtility(_s3Client);
-        await transferUtility.UploadAsync(uploadRequest, cancellationToken);
+        await _s3Client.PutObjectAsync(uploadRequest, cancellationToken);
 
-        var imageUrl = $"https://{_awsSettings.BucketName}.s3.{_awsSettings.Region}.amazonaws.com/{s3Key}";
+        var imageUrl = $"{_awsSettings.PublicUrl}/{s3Key}";
 
         var image = new ItemImage
         {
