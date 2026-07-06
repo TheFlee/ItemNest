@@ -21,8 +21,12 @@ services:
       GoogleAuth__ClientId: ${GOOGLE_CLIENT_ID:-}
       Aws__AccessKeyId: ${AWS_ACCESS_KEY_ID:-}
       Aws__SecretAccessKey: ${AWS_SECRET_ACCESS_KEY:-}
-      Aws__Region: ${AWS_REGION:-}
+      Aws__AccountId: ${AWS_ACCOUNT_ID:-}
       Aws__BucketName: ${AWS_BUCKET_NAME:-}
+      Aws__PublicUrl: ${AWS_PUBLIC_URL:-}
+      AdminSeed__Email: ${ADMIN_SEED_EMAIL:-}
+      AdminSeed__Password: ${ADMIN_SEED_PASSWORD:-}
+      AdminSeed__FullName: ${ADMIN_SEED_FULLNAME:-}
 
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
