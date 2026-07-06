@@ -1,3 +1,4 @@
+using dotenv.net;
 using ItemNest.Api.Extensions;
 using ItemNest.Api.Middlewares;
 using ItemNest.Domain.Entities;
@@ -7,6 +8,13 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+if (builder.Environment.IsDevelopment())
+{
+    var envFile = Path.GetFullPath(Path.Combine(builder.Environment.ContentRootPath, "..", "..", ".env"));
+    DotEnv.Load(options: new DotEnvOptions(envFilePaths: [envFile], ignoreExceptions: true));
+    builder.Configuration.AddEnvironmentVariables();
+}
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

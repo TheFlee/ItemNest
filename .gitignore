@@ -9,6 +9,7 @@ node_modules/
 # Secrets — do not commit
 backend/ItemNest.Api/appsettings.json
 frontend/.env
+.env
 
 # Uploads (local storage, replaced by S3)
 backend/ItemNest.Api/wwwroot/uploads/
