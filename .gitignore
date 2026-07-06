@@ -7,14 +7,13 @@ obj/
 node_modules/
 
 # Secrets — do not commit
-ItemNest.Api/appsettings.json
-ItemNest.Api/itemnest-front/.env
+backend/ItemNest.Api/appsettings.json
+frontend/.env
 
 # Uploads (local storage, replaced by S3)
-ItemNest.Api/wwwroot/uploads/
+backend/ItemNest.Api/wwwroot/uploads/
 
 # Build artifacts
-ItemNest.Api/itemnest-front.zip
 ItemNest.zip
 
 # Claude memory
