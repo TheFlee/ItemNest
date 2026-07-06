@@ -11,11 +11,9 @@
 **/*.db
 
 **/node_modules
-ItemNest.Api/itemnest-front/dist
+frontend/dist
 
-ItemNest.Api/appsettings.json
-ItemNest.Api/itemnest-front/.env
+backend/ItemNest.Api/appsettings.json
+frontend/.env
 
-ItemNest.Api/wwwroot/uploads
-ItemNest.Api/itemnest-front.zip
-ItemNest.zip
+backend/ItemNest.Api/wwwroot/uploads
