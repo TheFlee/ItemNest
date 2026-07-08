@@ -71,8 +71,8 @@ jobs:
           IMAGE_NAME=${{ env.DOCKER_IMAGE }}:latest
           APP_HTTP_PORT=80
           DATABASE_APPLY_MIGRATIONS=true
-          MSSQL_DATABASE=ItemNestDb
-          MSSQL_SA_PASSWORD=${{ secrets.MSSQL_SA_PASSWORD }}
+          POSTGRES_DB=ItemNestDb
+          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
           JWT_KEY=${{ secrets.JWT_KEY }}
           JWT_ISSUER=ItemNestAPI
           JWT_AUDIENCE=ItemNestClient
