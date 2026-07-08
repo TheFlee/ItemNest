@@ -1,0 +1,104 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  DOCKER_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/itemnest
+
+jobs:
+  build-and-push:
+    name: Build and push Docker image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          build-args: |
+            VITE_API_BASE_URL=/api
+            VITE_GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+          tags: |
+            ${{ env.DOCKER_IMAGE }}:latest
+            ${{ env.DOCKER_IMAGE }}:${{ github.sha }}
+
+  deploy:
+    name: Deploy to Oracle Cloud VM
+    runs-on: ubuntu-latest
+    needs: build-and-push
+
+    env:
+      VM_HOST: ${{ secrets.VM_HOST }}
+      VM_USER: ${{ secrets.VM_USER }}
+      VM_PORT: ${{ secrets.VM_PORT || '22' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Prepare SSH key
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.VM_SSH_KEY }}" > ~/.ssh/itemnest_vm
+          chmod 600 ~/.ssh/itemnest_vm
+          ssh-keyscan -p "$VM_PORT" "$VM_HOST" >> ~/.ssh/known_hosts
+
+      - name: Create production environment file
+        run: |
+          cat > itemnest.production.env <<'EOF'
+          IMAGE_NAME=${{ env.DOCKER_IMAGE }}:latest
+          APP_HTTP_PORT=80
+          DATABASE_APPLY_MIGRATIONS=true
+          MSSQL_DATABASE=ItemNestDb
+          MSSQL_SA_PASSWORD=${{ secrets.MSSQL_SA_PASSWORD }}
+          JWT_KEY=${{ secrets.JWT_KEY }}
+          JWT_ISSUER=ItemNestAPI
+          JWT_AUDIENCE=ItemNestClient
+          JWT_EXPIRY_MINUTES=60
+          GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+          AWS_ACCESS_KEY_ID=${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY=${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_ACCOUNT_ID=${{ secrets.R2_ACCOUNT_ID }}
+          AWS_BUCKET_NAME=${{ secrets.R2_BUCKET_NAME }}
+          AWS_PUBLIC_URL=${{ secrets.R2_PUBLIC_URL }}
+          ADMIN_SEED_EMAIL=${{ secrets.ADMIN_SEED_EMAIL }}
+          ADMIN_SEED_PASSWORD=${{ secrets.ADMIN_SEED_PASSWORD }}
+          ADMIN_SEED_FULLNAME=${{ secrets.ADMIN_SEED_FULLNAME }}
+          EOF
+
+      - name: Upload compose and env files
+        run: |
+          ssh -i ~/.ssh/itemnest_vm -p "$VM_PORT" "$VM_USER@$VM_HOST" \
+            "sudo mkdir -p /opt/itemnest && sudo chown -R $VM_USER:$VM_USER /opt/itemnest"
+          scp -i ~/.ssh/itemnest_vm -P "$VM_PORT" \
+            docker-compose.prod.yml "$VM_USER@$VM_HOST:/opt/itemnest/docker-compose.prod.yml"
+          scp -i ~/.ssh/itemnest_vm -P "$VM_PORT" \
+            itemnest.production.env "$VM_USER@$VM_HOST:/opt/itemnest/.env"
+
+      - name: Pull and restart containers
+        run: |
+          ssh -i ~/.ssh/itemnest_vm -p "$VM_PORT" "$VM_USER@$VM_HOST" \
+            "printf '%s' '${{ secrets.DOCKERHUB_TOKEN }}' | docker login -u '${{ secrets.DOCKERHUB_USERNAME }}' --password-stdin"
+          ssh -i ~/.ssh/itemnest_vm -p "$VM_PORT" "$VM_USER@$VM_HOST" \
+            "cd /opt/itemnest && \
+             docker compose --env-file .env -f docker-compose.prod.yml pull && \
+             docker compose --env-file .env -f docker-compose.prod.yml up -d --remove-orphans && \
+             docker image prune -f"
