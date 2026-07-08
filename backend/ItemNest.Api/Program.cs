@@ -19,14 +19,15 @@ if (builder.Environment.IsDevelopment())
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerDocs();
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+    ?? ["http://localhost:5173", "https://localhost:5173"];
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("FrontendCorsPolicy", policy =>
     {
         policy
-            .WithOrigins(
-                "http://localhost:5173",
-                "https://localhost:5173")
+            .WithOrigins(allowedOrigins)
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
@@ -63,13 +64,14 @@ if (app.Environment.IsDevelopment())
     });
 
     using var scope = app.Services.CreateScope();
-    var services = scope.ServiceProvider;
-
-    var adminUserSeeder = services.GetRequiredService<AdminUserSeeder>();
-    await adminUserSeeder.SeedAsync();
-
-    var testDataSeeder = services.GetRequiredService<TestDataSeeder>();
+    var testDataSeeder = scope.ServiceProvider.GetRequiredService<TestDataSeeder>();
     await testDataSeeder.SeedAsync();
+}
+
+using (var scope = app.Services.CreateScope())
+{
+    var adminUserSeeder = scope.ServiceProvider.GetRequiredService<AdminUserSeeder>();
+    await adminUserSeeder.SeedAsync();
 }
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
