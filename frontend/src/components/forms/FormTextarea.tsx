@@ -3,8 +3,9 @@ interface FormTextareaProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
-  required?: boolean;
   rows?: number;
+  required?: boolean;
+  disabled?: boolean;
 }
 
 export default function FormTextarea({
@@ -12,19 +13,23 @@ export default function FormTextarea({
   value,
   onChange,
   placeholder,
+  rows = 4,
   required,
-  rows = 5,
+  disabled,
 }: FormTextareaProps) {
   return (
     <div>
-      <label className="mb-1.5 block text-sm font-medium text-slate-700">{label}</label>
+      <label className="mb-1.5 block text-sm font-medium text-[var(--text-primary)]">
+        {label}
+      </label>
       <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        required={required}
         rows={rows}
-        className="w-full resize-y rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-500"
+        required={required}
+        disabled={disabled}
+        className="w-full resize-y rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-3.5 py-2.5 text-sm text-[var(--text-primary)] outline-none placeholder:text-[var(--text-secondary)] focus:border-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-60"
       />
     </div>
   );
