@@ -12,14 +12,15 @@ import {
   getReportStatusClassName,
   getReportStatusLabel,
 } from "../../utils/report";
+import { useToast } from "../../context/ToastContext";
 
 export default function AdminReportsPage() {
   const { t } = useTranslation();
+  const { show } = useToast();
   const [reports, setReports] = useState<ReportItem[]>([]);
   const [statusFilter, setStatusFilter] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
   const [processingId, setProcessingId] = useState<string | null>(null);
 
   const reportStatusFilterOptions = useMemo(
@@ -39,7 +40,7 @@ export default function AdminReportsPage() {
       try {
         const data = await getAllReports();
         setReports(data);
-      } catch (error: any) {
+      } catch (error: unknown) {
         setErrorMessage(getApiErrorMessage(error));
       } finally {
         setIsLoading(false);
@@ -51,7 +52,6 @@ export default function AdminReportsPage() {
 
   async function handleReview(id: string, status: number) {
     setErrorMessage("");
-    setSuccessMessage("");
     setProcessingId(id);
 
     try {
@@ -61,12 +61,13 @@ export default function AdminReportsPage() {
         prev.map((report) => (report.id === id ? updated : report))
       );
 
-      setSuccessMessage(
+      show(
         status === 2
           ? t("adminPages.reports.successReviewed")
-          : t("adminPages.reports.successRejected")
+          : t("adminPages.reports.successRejected"),
+        "success"
       );
-    } catch (error: any) {
+    } catch (error: unknown) {
       setErrorMessage(getApiErrorMessage(error));
     } finally {
       setProcessingId(null);
@@ -93,12 +94,6 @@ export default function AdminReportsPage() {
   if (isLoading || errorMessage || reports.length === 0) {
     return (
       <div className="space-y-4">
-        {successMessage && !isLoading && !errorMessage && (
-          <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-            {successMessage}
-          </div>
-        )}
-
         <PageState
           isLoading={isLoading}
           errorMessage={errorMessage}
@@ -111,16 +106,17 @@ export default function AdminReportsPage() {
 
   return (
     <div className="space-y-8">
-      <section className="rounded-2xl border border-slate-200 bg-white px-6 py-6 shadow-sm sm:px-8 sm:py-7">
+      <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] px-6 py-6 shadow-sm sm:px-8 sm:py-7">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
               {t("adminPages.reports.badge")}
             </p>
-            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900 sm:text-[2rem]">
+            <h1 className="mt-2 flex items-center gap-2 text-3xl font-semibold tracking-tight text-[var(--text-primary)] sm:text-[2rem]">
+              <ion-icon name="shield-outline" style={{ fontSize: "20px" }} />
               {t("adminPages.reports.title")}
             </h1>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600 sm:text-base">
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--text-secondary)] sm:text-base">
               {t("adminPages.reports.description")}
             </p>
           </div>
@@ -128,14 +124,14 @@ export default function AdminReportsPage() {
           <div className="flex flex-wrap gap-3">
             <Link
               to="/admin/dashboard"
-              className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800"
+              className="inline-flex items-center justify-center rounded-xl bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[var(--accent-hover)]"
             >
               {t("adminPages.reports.backToDashboard")}
             </Link>
 
             <Link
               to="/admin/posts"
-              className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-50"
+              className="inline-flex items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
             >
               {t("adminPages.reports.openPosts")}
             </Link>
@@ -143,42 +139,42 @@ export default function AdminReportsPage() {
         </div>
 
         <div className="mt-6 grid gap-4 md:grid-cols-4">
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">{t("adminPages.reports.totalReports")}</p>
-            <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
+            <p className="text-sm font-medium text-[var(--text-secondary)]">{t("adminPages.reports.totalReports")}</p>
+            <p className="mt-2 text-3xl font-semibold tracking-tight text-[var(--text-primary)]">
               {metrics.total}
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">{t("adminPages.reports.pending")}</p>
-            <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
+            <p className="text-sm font-medium text-[var(--text-secondary)]">{t("adminPages.reports.pending")}</p>
+            <p className="mt-2 text-3xl font-semibold tracking-tight text-[var(--text-primary)]">
               {metrics.pending}
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">{t("adminPages.reports.reviewed")}</p>
-            <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
+            <p className="text-sm font-medium text-[var(--text-secondary)]">{t("adminPages.reports.reviewed")}</p>
+            <p className="mt-2 text-3xl font-semibold tracking-tight text-[var(--text-primary)]">
               {metrics.reviewed}
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">{t("adminPages.reports.rejected")}</p>
-            <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
+            <p className="text-sm font-medium text-[var(--text-secondary)]">{t("adminPages.reports.rejected")}</p>
+            <p className="mt-2 text-3xl font-semibold tracking-tight text-[var(--text-primary)]">
               {metrics.rejected}
             </p>
           </div>
         </div>
 
-        <section className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-5">
+        <section className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <h2 className="text-xl font-semibold tracking-tight text-slate-900">
+              <h2 className="text-xl font-semibold tracking-tight text-[var(--text-primary)]">
                 {t("adminPages.reports.filterTitle")}
               </h2>
-              <p className="mt-1 text-sm text-slate-600">
+              <p className="mt-1 text-sm text-[var(--text-secondary)]">
                 {t("adminPages.reports.filterDescription")}
               </p>
             </div>
@@ -198,12 +194,12 @@ export default function AdminReportsPage() {
             <button
               type="button"
               onClick={() => setStatusFilter("")}
-              className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-50"
+              className="inline-flex items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
             >
               {t("adminPages.reports.clearFilter")}
             </button>
 
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-[var(--text-secondary)]">
               {t("adminPages.reports.showing", {
                 filtered: filteredReports.length,
                 total: reports.length,
@@ -213,17 +209,11 @@ export default function AdminReportsPage() {
         </section>
       </section>
 
-      {successMessage && (
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-          {successMessage}
-        </div>
-      )}
-
       <section className="flex flex-col gap-2">
-        <h2 className="text-xl font-semibold tracking-tight text-slate-900">
+        <h2 className="text-xl font-semibold tracking-tight text-[var(--text-primary)]">
           {t("adminPages.reports.submittedReports")}
         </h2>
-        <p className="text-sm text-slate-600">
+        <p className="text-sm text-[var(--text-secondary)]">
           {t("adminPages.reports.submittedDescription")}
         </p>
       </section>
@@ -244,14 +234,14 @@ export default function AdminReportsPage() {
             return (
               <article
                 key={report.id}
-                className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+                className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-sm"
               >
                 <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                   <div>
-                    <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+                    <h2 className="text-2xl font-semibold tracking-tight text-[var(--text-primary)]">
                       {report.itemPostTitle}
                     </h2>
-                    <p className="mt-2 text-sm leading-6 text-slate-600">
+                    <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">
                       {t("adminPages.reports.cardDescription")}
                     </p>
                   </div>
@@ -265,49 +255,49 @@ export default function AdminReportsPage() {
                   </span>
                 </div>
 
-                <div className="mt-5 grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm md:grid-cols-2 xl:grid-cols-4">
+                <div className="mt-5 grid gap-3 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 text-sm md:grid-cols-2 xl:grid-cols-4">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
                       {t("adminPages.reports.reporter")}
                     </p>
-                    <p className="mt-1 font-medium text-slate-700">
+                    <p className="mt-1 font-medium text-[var(--text-primary)]">
                       {report.reporterFullName}
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
                       {t("adminPages.reports.reason")}
                     </p>
-                    <p className="mt-1 font-medium text-slate-700">
+                    <p className="mt-1 font-medium text-[var(--text-primary)]">
                       {getReportReasonLabel(report.reason)}
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
                       {t("adminPages.reports.createdAt")}
                     </p>
-                    <p className="mt-1 font-medium text-slate-700">
+                    <p className="mt-1 font-medium text-[var(--text-primary)]">
                       {formatDateTime(report.createdAt)}
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
                       {t("adminPages.reports.reviewedAt")}
                     </p>
-                    <p className="mt-1 font-medium text-slate-700">
+                    <p className="mt-1 font-medium text-[var(--text-primary)]">
                       {report.reviewedAt ? formatDateTime(report.reviewedAt) : "-"}
                     </p>
                   </div>
                 </div>
 
-                <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-5">
-                  <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-slate-500">
+                <div className="mt-5 rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-5">
+                  <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-[var(--text-secondary)]">
                     {t("adminPages.reports.descriptionTitle")}
                   </h3>
-                  <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-700">
+                  <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-[var(--text-primary)]">
                     {report.description || t("adminPages.reports.noDescription")}
                   </p>
                 </div>
@@ -315,7 +305,7 @@ export default function AdminReportsPage() {
                 <div className="mt-6 flex flex-wrap gap-3">
                   <Link
                     to={`/posts/${report.itemPostId}`}
-                    className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800"
+                    className="inline-flex items-center justify-center rounded-xl bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[var(--accent-hover)]"
                   >
                     {t("adminPages.reports.viewPost")}
                   </Link>
@@ -335,7 +325,7 @@ export default function AdminReportsPage() {
                         type="button"
                         onClick={() => void handleReview(report.id, 3)}
                         disabled={isProcessing}
-                        className="inline-flex items-center justify-center rounded-xl border border-red-200 bg-white px-4 py-2.5 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="inline-flex items-center justify-center rounded-xl border border-red-200 bg-[var(--bg-card)] px-4 py-2.5 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {isProcessing ? t("adminPages.reports.processing") : t("adminPages.reports.reject")}
                       </button>

@@ -12,16 +12,17 @@ import type { AdminUserItem } from "../../types/user";
 import { getApiErrorMessage } from "../../utils/error";
 import { formatDateTime } from "../../utils/format";
 import { useAuth } from "../../context/AuthContext";
+import { useToast } from "../../context/ToastContext";
 
 export default function AdminUsersPage() {
   const { t } = useTranslation();
+  const { show } = useToast();
   const { user: currentUser, refreshUser, logout } = useAuth();
 
   const [users, setUsers] = useState<AdminUserItem[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
   const [processingId, setProcessingId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -32,7 +33,7 @@ export default function AdminUsersPage() {
       try {
         const data = await getAdminUsers();
         setUsers(data);
-      } catch (error: any) {
+      } catch (error: unknown) {
         setErrorMessage(getApiErrorMessage(error));
       } finally {
         setIsLoading(false);
@@ -44,7 +45,6 @@ export default function AdminUsersPage() {
 
   async function handleRoleChange(userId: string, role: string) {
     setErrorMessage("");
-    setSuccessMessage("");
     setProcessingId(userId);
 
     try {
@@ -58,8 +58,8 @@ export default function AdminUsersPage() {
         await refreshUser();
       }
 
-      setSuccessMessage(t("adminPages.users.successRoleUpdated"));
-    } catch (error: any) {
+      show(t("adminPages.users.successRoleUpdated"), "success");
+    } catch (error: unknown) {
       setErrorMessage(getApiErrorMessage(error));
     } finally {
       setProcessingId(null);
@@ -76,7 +76,6 @@ export default function AdminUsersPage() {
     }
 
     setErrorMessage("");
-    setSuccessMessage("");
     setProcessingId(userId);
 
     try {
@@ -95,12 +94,13 @@ export default function AdminUsersPage() {
         await refreshUser();
       }
 
-      setSuccessMessage(
+      show(
         isBlocked
           ? t("adminPages.users.successBlocked")
-          : t("adminPages.users.successUnblocked")
+          : t("adminPages.users.successUnblocked"),
+        "success"
       );
-    } catch (error: any) {
+    } catch (error: unknown) {
       setErrorMessage(getApiErrorMessage(error));
     } finally {
       setProcessingId(null);
@@ -139,12 +139,6 @@ export default function AdminUsersPage() {
   if (isLoading || errorMessage || users.length === 0) {
     return (
       <div className="space-y-4">
-        {successMessage && !isLoading && !errorMessage && (
-          <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-            {successMessage}
-          </div>
-        )}
-
         <PageState
           isLoading={isLoading}
           errorMessage={errorMessage}
@@ -157,16 +151,17 @@ export default function AdminUsersPage() {
 
   return (
     <div className="space-y-8">
-      <section className="rounded-2xl border border-slate-200 bg-white px-6 py-6 shadow-sm sm:px-8 sm:py-7">
+      <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] px-6 py-6 shadow-sm sm:px-8 sm:py-7">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
               {t("adminPages.users.badge")}
             </p>
-            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900 sm:text-[2rem]">
+            <h1 className="mt-2 flex items-center gap-2 text-3xl font-semibold tracking-tight text-[var(--text-primary)] sm:text-[2rem]">
+              <ion-icon name="people-outline" style={{ fontSize: "20px" }} />
               {t("adminPages.users.title")}
             </h1>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600 sm:text-base">
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--text-secondary)] sm:text-base">
               {t("adminPages.users.description")}
             </p>
           </div>
@@ -174,14 +169,14 @@ export default function AdminUsersPage() {
           <div className="flex flex-wrap gap-3">
             <Link
               to="/admin/dashboard"
-              className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800"
+              className="inline-flex items-center justify-center rounded-xl bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[var(--accent-hover)]"
             >
               {t("adminPages.users.backToDashboard")}
             </Link>
 
             <Link
               to="/admin/reports"
-              className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-50"
+              className="inline-flex items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
             >
               {t("adminPages.users.openReports")}
             </Link>
@@ -189,56 +184,50 @@ export default function AdminUsersPage() {
         </div>
 
         <div className="mt-6 grid gap-4 md:grid-cols-5">
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">{t("adminPages.users.totalUsers")}</p>
-            <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
+            <p className="text-sm font-medium text-[var(--text-secondary)]">{t("adminPages.users.totalUsers")}</p>
+            <p className="mt-2 text-3xl font-semibold tracking-tight text-[var(--text-primary)]">
               {metrics.total}
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">{t("adminPages.users.admins")}</p>
-            <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
+            <p className="text-sm font-medium text-[var(--text-secondary)]">{t("adminPages.users.admins")}</p>
+            <p className="mt-2 text-3xl font-semibold tracking-tight text-[var(--text-primary)]">
               {metrics.admins}
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">{t("adminPages.users.standardUsers")}</p>
-            <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
+            <p className="text-sm font-medium text-[var(--text-secondary)]">{t("adminPages.users.standardUsers")}</p>
+            <p className="mt-2 text-3xl font-semibold tracking-tight text-[var(--text-primary)]">
               {metrics.standardUsers}
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">{t("adminPages.users.blockedUsers")}</p>
-            <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
+            <p className="text-sm font-medium text-[var(--text-secondary)]">{t("adminPages.users.blockedUsers")}</p>
+            <p className="mt-2 text-3xl font-semibold tracking-tight text-[var(--text-primary)]">
               {metrics.blocked}
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">{t("adminPages.users.yourAdminAccess")}</p>
-            <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
+            <p className="text-sm font-medium text-[var(--text-secondary)]">{t("adminPages.users.yourAdminAccess")}</p>
+            <p className="mt-2 text-3xl font-semibold tracking-tight text-[var(--text-primary)]">
               {metrics.currentAccountIsAdmin ? t("common.yes") : t("common.no")}
             </p>
           </div>
         </div>
       </section>
 
-      {successMessage && (
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-          {successMessage}
-        </div>
-      )}
-
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-5 shadow-sm">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <h2 className="text-xl font-semibold tracking-tight text-slate-900">
+            <h2 className="text-xl font-semibold tracking-tight text-[var(--text-primary)]">
               {t("adminPages.users.registeredAccounts")}
             </h2>
-            <p className="mt-1 text-sm text-slate-600">
+            <p className="mt-1 text-sm text-[var(--text-secondary)]">
               {t("adminPages.users.registeredDescription")}
             </p>
           </div>
@@ -274,12 +263,12 @@ export default function AdminUsersPage() {
             return (
               <article
                 key={user.id}
-                className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+                className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-sm"
               >
                 <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
-                      <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+                      <h2 className="text-2xl font-semibold tracking-tight text-[var(--text-primary)]">
                         {user.fullName}
                       </h2>
 
@@ -296,7 +285,7 @@ export default function AdminUsersPage() {
                       )}
                     </div>
 
-                    <p className="mt-2 text-sm leading-6 text-slate-600">
+                    <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">
                       {t("adminPages.users.cardDescription")}
                     </p>
                   </div>
@@ -305,42 +294,42 @@ export default function AdminUsersPage() {
                     className={`inline-flex rounded-full px-3 py-1 text-sm font-medium ${
                       isAdmin
                         ? "bg-purple-100 text-purple-700"
-                        : "bg-slate-100 text-slate-700"
+                        : "bg-[var(--bg-surface)] text-[var(--text-primary)]"
                     }`}
                   >
                     {primaryRole}
                   </span>
                 </div>
 
-                <div className="mt-5 grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm md:grid-cols-2 xl:grid-cols-4">
+                <div className="mt-5 grid gap-3 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 text-sm md:grid-cols-2 xl:grid-cols-4">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
                       {t("adminPages.users.email")}
                     </p>
-                    <p className="mt-1 font-medium text-slate-700">{user.email}</p>
+                    <p className="mt-1 font-medium text-[var(--text-primary)]">{user.email}</p>
                   </div>
 
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
                       {t("adminPages.users.currentRole")}
                     </p>
-                    <p className="mt-1 font-medium text-slate-700">{primaryRole}</p>
+                    <p className="mt-1 font-medium text-[var(--text-primary)]">{primaryRole}</p>
                   </div>
 
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
                       {t("adminPages.users.createdAt")}
                     </p>
-                    <p className="mt-1 font-medium text-slate-700">
+                    <p className="mt-1 font-medium text-[var(--text-primary)]">
                       {formatDateTime(user.createdAt)}
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
                       {t("adminPages.users.accessStatus")}
                     </p>
-                    <p className="mt-1 font-medium text-slate-700">
+                    <p className="mt-1 font-medium text-[var(--text-primary)]">
                       {user.isBlocked ? t("adminPages.users.blockedStatus") : t("adminPages.users.active")}
                     </p>
                   </div>
@@ -363,7 +352,7 @@ export default function AdminUsersPage() {
                     type="button"
                     onClick={() => void handleRoleChange(user.id, "User")}
                     disabled={disableSetUser}
-                    className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="inline-flex items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-surface)] disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {isProcessing ? t("adminPages.users.processing") : t("adminPages.users.setAsUser")}
                   </button>
@@ -372,7 +361,7 @@ export default function AdminUsersPage() {
                     type="button"
                     onClick={() => void handleRoleChange(user.id, "Admin")}
                     disabled={isProcessing}
-                    className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="inline-flex items-center justify-center rounded-xl bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[var(--accent-hover)] disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {isProcessing ? t("adminPages.users.processing") : t("adminPages.users.setAsAdmin")}
                   </button>
@@ -382,7 +371,7 @@ export default function AdminUsersPage() {
                       type="button"
                       onClick={() => void handleBlockStatusChange(user.id, false)}
                       disabled={disableBlock}
-                      className="inline-flex items-center justify-center rounded-xl border border-emerald-200 bg-white px-4 py-2.5 text-sm font-semibold text-emerald-700 hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex items-center justify-center rounded-xl border border-emerald-200 bg-[var(--bg-card)] px-4 py-2.5 text-sm font-semibold text-emerald-700 hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {isProcessing ? t("adminPages.users.processing") : t("adminPages.users.unblockUser")}
                     </button>
@@ -391,7 +380,7 @@ export default function AdminUsersPage() {
                       type="button"
                       onClick={() => void handleBlockStatusChange(user.id, true)}
                       disabled={disableBlock}
-                      className="inline-flex items-center justify-center rounded-xl border border-red-200 bg-white px-4 py-2.5 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex items-center justify-center rounded-xl border border-red-200 bg-[var(--bg-card)] px-4 py-2.5 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {isProcessing ? t("adminPages.users.processing") : t("adminPages.users.blockUser")}
                     </button>

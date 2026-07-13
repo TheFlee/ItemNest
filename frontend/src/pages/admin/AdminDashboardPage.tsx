@@ -28,7 +28,7 @@ export default function AdminDashboardPage() {
       try {
         const data = await getAdminDashboard();
         setDashboard(data);
-      } catch (error: any) {
+      } catch (error: unknown) {
         setErrorMessage(getApiErrorMessage(error));
       } finally {
         setIsLoading(false);
@@ -84,6 +84,7 @@ export default function AdminDashboardPage() {
       title: t("adminPages.dashboard.cards.categories"),
       value: dashboard.totalCategoriesCount,
       description: t("adminPages.dashboard.cards.categoriesDescription"),
+      to: "/admin/categories",
     },
     {
       title: t("adminPages.dashboard.cards.pendingReports"),
@@ -123,16 +124,16 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="space-y-8">
-      <section className="rounded-2xl border border-slate-200 bg-white px-6 py-6 shadow-sm sm:px-8 sm:py-7">
+      <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] px-6 py-6 shadow-sm sm:px-8 sm:py-7">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
               {t("adminPages.dashboard.badge")}
             </p>
-            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900 sm:text-[2rem]">
+            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-[var(--text-primary)] sm:text-[2rem]">
               {t("adminPages.dashboard.title")}
             </h1>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600 sm:text-base">
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--text-secondary)] sm:text-base">
               {t("adminPages.dashboard.description")}
             </p>
           </div>
@@ -140,46 +141,62 @@ export default function AdminDashboardPage() {
           <div className="flex flex-wrap gap-3">
             <Link
               to="/admin/reports"
-              className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800"
+              className="inline-flex items-center justify-center rounded-xl bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[var(--accent-hover)]"
             >
               {t("adminPages.dashboard.reviewReports")}
             </Link>
             <Link
               to="/admin/posts"
-              className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-50"
+              className="inline-flex items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
             >
               {t("adminPages.dashboard.managePosts")}
+            </Link>
+            <Link
+              to="/admin/categories"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
+            >
+              <ion-icon name="pricetag-outline" style={{ fontSize: "15px" }} />
+              {t("nav.adminCategories")}
             </Link>
           </div>
         </div>
 
         <div className="mt-6 grid gap-4 md:grid-cols-3">
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">{t("adminPages.dashboard.users")}</p>
-            <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
+            <div className="flex items-center gap-2">
+              <ion-icon name="people-outline" style={{ fontSize: "18px" }} />
+              <p className="text-sm font-medium text-[var(--text-secondary)]">{t("adminPages.dashboard.users")}</p>
+            </div>
+            <p className="mt-2 text-3xl font-semibold tracking-tight text-[var(--text-primary)]">
               {dashboard.totalUsersCount}
             </p>
-            <p className="mt-3 text-sm leading-6 text-slate-600">
+            <p className="mt-3 text-sm leading-6 text-[var(--text-secondary)]">
               {t("adminPages.dashboard.usersDescription")}
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">{t("adminPages.dashboard.posts")}</p>
-            <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
+            <div className="flex items-center gap-2">
+              <ion-icon name="layers-outline" style={{ fontSize: "18px" }} />
+              <p className="text-sm font-medium text-[var(--text-secondary)]">{t("adminPages.dashboard.posts")}</p>
+            </div>
+            <p className="mt-2 text-3xl font-semibold tracking-tight text-[var(--text-primary)]">
               {dashboard.totalPostsCount}
             </p>
-            <p className="mt-3 text-sm leading-6 text-slate-600">
+            <p className="mt-3 text-sm leading-6 text-[var(--text-secondary)]">
               {t("adminPages.dashboard.postsDescription")}
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">{t("adminPages.dashboard.reportsWaiting")}</p>
-            <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
+            <div className="flex items-center gap-2">
+              <ion-icon name="flag-outline" style={{ fontSize: "18px" }} />
+              <p className="text-sm font-medium text-[var(--text-secondary)]">{t("adminPages.dashboard.reportsWaiting")}</p>
+            </div>
+            <p className="mt-2 text-3xl font-semibold tracking-tight text-[var(--text-primary)]">
               {dashboard.pendingReportsCount}
             </p>
-            <p className="mt-3 text-sm leading-6 text-slate-600">
+            <p className="mt-3 text-sm leading-6 text-[var(--text-secondary)]">
               {t("adminPages.dashboard.reportsDescription")}
             </p>
           </div>
@@ -188,10 +205,10 @@ export default function AdminDashboardPage() {
 
       <section>
         <div className="mb-4">
-          <h2 className="text-xl font-semibold tracking-tight text-slate-900">
+          <h2 className="text-xl font-semibold tracking-tight text-[var(--text-primary)]">
             {t("adminPages.dashboard.adminOverview")}
           </h2>
-          <p className="mt-1 text-sm text-slate-600">
+          <p className="mt-1 text-sm text-[var(--text-secondary)]">
             {t("adminPages.dashboard.adminOverviewDescription")}
           </p>
         </div>
@@ -202,27 +219,27 @@ export default function AdminDashboardPage() {
               <Link
                 key={card.title}
                 to={card.to}
-                className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md"
+                className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--border)] hover:shadow-md"
               >
-                <p className="text-sm font-medium text-slate-500">{card.title}</p>
-                <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+                <p className="text-sm font-medium text-[var(--text-secondary)]">{card.title}</p>
+                <p className="mt-2 text-3xl font-semibold tracking-tight text-[var(--text-primary)]">
                   {card.value}
                 </p>
-                <p className="mt-3 text-sm leading-6 text-slate-600">{card.description}</p>
-                <p className="mt-5 text-sm font-medium text-slate-900">
+                <p className="mt-3 text-sm leading-6 text-[var(--text-secondary)]">{card.description}</p>
+                <p className="mt-5 text-sm font-medium text-[var(--text-primary)]">
                   {t("adminPages.dashboard.openSection")}
                 </p>
               </Link>
             ) : (
               <div
                 key={card.title}
-                className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+                className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-5 shadow-sm"
               >
-                <p className="text-sm font-medium text-slate-500">{card.title}</p>
-                <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+                <p className="text-sm font-medium text-[var(--text-secondary)]">{card.title}</p>
+                <p className="mt-2 text-3xl font-semibold tracking-tight text-[var(--text-primary)]">
                   {card.value}
                 </p>
-                <p className="mt-3 text-sm leading-6 text-slate-600">{card.description}</p>
+                <p className="mt-3 text-sm leading-6 text-[var(--text-secondary)]">{card.description}</p>
               </div>
             )
           )}
@@ -230,22 +247,22 @@ export default function AdminDashboardPage() {
       </section>
 
       <section className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-sm">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h2 className="text-xl font-semibold tracking-tight text-slate-900">
+              <h2 className="text-xl font-semibold tracking-tight text-[var(--text-primary)]">
                 {t("adminPages.dashboard.moderationSummary")}
               </h2>
-              <p className="mt-1 text-sm text-slate-600">
+              <p className="mt-1 text-sm text-[var(--text-secondary)]">
                 {t("adminPages.dashboard.moderationSummaryDescription")}
               </p>
             </div>
 
-            <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2">
-              <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-500">
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-2">
+              <p className="text-xs font-medium uppercase tracking-[0.16em] text-[var(--text-secondary)]">
                 {t("adminPages.dashboard.totalPostsLabel")}
               </p>
-              <p className="mt-1 text-sm font-semibold text-slate-900">
+              <p className="mt-1 text-sm font-semibold text-[var(--text-primary)]">
                 {dashboard.totalPostsCount}
               </p>
             </div>
@@ -256,19 +273,19 @@ export default function AdminDashboardPage() {
               <div key={row.label}>
                 <div className="mb-2 flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-slate-800">{row.label}</p>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-sm font-medium text-[var(--text-primary)]">{row.label}</p>
+                    <p className="text-xs text-[var(--text-secondary)]">
                       {t("adminPages.dashboard.moderationRows.ofPostVolume", {
                         percentage: row.percentage,
                       })}
                     </p>
                   </div>
-                  <p className="text-sm font-semibold text-slate-900">{row.value}</p>
+                  <p className="text-sm font-semibold text-[var(--text-primary)]">{row.value}</p>
                 </div>
 
-                <div className="h-2.5 rounded-full bg-slate-100">
+                <div className="h-2.5 rounded-full bg-[var(--bg-surface)]">
                   <div
-                    className="h-2.5 rounded-full bg-slate-900"
+                    className="h-2.5 rounded-full bg-[var(--accent)]"
                     style={{ width: `${row.percentage}%` }}
                   />
                 </div>
@@ -277,18 +294,18 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-semibold tracking-tight text-slate-900">
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-sm">
+          <h2 className="text-xl font-semibold tracking-tight text-[var(--text-primary)]">
             {t("adminPages.dashboard.adminActions")}
           </h2>
-          <p className="mt-1 text-sm text-slate-600">
+          <p className="mt-1 text-sm text-[var(--text-secondary)]">
             {t("adminPages.dashboard.adminActionsDescription")}
           </p>
 
           <div className="mt-5 space-y-3">
             <Link
               to="/admin/reports"
-              className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-800 hover:border-slate-300 hover:bg-slate-100"
+              className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-3 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
             >
               <span>{t("adminPages.dashboard.actions.reviewReports")}</span>
               <span>{dashboard.pendingReportsCount}</span>
@@ -296,7 +313,7 @@ export default function AdminDashboardPage() {
 
             <Link
               to="/admin/posts"
-              className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-800 hover:border-slate-300 hover:bg-slate-100"
+              className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-3 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
             >
               <span>{t("adminPages.dashboard.actions.managePosts")}</span>
               <span>{dashboard.totalPostsCount}</span>
@@ -304,7 +321,7 @@ export default function AdminDashboardPage() {
 
             <Link
               to="/admin/users"
-              className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-800 hover:border-slate-300 hover:bg-slate-100"
+              className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-3 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
             >
               <span>{t("adminPages.dashboard.actions.manageUsers")}</span>
               <span>{dashboard.totalUsersCount}</span>
@@ -312,7 +329,7 @@ export default function AdminDashboardPage() {
 
             <Link
               to="/dashboard"
-              className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-800 hover:border-slate-300 hover:bg-slate-100"
+              className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-3 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
             >
               <span>{t("adminPages.dashboard.actions.openUserDashboard")}</span>
               <span>{t("adminPages.dashboard.actions.go")}</span>
