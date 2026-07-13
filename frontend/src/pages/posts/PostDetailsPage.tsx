@@ -326,7 +326,7 @@ export default function PostDetailsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <Link to="/" className="text-sm font-medium text-slate-600 hover:text-slate-900">
+        <Link to="/" className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
           {t("postDetails.backToPosts")}
         </Link>
       </div>
@@ -349,13 +349,13 @@ export default function PostDetailsPage() {
         </div>
       )}
 
-      <section className="rounded-2xl border border-slate-200 bg-white px-6 py-6 shadow-sm sm:px-8 sm:py-7">
+      <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] px-6 py-6 shadow-sm sm:px-8 sm:py-7">
         <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
               {t("postDetails.header.eyebrow")}
             </p>
-            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900 sm:text-[2rem]">
+            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-[var(--text-primary)] sm:text-[2rem]">
               {post.title}
             </h1>
 
@@ -370,7 +370,7 @@ export default function PostDetailsPage() {
                 {getPostTypeLabel(post.type)}
               </span>
 
-              <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700">
+              <span className="rounded-full bg-[var(--bg-surface)] px-3 py-1 text-sm font-medium text-[var(--text-primary)]">
                 {getPostStatusLabel(post.status)}
               </span>
 
@@ -387,7 +387,7 @@ export default function PostDetailsPage() {
               )}
             </div>
 
-            <p className="mt-4 max-w-3xl text-sm leading-6 text-slate-600 sm:text-base">
+            <p className="mt-4 max-w-3xl text-sm leading-6 text-[var(--text-secondary)] sm:text-base">
               {t("postDetails.header.description")}
             </p>
           </div>
@@ -400,7 +400,7 @@ export default function PostDetailsPage() {
               className={`inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-sm disabled:cursor-not-allowed disabled:opacity-60 ${
                 post.isFavorited
                   ? "bg-amber-600 hover:bg-amber-700"
-                  : "bg-slate-900 hover:bg-slate-800"
+                  : "bg-[var(--accent)] hover:bg-[var(--accent-hover)]"
               }`}
             >
               {isFavoriteSubmitting
@@ -417,27 +417,27 @@ export default function PostDetailsPage() {
         <PostImageGallery title={post.title} images={post.images} />
 
         <div className="space-y-6">
-          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="border-b border-slate-200 pb-5">
-              <h2 className="text-xl font-semibold tracking-tight text-slate-900">
+          <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-sm">
+            <div className="border-b border-[var(--border)] pb-5">
+              <h2 className="text-xl font-semibold tracking-tight text-[var(--text-primary)]">
                 {t("postDetails.sections.description.title")}
               </h2>
-              <p className="mt-1 text-sm text-slate-600">
+              <p className="mt-1 text-sm text-[var(--text-secondary)]">
                 {t("postDetails.sections.description.subtitle")}
               </p>
             </div>
 
-            <p className="mt-5 whitespace-pre-wrap text-sm leading-7 text-slate-700 sm:text-base">
+            <p className="mt-5 whitespace-pre-wrap text-sm leading-7 text-[var(--text-primary)] sm:text-base">
               {post.description}
             </p>
           </section>
 
-          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="border-b border-slate-200 pb-5">
-              <h2 className="text-xl font-semibold tracking-tight text-slate-900">
+          <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-sm">
+            <div className="border-b border-[var(--border)] pb-5">
+              <h2 className="text-xl font-semibold tracking-tight text-[var(--text-primary)]">
                 {t("postDetails.sections.information.title")}
               </h2>
-              <p className="mt-1 text-sm text-slate-600">
+              <p className="mt-1 text-sm text-[var(--text-secondary)]">
                 {t("postDetails.sections.information.subtitle")}
               </p>
             </div>
@@ -471,12 +471,12 @@ export default function PostDetailsPage() {
           </section>
 
           {post.isOwner && (
-            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-              <div className="border-b border-slate-200 pb-5">
-                <h2 className="text-xl font-semibold tracking-tight text-slate-900">
+            <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-sm">
+              <div className="border-b border-[var(--border)] pb-5">
+                <h2 className="text-xl font-semibold tracking-tight text-[var(--text-primary)]">
                   {t("postDetails.sections.ownerActions.title")}
                 </h2>
-                <p className="mt-1 text-sm text-slate-600">
+                <p className="mt-1 text-sm text-[var(--text-secondary)]">
                   {t("postDetails.sections.ownerActions.subtitle")}
                 </p>
               </div>
@@ -507,7 +507,7 @@ export default function PostDetailsPage() {
                     type="button"
                     onClick={() => void handleUpdateStatus(2)}
                     disabled={isOwnerActionBusy}
-                    className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="inline-flex items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-surface)] disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {statusSubmittingTo === 2
                       ? t("common.saving")
@@ -519,7 +519,7 @@ export default function PostDetailsPage() {
                   type="button"
                   onClick={() => void handleDeletePost()}
                   disabled={isOwnerActionBusy}
-                  className="inline-flex items-center justify-center rounded-xl border border-red-200 bg-white px-4 py-2.5 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center justify-center rounded-xl border border-red-200 bg-[var(--bg-card)] px-4 py-2.5 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {isDeletingPost
                     ? t("common.deleting")
@@ -530,12 +530,12 @@ export default function PostDetailsPage() {
           )}
 
           {isAuthenticated && !post.isOwner && (
-            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-              <div className="border-b border-slate-200 pb-5">
-                <h2 className="text-xl font-semibold tracking-tight text-slate-900">
+            <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-sm">
+              <div className="border-b border-[var(--border)] pb-5">
+                <h2 className="text-xl font-semibold tracking-tight text-[var(--text-primary)]">
                   {t("postDetails.sections.actions.title")}
                 </h2>
-                <p className="mt-1 text-sm text-slate-600">
+                <p className="mt-1 text-sm text-[var(--text-secondary)]">
                   {t("postDetails.sections.actions.subtitle")}
                 </p>
               </div>
@@ -564,7 +564,7 @@ export default function PostDetailsPage() {
                     setErrorMessage("");
                     setSuccessMessage("");
                   }}
-                  className="inline-flex items-center justify-center rounded-xl border border-red-200 bg-white px-4 py-2.5 text-sm font-semibold text-red-700 hover:bg-red-50"
+                  className="inline-flex items-center justify-center rounded-xl border border-red-200 bg-[var(--bg-card)] px-4 py-2.5 text-sm font-semibold text-red-700 hover:bg-red-50"
                 >
                   {showReportForm
                     ? t("postDetails.actions.closeReportForm")
@@ -573,11 +573,11 @@ export default function PostDetailsPage() {
               </div>
 
               {showContactForm && (
-                <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-5">
-                  <h3 className="text-lg font-semibold tracking-tight text-slate-900">
+                <div className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
+                  <h3 className="text-lg font-semibold tracking-tight text-[var(--text-primary)]">
                     {t("postDetails.contactForm.title")}
                   </h3>
-                  <p className="mt-1 text-sm leading-6 text-slate-600">
+                  <p className="mt-1 text-sm leading-6 text-[var(--text-secondary)]">
                     {t("postDetails.contactForm.subtitle")}
                   </p>
 
@@ -596,7 +596,7 @@ export default function PostDetailsPage() {
                       type="button"
                       onClick={() => void handleSendContactRequest()}
                       disabled={isContactSubmitting}
-                      className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex items-center justify-center rounded-xl bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[var(--accent-hover)] disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {isContactSubmitting
                         ? t("common.sending")
@@ -607,19 +607,19 @@ export default function PostDetailsPage() {
               )}
 
               {showReportForm && (
-                <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-5">
-                  <h3 className="text-lg font-semibold tracking-tight text-slate-900">
+                <div className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
+                  <h3 className="text-lg font-semibold tracking-tight text-[var(--text-primary)]">
                     {t("postDetails.reportForm.title")}
                   </h3>
 
                   <div className="mt-5">
-                    <label className="mb-1.5 block text-sm font-medium text-slate-700">
+                    <label className="mb-1.5 block text-sm font-medium text-[var(--text-primary)]">
                       {t("postDetails.reportForm.reasonLabel")}
                     </label>
                     <select
                       value={reportReason}
                       onChange={(e) => setReportReason(Number(e.target.value))}
-                      className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none focus:border-slate-500"
+                      className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-3.5 py-2.5 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
                     >
                       {reportReasonOptions.map((option) => (
                         <option key={option.value} value={option.value}>
@@ -627,7 +627,7 @@ export default function PostDetailsPage() {
                         </option>
                       ))}
                     </select>
-                    <p className="mt-2 text-xs text-slate-500">
+                    <p className="mt-2 text-xs text-[var(--text-secondary)]">
                       {t("postDetails.reportForm.selectedReason", {
                         reason: reportReasonLabel,
                       })}
@@ -672,24 +672,24 @@ export default function PostDetailsPage() {
       )}
 
       {isAuthenticated && (
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex flex-col gap-2 border-b border-slate-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
+        <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-sm">
+          <div className="flex flex-col gap-2 border-b border-[var(--border)] pb-5 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h2 className="text-xl font-semibold tracking-tight text-slate-900">
+              <h2 className="text-xl font-semibold tracking-tight text-[var(--text-primary)]">
                 {t("postDetails.matches.title")}
               </h2>
-              <p className="mt-1 text-sm text-slate-600">
+              <p className="mt-1 text-sm text-[var(--text-secondary)]">
                 {t("postDetails.matches.subtitle")}
               </p>
             </div>
           </div>
 
           {isMatchesLoading ? (
-            <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+            <div className="mt-5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-3 text-sm text-[var(--text-secondary)]">
               {t("postDetails.matches.loading")}
             </div>
           ) : matches.length === 0 ? (
-            <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+            <div className="mt-5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-3 text-sm text-[var(--text-secondary)]">
               {t("postDetails.matches.empty")}
             </div>
           ) : (
@@ -697,9 +697,9 @@ export default function PostDetailsPage() {
               {matches.map((match) => (
                 <article
                   key={match.id}
-                  className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50"
+                  className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)]"
                 >
-                  <div className="relative h-48 bg-slate-100">
+                  <div className="relative h-48 bg-[var(--bg-surface)]">
                     {match.images.length > 0 ? (
                       <img
                         src={buildFileUrl(match.images[0].imageUrl)}
@@ -707,7 +707,7 @@ export default function PostDetailsPage() {
                         className="h-full w-full object-cover"
                       />
                     ) : (
-                      <div className="flex h-full items-center justify-center text-sm text-slate-500">
+                      <div className="flex h-full items-center justify-center text-sm text-[var(--text-secondary)]">
                         {t("common.noImage")}
                       </div>
                     )}
@@ -716,51 +716,50 @@ export default function PostDetailsPage() {
                   <div className="p-5">
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <h3 className="text-lg font-semibold tracking-tight text-slate-900">
+                        <h3 className="text-lg font-semibold tracking-tight text-[var(--text-primary)]">
                           {match.title}
                         </h3>
-                        <p className="mt-2 text-sm leading-6 text-slate-600">
+                        <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">
                           {match.description}
                         </p>
                       </div>
+                    </div>
 
-                      <div className="shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-right">
-                        <p className="text-xs font-medium uppercase tracking-[0.14em] text-slate-500">
-                          {t("postDetails.matches.score")}
-                        </p>
-                        <p className="mt-1 text-sm font-semibold text-slate-900">
-                          {Math.round(match.matchScore)}%
-                        </p>
+                    <div className="mt-4 space-y-2">
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-secondary)]">
+                        {t("postDetails.matches.score")}
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <div className="h-2 flex-1 rounded-full bg-[var(--bg-surface)]">
+                          <div
+                            className="h-2 rounded-full bg-[var(--accent)] transition-all"
+                            style={{ width: getMatchScoreWidth(match.matchScore) }}
+                          />
+                        </div>
+                        <span className="text-sm font-semibold text-[var(--text-primary)]">{Math.round(match.matchScore)}</span>
                       </div>
                     </div>
 
-                    <div className="mt-4 h-2.5 rounded-full bg-white">
-                      <div
-                        className="h-2.5 rounded-full bg-slate-900"
-                        style={{ width: getMatchScoreWidth(match.matchScore) }}
-                      />
-                    </div>
-
-                    <div className="mt-5 grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 text-sm">
+                    <div className="mt-5 grid gap-3 rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-4 text-sm">
                       <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
                           {t("postDetails.fields.category")}
                         </p>
-                        <p className="mt-1 font-medium text-slate-700">{match.categoryName}</p>
+                        <p className="mt-1 font-medium text-[var(--text-primary)]">{match.categoryName}</p>
                       </div>
 
                       <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
                           {t("postDetails.fields.location")}
                         </p>
-                        <p className="mt-1 font-medium text-slate-700">{match.location}</p>
+                        <p className="mt-1 font-medium text-[var(--text-primary)]">{match.location}</p>
                       </div>
 
                       <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
                           {t("postDetails.fields.eventDate")}
                         </p>
-                        <p className="mt-1 font-medium text-slate-700">
+                        <p className="mt-1 font-medium text-[var(--text-primary)]">
                           {formatDate(match.eventDate)}
                         </p>
                       </div>
@@ -768,14 +767,14 @@ export default function PostDetailsPage() {
 
                     {match.matchReasons.length > 0 && (
                       <div className="mt-5">
-                        <p className="text-sm font-medium text-slate-800">
+                        <p className="text-sm font-medium text-[var(--text-primary)]">
                           {t("postDetails.matches.matchReasons")}
                         </p>
                         <div className="mt-3 flex flex-wrap gap-2">
                           {match.matchReasons.map((reason, index) => (
                             <span
                               key={`${match.id}-${index}-${reason}`}
-                              className="rounded-full bg-slate-200 px-3 py-1 text-xs font-medium text-slate-700"
+                              className="rounded-full bg-[var(--bg-surface)] px-3 py-1 text-xs font-medium text-[var(--text-primary)]"
                             >
                               {reason}
                             </span>
@@ -787,7 +786,7 @@ export default function PostDetailsPage() {
                     <div className="mt-5">
                       <Link
                         to={`/posts/${match.id}`}
-                        className="text-sm font-semibold text-slate-900 hover:text-slate-700"
+                        className="text-sm font-semibold text-[var(--text-primary)] hover:text-[var(--text-secondary)]"
                       >
                         {t("postDetails.matches.viewMatchedPost")}
                       </Link>
