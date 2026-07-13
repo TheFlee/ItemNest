@@ -1,0 +1,51 @@
+name: itemnest-local
+
+services:
+  itemnest-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: itemnest-local-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      Database__ApplyMigrations: "true"
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=ItemNestDb;Username=postgres;Password=localpassword123"
+      Jwt__Key: "local-dev-secret-key-minimum-32-characters-long"
+      Jwt__Issuer: "ItemNestAPI"
+      Jwt__Audience: "ItemNestClient"
+      Jwt__ExpiryMinutes: "60"
+      AdminSeed__Email: "admin@local.dev"
+      AdminSeed__Password: "Admin@123456"
+      AdminSeed__FullName: "Local Admin"
+      Cors__AllowedOrigins__0: "http://localhost:8080"
+      # AWS/R2 left empty — image upload will return errors but rest of app works
+      Aws__AccessKeyId: ""
+      Aws__SecretAccessKey: ""
+      Aws__AccountId: ""
+      Aws__BucketName: ""
+      Aws__PublicUrl: ""
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: itemnest-local-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ItemNestDb
+      POSTGRES_PASSWORD: localpassword123
+    volumes:
+      - itemnest-local-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  itemnest-local-postgres-data:
