@@ -1,11 +1,8 @@
 import { Outlet } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "../components/layout/LanguageSwitcher";
-import { useTheme } from "../context/ThemeContext";
-
 export default function AuthLayout() {
   const { t } = useTranslation();
-  const { isDark, toggle } = useTheme();
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
@@ -57,12 +54,6 @@ export default function AuthLayout() {
           </div>
           <div className="ml-auto flex items-center gap-2">
             <LanguageSwitcher />
-            <button
-              onClick={toggle}
-              className="flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-secondary)]"
-            >
-              <ion-icon name={isDark ? "sunny-outline" : "moon-outline"} style={{ fontSize: "16px" }} />
-            </button>
           </div>
         </div>
 

@@ -2,17 +2,7 @@ import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../context/AuthContext";
-import { useTheme } from "../../context/ThemeContext";
 import LanguageSwitcher from "./LanguageSwitcher";
-
-// Declare ion-icon as a valid JSX element (Ionicons web component)
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      "ion-icon": any;
-    }
-  }
-}
 
 const navIconMap: Record<string, string> = {
   "/": "home-outline",
@@ -44,7 +34,6 @@ function navLinkClass(isActive: boolean) {
 export default function Navbar() {
   const { t } = useTranslation();
   const { isAuthenticated, user, logout } = useAuth();
-  const { isDark, toggle } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
   const isAdmin = user?.roles.includes("Admin") ?? false;
 
@@ -97,15 +86,6 @@ export default function Navbar() {
 
               <div className="flex items-center gap-2">
                 <LanguageSwitcher />
-
-                {/* Dark mode toggle */}
-                <button
-                  onClick={toggle}
-                  aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-                  className="flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-                >
-                  <ion-icon name={isDark ? "sunny-outline" : "moon-outline"} style={{ fontSize: "16px" }} />
-                </button>
 
                 {/* Mobile hamburger — hidden at lg and above */}
                 <button
@@ -177,7 +157,7 @@ export default function Navbar() {
                     {memberLinks.map((link) => renderNavLink(link.to, link.label, navIconMap))}
                   </div>
                   {isAdmin && (
-                    <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-3 dark:border-amber-800 dark:bg-amber-950">
+                    <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-3 ">
                       <div className="flex flex-wrap gap-2">
                         {adminLinks.map((link) => renderNavLink(link.to, link.label, adminIconMap))}
                       </div>
@@ -196,7 +176,7 @@ export default function Navbar() {
                       {memberLinks.map((link) => renderNavLink(link.to, link.label, navIconMap))}
                     </div>
                     {isAdmin && (
-                      <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-3 dark:border-amber-800 dark:bg-amber-950">
+                      <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-3 ">
                         <div className="flex flex-col gap-1">
                           {adminLinks.map((link) => renderNavLink(link.to, link.label, adminIconMap))}
                         </div>

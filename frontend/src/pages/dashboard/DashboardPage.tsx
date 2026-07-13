@@ -181,7 +181,7 @@ export default function DashboardPage() {
           </div>
 
           <div
-            className={`rounded-2xl border p-5 ${dashboard.pendingReceivedContactRequestsCount > 0 ? "border-amber-300 bg-amber-50 dark:border-amber-700 dark:bg-amber-950/50 animate-pulse" : "border-[var(--border)] bg-[var(--bg-surface)]"}`}
+            className={`rounded-2xl border p-5 ${dashboard.pendingReceivedContactRequestsCount > 0 ? "border-amber-300 bg-amber-50 animate-pulse" : "border-[var(--border)] bg-[var(--bg-surface)]"}`}
           >
             <p className="text-sm font-medium text-[var(--text-secondary)]">
               {t("dashboardPage.highlights.requestsWaiting")}

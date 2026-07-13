@@ -218,7 +218,7 @@ export default function AdminCategoriesPage() {
                             </button>
                             <button
                               onClick={() => setDeleteConfirmId(cat.id)}
-                              className="flex items-center gap-1 rounded-lg border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950"
+                              className="flex items-center gap-1 rounded-lg border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50"
                             >
                               <ion-icon name="trash-outline" style={{ fontSize: "13px" }} />
                               {t("common.delete")}

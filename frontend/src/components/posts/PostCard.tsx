@@ -36,7 +36,7 @@ export default function PostCard({ post, showOwnerActions = false }: PostCardPro
   const { t } = useTranslation();
 
   return (
-    <article className="group overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-lg hover:shadow-amber-100/30 dark:hover:shadow-black/30">
+    <article className="group overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-lg hover:shadow-amber-100/30">
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-[var(--bg-surface)]">
         {post.primaryImageUrl ? (
           <img
@@ -58,12 +58,12 @@ export default function PostCard({ post, showOwnerActions = false }: PostCardPro
             {getPostStatusLabel(post.status)}
           </span>
           {post.isOwner && (
-            <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700 shadow-sm dark:bg-blue-950 dark:text-blue-300">
+            <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700 shadow-sm">
               {t("post.myPost")}
             </span>
           )}
           {post.isFavorited && (
-            <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700 shadow-sm dark:bg-amber-950 dark:text-amber-300">
+            <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700 shadow-sm">
               {t("post.favorited")}
             </span>
           )}
