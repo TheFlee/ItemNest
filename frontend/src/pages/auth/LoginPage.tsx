@@ -52,14 +52,14 @@ export default function LoginPage() {
 
   return (
     <div>
-      <div className="border-b border-slate-200 pb-5">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+      <div className="border-b border-[var(--border)] pb-5">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
           {t("auth.login.badge")}
         </p>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-slate-900">
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-[var(--text-primary)]">
           {t("auth.login.title")}
         </h1>
-        <p className="mt-2 text-sm leading-6 text-slate-600">
+        <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">
           {t("auth.login.description")}
         </p>
       </div>
@@ -72,24 +72,24 @@ export default function LoginPage() {
         />
 
         <div className="flex items-center gap-3">
-          <div className="h-px flex-1 bg-slate-200" />
-          <span className="text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
+          <div className="h-px flex-1 bg-[var(--border)]" />
+          <span className="text-xs font-medium uppercase tracking-[0.16em] text-[var(--text-secondary)]">
             {t("auth.login.orContinueWithEmail")}
           </span>
-          <div className="h-px flex-1 bg-slate-200" />
+          <div className="h-px flex-1 bg-[var(--border)]" />
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-5">
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-slate-700">
+          <label className="mb-1.5 block text-sm font-medium text-[var(--text-primary)]">
             {t("auth.login.email")}
           </label>
           <input
             type="email"
             value={form.email}
             onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
-            className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-500"
+            className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-3.5 py-2.5 text-sm text-[var(--text-primary)] outline-none placeholder:text-[var(--text-secondary)] focus:border-[var(--accent)]"
             placeholder={t("auth.login.emailPlaceholder")}
             required
           />
@@ -97,7 +97,7 @@ export default function LoginPage() {
 
         <div>
           <div className="mb-1.5 flex items-center justify-between">
-            <label className="block text-sm font-medium text-slate-700">
+            <label className="block text-sm font-medium text-[var(--text-primary)]">
               {t("auth.login.password")}
             </label>
           </div>
@@ -106,7 +106,7 @@ export default function LoginPage() {
             type="password"
             value={form.password}
             onChange={(e) => setForm((prev) => ({ ...prev, password: e.target.value }))}
-            className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-500"
+            className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-3.5 py-2.5 text-sm text-[var(--text-primary)] outline-none placeholder:text-[var(--text-secondary)] focus:border-[var(--accent)]"
             placeholder={t("auth.login.passwordPlaceholder")}
             required
           />
@@ -121,16 +121,16 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="inline-flex w-full items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex w-full items-center justify-center rounded-xl bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[var(--accent-hover)] disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isSubmitting ? t("auth.login.submitting") : t("auth.login.submit")}
         </button>
       </form>
 
-      <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
-        <p className="text-sm text-slate-600">
+      <div className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-4">
+        <p className="text-sm text-[var(--text-secondary)]">
           {t("auth.login.noAccount")} {" "}
-          <Link to="/register" className="font-semibold text-slate-900 hover:underline">
+          <Link to="/register" className="font-semibold text-[var(--text-primary)] hover:underline">
             {t("auth.login.register")}
           </Link>
         </p>

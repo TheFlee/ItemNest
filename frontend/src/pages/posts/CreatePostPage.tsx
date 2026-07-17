@@ -11,6 +11,7 @@ import FormTextarea from "../../components/forms/FormTextarea";
 import type { Category } from "../../types/category";
 import { getApiErrorMessage } from "../../utils/error";
 import { getItemColorOptions, getPostTypeOptions } from "../../utils/options";
+import { useToast } from "../../context/ToastContext";
 
 interface CreatePostFormState {
   title: string;
@@ -28,6 +29,7 @@ const MAX_FILE_SIZE_MB = 5;
 export default function CreatePostPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { show } = useToast();
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -171,6 +173,7 @@ export default function CreatePostPage() {
           await uploadImages(createdPost.id, selectedFiles);
         }
 
+        show(t("createPostPage.successMessage") ?? "Post created successfully", "success");
         navigate(`/posts/${createdPost.id}`);
       } catch {
         navigate(`/posts/${createdPost.id}`, {
@@ -188,9 +191,9 @@ export default function CreatePostPage() {
 
   if (isLoadingCategories) {
     return (
-      <div className="rounded-2xl border border-slate-200 bg-white px-6 py-10 text-center shadow-sm">
-        <p className="text-base font-medium text-slate-700">{t("createPostPage.loadingTitle")}</p>
-        <p className="mt-2 text-sm text-slate-500">{t("createPostPage.loadingSubtitle")}</p>
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] px-6 py-10 text-center shadow-sm">
+        <p className="text-base font-medium text-[var(--text-primary)]">{t("createPostPage.loadingTitle")}</p>
+        <p className="mt-2 text-sm text-[var(--text-secondary)]">{t("createPostPage.loadingSubtitle")}</p>
       </div>
     );
   }
@@ -200,44 +203,44 @@ export default function CreatePostPage() {
       <div>
         <Link
           to="/dashboard"
-          className="text-sm font-medium text-slate-600 hover:text-slate-900"
+          className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
         >
           {t("createPostPage.backToDashboard")}
         </Link>
       </div>
 
-      <section className="rounded-2xl border border-slate-200 bg-white px-6 py-6 shadow-sm sm:px-8 sm:py-7">
+      <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] px-6 py-6 shadow-sm sm:px-8 sm:py-7">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
               {t("createPostPage.badge")}
             </p>
-            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900 sm:text-[2rem]">
+            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-[var(--text-primary)] sm:text-[2rem]">
               {t("createPostPage.title")}
             </h1>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600 sm:text-base">
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--text-secondary)] sm:text-base">
               {t("createPostPage.description")}
             </p>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-3">
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
-              <p className="text-sm font-medium text-slate-500">{t("createPostPage.cards.postTypes")}</p>
-              <p className="mt-2 text-lg font-semibold text-slate-900">
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-4">
+              <p className="text-sm font-medium text-[var(--text-secondary)]">{t("createPostPage.cards.postTypes")}</p>
+              <p className="mt-2 text-lg font-semibold text-[var(--text-primary)]">
                 {t("createPostPage.cards.postTypesValue")}
               </p>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
-              <p className="text-sm font-medium text-slate-500">{t("createPostPage.cards.images")}</p>
-              <p className="mt-2 text-lg font-semibold text-slate-900">
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-4">
+              <p className="text-sm font-medium text-[var(--text-secondary)]">{t("createPostPage.cards.images")}</p>
+              <p className="mt-2 text-lg font-semibold text-[var(--text-primary)]">
                 {t("createPostPage.cards.imagesValue", { count: MAX_IMAGE_COUNT })}
               </p>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
-              <p className="text-sm font-medium text-slate-500">{t("createPostPage.cards.maxSize")}</p>
-              <p className="mt-2 text-lg font-semibold text-slate-900">
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-4">
+              <p className="text-sm font-medium text-[var(--text-secondary)]">{t("createPostPage.cards.maxSize")}</p>
+              <p className="mt-2 text-lg font-semibold text-[var(--text-primary)]">
                 {t("createPostPage.cards.maxSizeValue", { size: MAX_FILE_SIZE_MB })}
               </p>
             </div>
@@ -246,12 +249,12 @@ export default function CreatePostPage() {
       </section>
 
       <form onSubmit={handleSubmit} className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
-          <div className="border-b border-slate-200 pb-5">
-            <h2 className="text-xl font-semibold tracking-tight text-slate-900">
+        <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-sm sm:p-7">
+          <div className="border-b border-[var(--border)] pb-5">
+            <h2 className="text-xl font-semibold tracking-tight text-[var(--text-primary)]">
               {t("createPostPage.section.postInfo")}
             </h2>
-            <p className="mt-1 text-sm text-slate-600">
+            <p className="mt-1 text-sm text-[var(--text-secondary)]">
               {t("createPostPage.section.postInfoSubtitle")}
             </p>
           </div>
@@ -264,6 +267,7 @@ export default function CreatePostPage() {
                 onChange={(value) => updateField("title", value)}
                 placeholder={t("createPostPage.form.titlePlaceholder")}
                 required
+                icon="create-outline"
               />
             </div>
 
@@ -302,6 +306,7 @@ export default function CreatePostPage() {
               onChange={(value) => updateField("location", value)}
               placeholder={t("createPostPage.form.locationPlaceholder")}
               required
+              icon="location-outline"
             />
 
             <FormInput
@@ -330,18 +335,18 @@ export default function CreatePostPage() {
             </div>
           )}
 
-          <div className="mt-6 flex flex-wrap gap-3 border-t border-slate-200 pt-6">
+          <div className="mt-6 flex flex-wrap gap-3 border-t border-[var(--border)] pt-6">
             <button
               type="submit"
               disabled={isSubmitting}
-              className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center justify-center rounded-xl bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[var(--accent-hover)] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isSubmitting ? t("createPostPage.submitting") : t("createPostPage.submit")}
             </button>
 
             <Link
               to="/dashboard"
-              className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-50"
+              className="inline-flex items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] hover:border-[var(--border)] hover:bg-[var(--bg-surface)]"
             >
               {t("createPostPage.cancel")}
             </Link>
@@ -349,12 +354,12 @@ export default function CreatePostPage() {
         </section>
 
         <div className="space-y-6">
-          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
-            <div className="border-b border-slate-200 pb-5">
-              <h2 className="text-xl font-semibold tracking-tight text-slate-900">
+          <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-sm sm:p-7">
+            <div className="border-b border-[var(--border)] pb-5">
+              <h2 className="text-xl font-semibold tracking-tight text-[var(--text-primary)]">
                 {t("createPostPage.section.images")}
               </h2>
-              <p className="mt-1 text-sm text-slate-600">
+              <p className="mt-1 text-sm text-[var(--text-secondary)]">
                 {t("createPostPage.section.imagesSubtitle")}
               </p>
             </div>
@@ -369,11 +374,11 @@ export default function CreatePostPage() {
             </div>
           </section>
 
-          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="text-lg font-semibold tracking-tight text-slate-900">
+          <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-sm">
+            <h2 className="text-lg font-semibold tracking-tight text-[var(--text-primary)]">
               {t("createPostPage.section.notes")}
             </h2>
-            <div className="mt-4 space-y-3 text-sm leading-6 text-slate-600">
+            <div className="mt-4 space-y-3 text-sm leading-6 text-[var(--text-secondary)]">
               <p>{t("createPostPage.section.note1")}</p>
               <p>{t("createPostPage.section.note2")}</p>
               <p>{t("createPostPage.section.note3")}</p>

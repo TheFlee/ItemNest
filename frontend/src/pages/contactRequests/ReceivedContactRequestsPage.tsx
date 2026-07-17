@@ -11,6 +11,14 @@ import type { ContactRequestItem } from "../../types/contactRequest";
 import { getApiErrorMessage } from "../../utils/error";
 import { formatDateTime } from "../../utils/format";
 import { getContactRequestStatusClassName } from "../../utils/contactRequest";
+import { useToast } from "../../context/ToastContext";
+
+const statusIconMap: Record<number, string> = {
+  1: "time-outline",
+  2: "checkmark-circle-outline",
+  3: "close-circle-outline",
+  4: "ban-outline",
+};
 
 function getContactRequestStatusTranslationKey(status: number) {
   switch (status) {
@@ -29,10 +37,10 @@ function getContactRequestStatusTranslationKey(status: number) {
 
 export default function ReceivedContactRequestsPage() {
   const { t } = useTranslation();
+  const { show } = useToast();
   const [requests, setRequests] = useState<ContactRequestItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
   const [processingId, setProcessingId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -55,7 +63,6 @@ export default function ReceivedContactRequestsPage() {
 
   async function handleAccept(id: string) {
     setErrorMessage("");
-    setSuccessMessage("");
     setProcessingId(id);
 
     try {
@@ -65,7 +72,7 @@ export default function ReceivedContactRequestsPage() {
         prev.map((request) => (request.id === id ? updated : request))
       );
 
-      setSuccessMessage(t("contactRequestsPages.received.messages.accepted"));
+      show(t("contactRequestsPages.received.messages.accepted"), "success");
     } catch (error: any) {
       setErrorMessage(getApiErrorMessage(error));
     } finally {
@@ -75,7 +82,6 @@ export default function ReceivedContactRequestsPage() {
 
   async function handleReject(id: string) {
     setErrorMessage("");
-    setSuccessMessage("");
     setProcessingId(id);
 
     try {
@@ -85,7 +91,7 @@ export default function ReceivedContactRequestsPage() {
         prev.map((request) => (request.id === id ? updated : request))
       );
 
-      setSuccessMessage(t("contactRequestsPages.received.messages.rejected"));
+      show(t("contactRequestsPages.received.messages.rejected"), "success");
     } catch (error: any) {
       setErrorMessage(getApiErrorMessage(error));
     } finally {
@@ -115,16 +121,16 @@ export default function ReceivedContactRequestsPage() {
 
   return (
     <div className="space-y-8">
-      <section className="rounded-2xl border border-slate-200 bg-white px-6 py-6 shadow-sm sm:px-8 sm:py-7">
+      <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] px-6 py-6 shadow-sm sm:px-8 sm:py-7">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
               {t("contactRequestsPages.received.badge")}
             </p>
-            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900 sm:text-[2rem]">
+            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-[var(--text-primary)] sm:text-[2rem]">
               {t("contactRequestsPages.received.title")}
             </h1>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600 sm:text-base">
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--text-secondary)] sm:text-base">
               {t("contactRequestsPages.received.description")}
             </p>
           </div>
@@ -132,13 +138,13 @@ export default function ReceivedContactRequestsPage() {
           <div className="flex flex-wrap gap-3">
             <Link
               to="/my-posts"
-              className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800"
+              className="inline-flex items-center justify-center rounded-xl bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[var(--accent-hover)]"
             >
               {t("contactRequestsPages.received.actions.openMyPosts")}
             </Link>
             <Link
               to="/dashboard"
-              className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-50"
+              className="inline-flex items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] hover:border-[var(--border)] hover:bg-[var(--bg-surface)]"
             >
               {t("contactRequestsPages.received.actions.backToDashboard")}
             </Link>
@@ -146,49 +152,43 @@ export default function ReceivedContactRequestsPage() {
         </div>
 
         <div className="mt-6 grid gap-4 md:grid-cols-4">
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
+            <p className="text-sm font-medium text-[var(--text-secondary)]">
               {t("contactRequestsPages.received.metrics.total")}
             </p>
-            <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+            <p className="mt-2 text-3xl font-semibold tracking-tight text-[var(--text-primary)]">
               {metrics.total}
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">{t("contactRequest.pending")}</p>
-            <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
+            <p className="text-sm font-medium text-[var(--text-secondary)]">{t("contactRequest.pending")}</p>
+            <p className="mt-2 text-3xl font-semibold tracking-tight text-[var(--text-primary)]">
               {metrics.pending}
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">{t("contactRequest.accepted")}</p>
-            <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
+            <p className="text-sm font-medium text-[var(--text-secondary)]">{t("contactRequest.accepted")}</p>
+            <p className="mt-2 text-3xl font-semibold tracking-tight text-[var(--text-primary)]">
               {metrics.accepted}
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">{t("contactRequest.rejected")}</p>
-            <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
+            <p className="text-sm font-medium text-[var(--text-secondary)]">{t("contactRequest.rejected")}</p>
+            <p className="mt-2 text-3xl font-semibold tracking-tight text-[var(--text-primary)]">
               {metrics.rejected}
             </p>
           </div>
         </div>
       </section>
 
-      {successMessage && (
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-          {successMessage}
-        </div>
-      )}
-
       <section className="flex flex-col gap-2">
-        <h2 className="text-xl font-semibold tracking-tight text-slate-900">
+        <h2 className="text-xl font-semibold tracking-tight text-[var(--text-primary)]">
           {t("contactRequestsPages.received.list.title")}
         </h2>
-        <p className="text-sm text-slate-600">
+        <p className="text-sm text-[var(--text-secondary)]">
           {t("contactRequestsPages.received.list.description")}
         </p>
       </section>
@@ -200,70 +200,71 @@ export default function ReceivedContactRequestsPage() {
           return (
             <article
               key={request.id}
-              className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+              className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-sm"
             >
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div>
-                  <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+                  <h2 className="text-2xl font-semibold tracking-tight text-[var(--text-primary)]">
                     {request.itemPostTitle}
                   </h2>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                  <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">
                     {t("contactRequestsPages.received.list.cardDescription")}
                   </p>
                 </div>
 
                 <span
-                  className={`inline-flex rounded-full px-3 py-1 text-sm font-medium ${getContactRequestStatusClassName(
+                  className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-sm font-medium ${getContactRequestStatusClassName(
                     request.status
                   )}`}
                 >
+                  <ion-icon name={statusIconMap[request.status] ?? "help-outline"} style={{ fontSize: "12px" }} />
                   {t(getContactRequestStatusTranslationKey(request.status))}
                 </span>
               </div>
 
-              <div className="mt-5 grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm md:grid-cols-2 xl:grid-cols-4">
+              <div className="mt-5 grid gap-3 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 text-sm md:grid-cols-2 xl:grid-cols-4">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
                     {t("contactRequestsPages.received.fields.requester")}
                   </p>
-                  <p className="mt-1 font-medium text-slate-700">
+                  <p className="mt-1 font-medium text-[var(--text-primary)]">
                     {request.requesterFullName}
                   </p>
                 </div>
 
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
                     {t("contactRequestsPages.received.fields.requesterEmail")}
                   </p>
-                  <p className="mt-1 font-medium text-slate-700">
+                  <p className="mt-1 font-medium text-[var(--text-primary)]">
                     {request.requesterEmail ?? "-"}
                   </p>
                 </div>
 
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
                     {t("contactRequestsPages.received.fields.createdAt")}
                   </p>
-                  <p className="mt-1 font-medium text-slate-700">
+                  <p className="mt-1 font-medium text-[var(--text-primary)]">
                     {formatDateTime(request.createdAt)}
                   </p>
                 </div>
 
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
                     {t("contactRequestsPages.received.fields.respondedAt")}
                   </p>
-                  <p className="mt-1 font-medium text-slate-700">
+                  <p className="mt-1 font-medium text-[var(--text-primary)]">
                     {request.respondedAt ? formatDateTime(request.respondedAt) : "-"}
                   </p>
                 </div>
               </div>
 
-              <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-5">
-                <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-slate-500">
+              <div className="mt-5 rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-5">
+                <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-[var(--text-secondary)]">
                   {t("contactRequestsPages.received.fields.requestMessage")}
                 </h3>
-                <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-700">
+                <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-[var(--text-primary)]">
                   {request.message}
                 </p>
               </div>
@@ -282,7 +283,7 @@ export default function ReceivedContactRequestsPage() {
               <div className="mt-6 flex flex-wrap gap-3">
                 <Link
                   to={`/posts/${request.itemPostId}`}
-                  className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800"
+                  className="inline-flex items-center justify-center rounded-xl bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[var(--accent-hover)]"
                 >
                   {t("contactRequestsPages.common.viewPost")}
                 </Link>
@@ -304,7 +305,7 @@ export default function ReceivedContactRequestsPage() {
                       type="button"
                       onClick={() => void handleReject(request.id)}
                       disabled={processingId === request.id}
-                      className="inline-flex items-center justify-center rounded-xl border border-red-200 bg-white px-4 py-2.5 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex items-center justify-center rounded-xl border border-red-200 bg-[var(--bg-card)] px-4 py-2.5 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {processingId === request.id
                         ? t("contactRequestsPages.common.processing")

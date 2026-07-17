@@ -12,6 +12,7 @@ import type { UpdatePostRequest } from "../../types/post";
 import { getApiErrorMessage } from "../../utils/error";
 import { getItemColorOptions, getPostStatusOptions } from "../../utils/options";
 import { getPostStatusLabel } from "../../utils/post";
+import { useToast } from "../../context/ToastContext";
 
 interface EditPostFormState {
   title: string;
@@ -33,6 +34,7 @@ export default function EditPostPage() {
   const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
+  const { show } = useToast();
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -170,12 +172,8 @@ export default function EditPostPage() {
 
       await updatePost(id, request);
 
-      navigate(`/posts/${id}`, {
-        replace: true,
-        state: {
-          successMessage: t("editPostPage.successMessage"),
-        },
-      });
+      show(t("editPostPage.successMessage"), "success");
+      navigate(`/posts/${id}`, { replace: true });
     } catch (error: any) {
       setErrorMessage(getApiErrorMessage(error));
     } finally {
@@ -192,50 +190,50 @@ export default function EditPostPage() {
       <div>
         <Link
           to={`/posts/${id}`}
-          className="text-sm font-medium text-slate-600 hover:text-slate-900"
+          className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
         >
           {t("editPostPage.backToPost")}
         </Link>
       </div>
 
-      <section className="rounded-2xl border border-slate-200 bg-white px-6 py-6 shadow-sm sm:px-8 sm:py-7">
+      <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] px-6 py-6 shadow-sm sm:px-8 sm:py-7">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
               {t("editPostPage.badge")}
             </p>
-            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900 sm:text-[2rem]">
+            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-[var(--text-primary)] sm:text-[2rem]">
               {t("editPostPage.title")}
             </h1>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600 sm:text-base">
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--text-secondary)] sm:text-base">
               {t("editPostPage.description")}
             </p>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-3">
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
-              <p className="text-sm font-medium text-slate-500">
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-4">
+              <p className="text-sm font-medium text-[var(--text-secondary)]">
                 {t("editPostPage.cards.editableFields")}
               </p>
-              <p className="mt-2 text-lg font-semibold text-slate-900">
+              <p className="mt-2 text-lg font-semibold text-[var(--text-primary)]">
                 {t("editPostPage.cards.editableFieldsValue")}
               </p>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
-              <p className="text-sm font-medium text-slate-500">
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-4">
+              <p className="text-sm font-medium text-[var(--text-secondary)]">
                 {t("editPostPage.cards.statusOptions")}
               </p>
-              <p className="mt-2 text-lg font-semibold text-slate-900">
+              <p className="mt-2 text-lg font-semibold text-[var(--text-primary)]">
                 {t("editPostPage.cards.statusOptionsValue")}
               </p>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
-              <p className="text-sm font-medium text-slate-500">
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-4">
+              <p className="text-sm font-medium text-[var(--text-secondary)]">
                 {t("editPostPage.cards.nextStep")}
               </p>
-              <p className="mt-2 text-lg font-semibold text-slate-900">
+              <p className="mt-2 text-lg font-semibold text-[var(--text-primary)]">
                 {t("editPostPage.cards.nextStepValue")}
               </p>
             </div>
@@ -244,12 +242,12 @@ export default function EditPostPage() {
       </section>
 
       <form onSubmit={handleSubmit} className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
-          <div className="border-b border-slate-200 pb-5">
-            <h2 className="text-xl font-semibold tracking-tight text-slate-900">
+        <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-sm sm:p-7">
+          <div className="border-b border-[var(--border)] pb-5">
+            <h2 className="text-xl font-semibold tracking-tight text-[var(--text-primary)]">
               {t("editPostPage.section.editInfo")}
             </h2>
-            <p className="mt-1 text-sm text-slate-600">
+            <p className="mt-1 text-sm text-[var(--text-secondary)]">
               {t("editPostPage.section.editInfoSubtitle")}
             </p>
           </div>
@@ -262,6 +260,7 @@ export default function EditPostPage() {
                 onChange={(value) => updateField("title", value)}
                 placeholder={t("editPostPage.form.titlePlaceholder")}
                 required
+                icon="create-outline"
               />
             </div>
 
@@ -301,11 +300,12 @@ export default function EditPostPage() {
                 onChange={(value) => updateField("location", value)}
                 placeholder={t("editPostPage.form.locationPlaceholder")}
                 required
+                icon="location-outline"
               />
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-slate-700">
+              <label className="mb-1.5 block text-sm font-medium text-[var(--text-primary)]">
                 {t("editPostPage.form.eventDate")}
               </label>
               <input
@@ -313,7 +313,7 @@ export default function EditPostPage() {
                 value={form.eventDate}
                 onChange={(e) => updateField("eventDate", e.target.value)}
                 required
-                className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none focus:border-slate-500"
+                className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-3.5 py-2.5 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
               />
             </div>
 
@@ -333,18 +333,18 @@ export default function EditPostPage() {
             </div>
           )}
 
-          <div className="mt-6 flex flex-wrap gap-3 border-t border-slate-200 pt-6">
+          <div className="mt-6 flex flex-wrap gap-3 border-t border-[var(--border)] pt-6">
             <button
               type="submit"
               disabled={isSubmitting}
-              className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center justify-center rounded-xl bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[var(--accent-hover)] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isSubmitting ? t("editPostPage.submitting") : t("editPostPage.submit")}
             </button>
 
             <Link
               to={`/posts/${id}`}
-              className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-50"
+              className="inline-flex items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] hover:border-[var(--border)] hover:bg-[var(--bg-surface)]"
             >
               {t("editPostPage.cancel")}
             </Link>
@@ -352,8 +352,8 @@ export default function EditPostPage() {
         </section>
 
         <div className="space-y-6">
-          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="text-lg font-semibold tracking-tight text-slate-900">
+          <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-sm">
+            <h2 className="text-lg font-semibold tracking-tight text-[var(--text-primary)]">
               {t("editPostPage.statusGuidance.title")}
             </h2>
 
@@ -372,25 +372,25 @@ export default function EditPostPage() {
                     key={option.value}
                     className={`rounded-2xl border px-4 py-4 ${
                       isSelected
-                        ? "border-slate-900 bg-slate-50"
-                        : "border-slate-200 bg-white"
+                        ? "border-[var(--accent)] bg-[var(--bg-surface)]"
+                        : "border-[var(--border)] bg-[var(--bg-card)]"
                     }`}
                   >
-                    <p className="text-sm font-semibold text-slate-900">
+                    <p className="text-sm font-semibold text-[var(--text-primary)]">
                       {getPostStatusLabel(option.value)}
                     </p>
-                    <p className="mt-1 text-sm leading-6 text-slate-600">{t(descKey)}</p>
+                    <p className="mt-1 text-sm leading-6 text-[var(--text-secondary)]">{t(descKey)}</p>
                   </div>
                 );
               })}
             </div>
           </section>
 
-          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="text-lg font-semibold tracking-tight text-slate-900">
+          <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-sm">
+            <h2 className="text-lg font-semibold tracking-tight text-[var(--text-primary)]">
               {t("editPostPage.section.notes")}
             </h2>
-            <div className="mt-4 space-y-3 text-sm leading-6 text-slate-600">
+            <div className="mt-4 space-y-3 text-sm leading-6 text-[var(--text-secondary)]">
               <p>{t("editPostPage.section.note1")}</p>
               <p>{t("editPostPage.section.note2")}</p>
               <p>{t("editPostPage.section.note3")}</p>

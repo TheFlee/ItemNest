@@ -8,6 +8,7 @@ import AdminDashboardPage from "../pages/admin/AdminDashboardPage";
 import AdminPostsPage from "../pages/admin/AdminPostsPage";
 import AdminReportsPage from "../pages/admin/AdminReportsPage";
 import AdminUsersPage from "../pages/admin/AdminUsersPage";
+import AdminCategoriesPage from "../pages/admin/AdminCategoriesPage";
 import AccountPage from "../pages/account/AccountPage";
 import ReceivedContactRequestsPage from "../pages/contactRequests/ReceivedContactRequestsPage";
 import SentContactRequestsPage from "../pages/contactRequests/SentContactRequestsPage";
@@ -60,6 +61,7 @@ export default function AppRouter() {
             <Route path="/admin/reports" element={<AdminReportsPage />} />
             <Route path="/admin/posts" element={<AdminPostsPage />} />
             <Route path="/admin/users" element={<AdminUsersPage />} />
+            <Route path="/admin/categories" element={<AdminCategoriesPage />} />
           </Route>
         </Route>
       </Routes>

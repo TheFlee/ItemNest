@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { getCategories } from "../../api/categoryApi";
 import { getPosts } from "../../api/itemPostApi";
@@ -8,6 +8,7 @@ import Pagination from "../../components/common/Pagination";
 import FormInput from "../../components/forms/FormInput";
 import FormSelect from "../../components/forms/FormSelect";
 import PostCard from "../../components/posts/PostCard";
+import PostCardSkeleton from "../../components/posts/PostCardSkeleton";
 import { useAuth } from "../../context/AuthContext";
 import type { Category } from "../../types/category";
 import type { ItemPost, PostFilterParams } from "../../types/post";
@@ -58,6 +59,7 @@ export default function HomePage() {
   const [errorMessage, setErrorMessage] = useState("");
   const [categoryErrorMessage, setCategoryErrorMessage] = useState("");
   const [filters, setFilters] = useState(initialFilters);
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
 
   useEffect(() => {
     setFilters(createFilterState(searchParams, isAdmin));
@@ -234,134 +236,112 @@ export default function HomePage() {
 
   return (
     <div className="space-y-6">
-      <section className="flex flex-col gap-2">
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
-          {t("home.title")}
-        </h1>
-        <p className="max-w-3xl text-sm leading-6 text-slate-600">
-          {t("home.description")}
-        </p>
-      </section>
+      {/* Guest hero */}
+      {!user && (
+        <section
+          className="relative overflow-hidden rounded-3xl px-8 py-14 text-center sm:py-20"
+          style={{ background: "linear-gradient(135deg, #fdf6ee 0%, #fae8d4 50%, #f5d5b8 100%)" }}
+        >
+          <div className="relative z-10">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent)]">
+              {t("brand.tagline")}
+            </p>
+            <h1
+              className="mt-3 text-4xl font-bold italic leading-tight tracking-tight text-[var(--text-primary)] sm:text-5xl"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
+              {t("home.hero.title")}
+            </h1>
+            <p className="mx-auto mt-4 max-w-xl text-base leading-7 text-[var(--text-secondary)]">
+              {t("home.hero.subtitle")}
+            </p>
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+              <Link
+                to="/register"
+                className="inline-flex items-center gap-2 rounded-xl bg-[var(--accent)] px-6 py-3 text-sm font-semibold text-white shadow-md hover:bg-[var(--accent-hover)]"
+              >
+                <ion-icon name="search-outline" style={{ fontSize: "15px" }} />
+                {t("home.hero.ctaLost")}
+              </Link>
+              <Link
+                to="/register"
+                className="inline-flex items-center gap-2 rounded-xl border border-[var(--border)] bg-white/80 px-6 py-3 text-sm font-semibold text-[var(--text-primary)] hover:bg-white"
+              >
+                <ion-icon name="hand-left-outline" style={{ fontSize: "15px" }} />
+                {t("home.hero.ctaFound")}
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Browse header (authenticated) */}
+      {user && (
+        <section className="flex flex-col gap-2">
+          <h1 className="text-2xl font-semibold tracking-tight text-[var(--text-primary)]" style={{ fontFamily: "var(--font-display)" }}>
+            {t("home.title")}
+          </h1>
+          <p className="max-w-3xl text-sm leading-6 text-[var(--text-secondary)]">
+            {t("home.description")}
+          </p>
+        </section>
+      )}
+
+      {/* Mobile filter toggle */}
+      <div className="xl:hidden">
+        <button
+          type="button"
+          onClick={() => setMobileFilterOpen((o) => !o)}
+          className="inline-flex items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
+        >
+          <ion-icon name="options-outline" style={{ fontSize: "15px" }} />
+          {mobileFilterOpen ? t("home.hideFilters") : t("home.showFilters")}
+          {hasAnyFilter && (
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[var(--accent)] text-[10px] font-bold text-white">
+              •
+            </span>
+          )}
+        </button>
+      </div>
 
       <div className="grid gap-6 xl:grid-cols-[280px_minmax(0,1fr)]">
-        <aside className="self-start">
-          <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+        {/* Filter sidebar */}
+        <aside className={`self-start xl:sticky xl:top-4 ${mobileFilterOpen ? "block" : "hidden xl:block"}`}>
+          <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-4 shadow-sm sm:p-5">
             <div className="mb-4 flex items-start justify-between gap-3">
               <div>
-                <h2 className="text-base font-semibold text-slate-900">
+                <h2 className="text-base font-semibold text-[var(--text-primary)]">
                   {t("common.filters")}
                 </h2>
-                <p className="mt-1 text-xs leading-5 text-slate-500">
+                <p className="mt-1 text-xs leading-5 text-[var(--text-secondary)]">
                   {isAdmin ? t("home.adminStatusHint") : t("home.publicStatusHint")}
                 </p>
               </div>
-
-              <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-right">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+              <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] px-3 py-2 text-right">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
                   {t("common.results")}
                 </p>
-                <p className="mt-1 text-sm font-semibold text-slate-900">{totalCount}</p>
+                <p className="mt-1 text-sm font-semibold text-[var(--text-primary)]">{totalCount}</p>
               </div>
             </div>
 
             <form className="space-y-4" onSubmit={handleApplyFilters}>
-              <FormInput
-                label={t("common.search")}
-                value={filters.searchTerm}
-                onChange={(value) =>
-                  setFilters((current) => ({ ...current, searchTerm: value }))
-                }
-                placeholder={t("home.searchPlaceholder")}
-              />
-
-              <FormInput
-                label={t("common.location")}
-                value={filters.location}
-                onChange={(value) =>
-                  setFilters((current) => ({ ...current, location: value }))
-                }
-                placeholder={t("home.locationPlaceholder")}
-              />
-
-              <FormSelect
-                label={t("common.type")}
-                value={filters.type ?? ""}
-                onChange={(value) =>
-                  setFilters((current) => ({
-                    ...current,
-                    type: value === "" ? undefined : Number(value),
-                  }))
-                }
-                options={postTypeOptions}
-                placeholder={t("common.allTypes")}
-              />
-
+              <FormInput label={t("common.search")} value={filters.searchTerm} onChange={(value) => setFilters((c) => ({ ...c, searchTerm: value }))} placeholder={t("home.searchPlaceholder")} icon="search-outline" />
+              <FormInput label={t("common.location")} value={filters.location} onChange={(value) => setFilters((c) => ({ ...c, location: value }))} placeholder={t("home.locationPlaceholder")} icon="location-outline" />
+              <FormSelect label={t("common.type")} value={filters.type ?? ""} onChange={(value) => setFilters((c) => ({ ...c, type: value === "" ? undefined : Number(value) }))} options={postTypeOptions} placeholder={t("common.allTypes")} />
               {isAdmin && (
-                <FormSelect
-                  label={t("common.status")}
-                  value={filters.status ?? ""}
-                  onChange={(value) =>
-                    setFilters((current) => ({
-                      ...current,
-                      status: value === "" ? undefined : Number(value),
-                    }))
-                  }
-                  options={postStatusOptions}
-                  placeholder={t("common.allStatuses")}
-                />
+                <FormSelect label={t("common.status")} value={filters.status ?? ""} onChange={(value) => setFilters((c) => ({ ...c, status: value === "" ? undefined : Number(value) }))} options={postStatusOptions} placeholder={t("common.allStatuses")} />
               )}
-
-              <FormSelect
-                label={t("common.category")}
-                value={filters.categoryId ?? ""}
-                onChange={(value) =>
-                  setFilters((current) => ({
-                    ...current,
-                    categoryId: value === "" ? undefined : Number(value),
-                  }))
-                }
-                options={categoryOptions}
-                placeholder={t("common.allCategories")}
-              />
-
-              <FormSelect
-                label={t("common.color")}
-                value={filters.color ?? ""}
-                onChange={(value) =>
-                  setFilters((current) => ({
-                    ...current,
-                    color: value === "" ? undefined : Number(value),
-                  }))
-                }
-                options={itemColorOptions}
-                placeholder={t("common.allColors")}
-              />
-
-              <FormSelect
-                label={t("common.sortBy")}
-                value={filters.sortValue}
-                onChange={(value) =>
-                  setFilters((current) => ({
-                    ...current,
-                    sortValue: value,
-                  }))
-                }
-                options={sortByOptions}
-              />
+              <FormSelect label={t("common.category")} value={filters.categoryId ?? ""} onChange={(value) => setFilters((c) => ({ ...c, categoryId: value === "" ? undefined : Number(value) }))} options={categoryOptions} placeholder={t("common.allCategories")} />
+              <FormSelect label={t("common.color")} value={filters.color ?? ""} onChange={(value) => setFilters((c) => ({ ...c, color: value === "" ? undefined : Number(value) }))} options={itemColorOptions} placeholder={t("common.allColors")} />
+              <FormSelect label={t("common.sortBy")} value={filters.sortValue} onChange={(value) => setFilters((c) => ({ ...c, sortValue: value }))} options={sortByOptions} />
 
               <div className="flex flex-col gap-2 pt-2">
-                <button
-                  type="submit"
-                  className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800"
-                >
+                <button type="submit" className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[var(--accent-hover)]">
+                  <ion-icon name="filter-outline" style={{ fontSize: "14px" }} />
                   {t("common.applyFilters")}
                 </button>
-
-                <button
-                  type="button"
-                  onClick={handleClearFilters}
-                  className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-50"
-                >
+                <button type="button" onClick={handleClearFilters} className="inline-flex items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-surface)]">
                   {t("common.clearFilters")}
                 </button>
               </div>
@@ -375,19 +355,24 @@ export default function HomePage() {
           </section>
         </aside>
 
+        {/* Posts grid */}
         <section className="space-y-4">
           {hasAnyFilter && (
-            <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-3 text-sm text-[var(--text-secondary)]">
               {t("home.customFiltersActive")}
             </div>
           )}
 
-          <PageState
-            isLoading={isLoading}
-            errorMessage={errorMessage}
-            isEmpty={!isLoading && !errorMessage && posts.length === 0}
-            emptyMessage={hasAnyFilter ? t("home.noFilteredResults") : t("home.noPosts")}
-          />
+          {isLoading ? (
+            <PostCardSkeleton />
+          ) : (
+            <PageState
+              isLoading={false}
+              errorMessage={errorMessage}
+              isEmpty={!errorMessage && posts.length === 0}
+              emptyMessage={hasAnyFilter ? t("home.noFilteredResults") : t("home.noPosts")}
+            />
+          )}
 
           {!isLoading && !errorMessage && posts.length > 0 && (
             <>
@@ -396,12 +381,7 @@ export default function HomePage() {
                   <PostCard key={post.id} post={post} />
                 ))}
               </div>
-
-              <Pagination
-                pageNumber={pageNumber}
-                totalPages={totalPages}
-                onPageChange={handlePageChange}
-              />
+              <Pagination pageNumber={pageNumber} totalPages={totalPages} onPageChange={handlePageChange} />
             </>
           )}
         </section>

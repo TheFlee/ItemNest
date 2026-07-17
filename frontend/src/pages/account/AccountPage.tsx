@@ -5,6 +5,7 @@ import FormInput from "../../components/forms/FormInput";
 import { useAuth } from "../../context/AuthContext";
 import { changeMyPassword, updateMyEmail } from "../../api/userApi";
 import { getApiErrorMessage } from "../../utils/error";
+import { useToast } from "../../context/ToastContext";
 
 function getRoleLabel(roles: string[], fallback: string) {
   if (roles.length === 0) {
@@ -17,6 +18,7 @@ function getRoleLabel(roles: string[], fallback: string) {
 export default function AccountPage() {
   const { t } = useTranslation();
   const { user, isLoading, updateAuth } = useAuth();
+  const { show } = useToast();
 
   const [newEmail, setNewEmail] = useState(user?.email ?? "");
   const [emailCurrentPassword, setEmailCurrentPassword] = useState("");
@@ -24,9 +26,7 @@ export default function AccountPage() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [emailErrorMessage, setEmailErrorMessage] = useState("");
-  const [emailSuccessMessage, setEmailSuccessMessage] = useState("");
   const [passwordErrorMessage, setPasswordErrorMessage] = useState("");
-  const [passwordSuccessMessage, setPasswordSuccessMessage] = useState("");
   const [isUpdatingEmail, setIsUpdatingEmail] = useState(false);
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
 
@@ -44,7 +44,6 @@ export default function AccountPage() {
   async function handleEmailSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setEmailErrorMessage("");
-    setEmailSuccessMessage("");
 
     if (!newEmail.trim()) {
       setEmailErrorMessage(t("accountPage.emailSection.requiredNewEmail"));
@@ -67,7 +66,7 @@ export default function AccountPage() {
       await updateAuth(response);
       setNewEmail(response.email);
       setEmailCurrentPassword("");
-      setEmailSuccessMessage(t("accountPage.emailSection.success"));
+      show(t("accountPage.emailSection.success"), "success");
     } catch (error: any) {
       setEmailErrorMessage(getApiErrorMessage(error));
     } finally {
@@ -78,7 +77,6 @@ export default function AccountPage() {
   async function handlePasswordSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setPasswordErrorMessage("");
-    setPasswordSuccessMessage("");
 
     if (!currentPassword.trim()) {
       setPasswordErrorMessage(t("accountPage.passwordSection.requiredCurrentPassword"));
@@ -111,7 +109,7 @@ export default function AccountPage() {
       setCurrentPassword("");
       setNewPassword("");
       setConfirmNewPassword("");
-      setPasswordSuccessMessage(t("accountPage.passwordSection.success"));
+      show(t("accountPage.passwordSection.success"), "success");
     } catch (error: any) {
       setPasswordErrorMessage(getApiErrorMessage(error));
     } finally {
@@ -121,54 +119,57 @@ export default function AccountPage() {
 
   return (
     <div className="space-y-8">
-      <section className="rounded-2xl border border-slate-200 bg-white px-6 py-6 shadow-sm sm:px-8 sm:py-7">
+      <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] px-6 py-6 shadow-sm sm:px-8 sm:py-7">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
               {t("accountPage.badge")}
             </p>
-            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900 sm:text-[2rem]">
+            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-[var(--text-primary)] sm:text-[2rem]">
               {t("accountPage.title")}
             </h1>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600 sm:text-base">
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--text-secondary)] sm:text-base">
               {t("accountPage.description")}
             </p>
           </div>
         </div>
 
         <div className="mt-6 grid gap-4 md:grid-cols-3">
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
+            <p className="flex items-center gap-2 text-sm font-medium text-[var(--text-secondary)]">
+              <ion-icon name="person-outline" style={{ fontSize: "18px" }} />
               {t("accountPage.cards.fullName")}
             </p>
-            <p className="mt-2 text-xl font-semibold tracking-tight text-slate-900">
+            <p className="mt-2 text-xl font-semibold tracking-tight text-[var(--text-primary)]">
               {user.fullName}
             </p>
-            <p className="mt-3 text-sm leading-6 text-slate-600">
+            <p className="mt-3 text-sm leading-6 text-[var(--text-secondary)]">
               {t("accountPage.cards.fullNameDescription")}
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
+            <p className="flex items-center gap-2 text-sm font-medium text-[var(--text-secondary)]">
+              <ion-icon name="mail-outline" style={{ fontSize: "18px" }} />
               {t("accountPage.cards.emailAddress")}
             </p>
-            <p className="mt-2 break-all text-xl font-semibold tracking-tight text-slate-900">
+            <p className="mt-2 break-all text-xl font-semibold tracking-tight text-[var(--text-primary)]">
               {user.email}
             </p>
-            <p className="mt-3 text-sm leading-6 text-slate-600">
+            <p className="mt-3 text-sm leading-6 text-[var(--text-secondary)]">
               {t("accountPage.cards.emailDescription")}
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
+            <p className="flex items-center gap-2 text-sm font-medium text-[var(--text-secondary)]">
+              <ion-icon name="lock-closed-outline" style={{ fontSize: "18px" }} />
               {t("accountPage.cards.accountRole")}
             </p>
-            <p className="mt-2 text-xl font-semibold tracking-tight text-slate-900">
+            <p className="mt-2 text-xl font-semibold tracking-tight text-[var(--text-primary)]">
               {getRoleLabel(user.roles, t("accountPage.roleMember"))}
             </p>
-            <p className="mt-3 text-sm leading-6 text-slate-600">
+            <p className="mt-3 text-sm leading-6 text-[var(--text-secondary)]">
               {t("accountPage.cards.memberSince", {
                 date: new Date(user.createdAt).toLocaleDateString(),
               })}
@@ -178,12 +179,12 @@ export default function AccountPage() {
       </section>
 
       <section className="grid gap-6 xl:grid-cols-2">
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-sm">
           <div>
-            <h2 className="text-xl font-semibold tracking-tight text-slate-900">
+            <h2 className="text-xl font-semibold tracking-tight text-[var(--text-primary)]">
               {t("accountPage.emailSection.title")}
             </h2>
-            <p className="mt-1 text-sm text-slate-600">
+            <p className="mt-1 text-sm text-[var(--text-secondary)]">
               {t("accountPage.emailSection.description")}
             </p>
           </div>
@@ -213,16 +214,10 @@ export default function AccountPage() {
               </div>
             )}
 
-            {emailSuccessMessage && (
-              <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-                {emailSuccessMessage}
-              </div>
-            )}
-
             <button
               type="submit"
               disabled={isUpdatingEmail}
-              className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center justify-center rounded-xl bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--accent-hover)] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isUpdatingEmail
                 ? t("accountPage.emailSection.updating")
@@ -231,12 +226,12 @@ export default function AccountPage() {
           </form>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-sm">
           <div>
-            <h2 className="text-xl font-semibold tracking-tight text-slate-900">
+            <h2 className="text-xl font-semibold tracking-tight text-[var(--text-primary)]">
               {t("accountPage.passwordSection.title")}
             </h2>
-            <p className="mt-1 text-sm text-slate-600">
+            <p className="mt-1 text-sm text-[var(--text-secondary)]">
               {t("accountPage.passwordSection.description")}
             </p>
           </div>
@@ -275,16 +270,10 @@ export default function AccountPage() {
               </div>
             )}
 
-            {passwordSuccessMessage && (
-              <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-                {passwordSuccessMessage}
-              </div>
-            )}
-
             <button
               type="submit"
               disabled={isUpdatingPassword}
-              className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center justify-center rounded-xl bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--accent-hover)] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isUpdatingPassword
                 ? t("accountPage.passwordSection.updating")

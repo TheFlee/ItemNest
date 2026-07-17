@@ -11,6 +11,7 @@ import PageState from "../../components/common/PageState";
 import Pagination from "../../components/common/Pagination";
 import FormInput from "../../components/forms/FormInput";
 import FormSelect from "../../components/forms/FormSelect";
+import PostCardSkeleton from "../../components/posts/PostCardSkeleton";
 import type { Category } from "../../types/category";
 import type { ItemPost } from "../../types/post";
 import { buildFileUrl } from "../../utils/api";
@@ -22,11 +23,13 @@ import {
   getPostTypeOptions,
 } from "../../utils/options";
 import { getPostStatusLabel, getPostTypeLabel } from "../../utils/post";
+import { useToast } from "../../context/ToastContext";
 
 const PAGE_SIZE = 15;
 
 export default function AdminPostsPage() {
   const { t } = useTranslation();
+  const { show } = useToast();
   const [posts, setPosts] = useState<ItemPost[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -41,7 +44,6 @@ export default function AdminPostsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const [categoryErrorMessage, setCategoryErrorMessage] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
   const [processingId, setProcessingId] = useState<string | null>(null);
 
   const sortByOptions = useMemo(
@@ -72,7 +74,7 @@ export default function AdminPostsPage() {
         setPosts(postData);
         setCategories(categoryData);
         setCategoryErrorMessage("");
-      } catch (error: any) {
+      } catch (error: unknown) {
         const message = getApiErrorMessage(error);
         setErrorMessage(message);
         setCategoryErrorMessage(message);
@@ -86,14 +88,13 @@ export default function AdminPostsPage() {
 
   async function handleStatusChange(postId: string, nextStatus: number) {
     setErrorMessage("");
-    setSuccessMessage("");
     setProcessingId(postId);
 
     try {
       const updatedPost = await updateAdminPostStatus(postId, { status: nextStatus });
       setPosts((prev) => prev.map((post) => (post.id === postId ? updatedPost : post)));
-      setSuccessMessage(t("adminPages.posts.successStatusUpdated"));
-    } catch (error: any) {
+      show(t("adminPages.posts.successStatusUpdated"), "success");
+    } catch (error: unknown) {
       setErrorMessage(getApiErrorMessage(error));
     } finally {
       setProcessingId(null);
@@ -108,14 +109,13 @@ export default function AdminPostsPage() {
     }
 
     setErrorMessage("");
-    setSuccessMessage("");
     setProcessingId(postId);
 
     try {
       await deleteAdminPost(postId);
       setPosts((prev) => prev.filter((post) => post.id !== postId));
-      setSuccessMessage(t("adminPages.posts.successDeleted"));
-    } catch (error: any) {
+      show(t("adminPages.posts.successDeleted"), "success");
+    } catch (error: unknown) {
       setErrorMessage(getApiErrorMessage(error));
     } finally {
       setProcessingId(null);
@@ -240,34 +240,30 @@ export default function AdminPostsPage() {
   if (isLoading || errorMessage || posts.length === 0) {
     return (
       <div className="space-y-4">
-        {successMessage && !isLoading && !errorMessage && (
-          <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-            {successMessage}
-          </div>
-        )}
-
         <PageState
-          isLoading={isLoading}
+          isLoading={false}
           errorMessage={errorMessage}
           isEmpty={!isLoading && !errorMessage && posts.length === 0}
           emptyMessage={t("adminPages.posts.emptyMessage")}
         />
+        {isLoading && <PostCardSkeleton />}
       </div>
     );
   }
 
   return (
     <div className="space-y-8">
-      <section className="rounded-2xl border border-slate-200 bg-white px-6 py-6 shadow-sm sm:px-8 sm:py-7">
+      <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] px-6 py-6 shadow-sm sm:px-8 sm:py-7">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
               {t("adminPages.posts.badge")}
             </p>
-            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900 sm:text-[2rem]">
+            <h1 className="mt-2 flex items-center gap-2 text-3xl font-semibold tracking-tight text-[var(--text-primary)] sm:text-[2rem]">
+              <ion-icon name="layers-outline" style={{ fontSize: "20px" }} />
               {t("adminPages.posts.title")}
             </h1>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600 sm:text-base">
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--text-secondary)] sm:text-base">
               {t("adminPages.posts.description")}
             </p>
           </div>
@@ -275,13 +271,13 @@ export default function AdminPostsPage() {
           <div className="flex flex-wrap gap-3">
             <Link
               to="/admin/dashboard"
-              className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800"
+              className="inline-flex items-center justify-center rounded-xl bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[var(--accent-hover)]"
             >
               {t("adminPages.posts.backToDashboard")}
             </Link>
             <Link
               to="/admin/reports"
-              className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-50"
+              className="inline-flex items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
             >
               {t("adminPages.posts.openReports")}
             </Link>
@@ -289,51 +285,51 @@ export default function AdminPostsPage() {
         </div>
 
         <div className="mt-6 grid gap-4 md:grid-cols-4">
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">{t("adminPages.posts.totalPosts")}</p>
-            <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
+            <p className="text-sm font-medium text-[var(--text-secondary)]">{t("adminPages.posts.totalPosts")}</p>
+            <p className="mt-2 text-3xl font-semibold tracking-tight text-[var(--text-primary)]">
               {metrics.total}
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">{t("adminPages.posts.open")}</p>
-            <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
+            <p className="text-sm font-medium text-[var(--text-secondary)]">{t("adminPages.posts.open")}</p>
+            <p className="mt-2 text-3xl font-semibold tracking-tight text-[var(--text-primary)]">
               {metrics.open}
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">{t("adminPages.posts.returned")}</p>
-            <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
+            <p className="text-sm font-medium text-[var(--text-secondary)]">{t("adminPages.posts.returned")}</p>
+            <p className="mt-2 text-3xl font-semibold tracking-tight text-[var(--text-primary)]">
               {metrics.returned}
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">{t("adminPages.posts.closed")}</p>
-            <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
+            <p className="text-sm font-medium text-[var(--text-secondary)]">{t("adminPages.posts.closed")}</p>
+            <p className="mt-2 text-3xl font-semibold tracking-tight text-[var(--text-primary)]">
               {metrics.closed}
             </p>
           </div>
         </div>
 
-        <section className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-5">
+        <section className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div>
-              <h2 className="text-xl font-semibold tracking-tight text-slate-900">
+              <h2 className="text-xl font-semibold tracking-tight text-[var(--text-primary)]">
                 {t("adminPages.posts.filtersTitle")}
               </h2>
-              <p className="mt-1 text-sm text-slate-600">
+              <p className="mt-1 text-sm text-[var(--text-secondary)]">
                 {t("adminPages.posts.filtersDescription")}
               </p>
             </div>
 
-            <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-right">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-4 py-3 text-right">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
                 {t("adminPages.posts.results")}
               </p>
-              <p className="mt-1 text-sm font-semibold text-slate-900">
+              <p className="mt-1 text-sm font-semibold text-[var(--text-primary)]">
                 {filteredPosts.length}
               </p>
             </div>
@@ -407,13 +403,13 @@ export default function AdminPostsPage() {
             <button
               type="button"
               onClick={handleClearFilters}
-              className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-50"
+              className="inline-flex items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
             >
               {t("adminPages.posts.clearFilters")}
             </button>
 
             {hasAnyFilter && (
-              <p className="text-sm text-slate-500">{t("adminPages.posts.filtersActive")}</p>
+              <p className="text-sm text-[var(--text-secondary)]">{t("adminPages.posts.filtersActive")}</p>
             )}
           </div>
 
@@ -424,12 +420,6 @@ export default function AdminPostsPage() {
           )}
         </section>
       </section>
-
-      {successMessage && (
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-          {successMessage}
-        </div>
-      )}
 
       <div className="space-y-5">
         {filteredPosts.length === 0 ? (
@@ -442,10 +432,10 @@ export default function AdminPostsPage() {
         ) : (
           <>
             <section className="flex flex-col gap-2">
-              <h2 className="text-xl font-semibold tracking-tight text-slate-900">
+              <h2 className="text-xl font-semibold tracking-tight text-[var(--text-primary)]">
                 {t("adminPages.posts.platformPosts")}
               </h2>
-              <p className="text-sm text-slate-600">
+              <p className="text-sm text-[var(--text-secondary)]">
                 {t("adminPages.posts.platformPostsDescription")}
               </p>
             </section>
@@ -454,10 +444,10 @@ export default function AdminPostsPage() {
               {paginatedPosts.map((post) => (
                 <article
                   key={post.id}
-                  className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+                  className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] shadow-sm"
                 >
                   <div className="flex flex-col lg:flex-row">
-                    <div className="h-56 w-full shrink-0 overflow-hidden bg-slate-100 lg:h-auto lg:w-80">
+                    <div className="h-56 w-full shrink-0 overflow-hidden bg-[var(--bg-surface)] lg:h-auto lg:w-80">
                       {post.primaryImageUrl ? (
                         <img
                           src={buildFileUrl(post.primaryImageUrl)}
@@ -465,7 +455,7 @@ export default function AdminPostsPage() {
                           className="h-full w-full object-cover"
                         />
                       ) : (
-                        <div className="flex h-full min-h-56 items-center justify-center text-sm text-slate-500">
+                        <div className="flex h-full min-h-56 items-center justify-center text-sm text-[var(--text-secondary)]">
                           {t("adminPages.posts.noImage")}
                         </div>
                       )}
@@ -475,10 +465,10 @@ export default function AdminPostsPage() {
                       <div>
                         <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                           <div>
-                            <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+                            <h2 className="text-2xl font-semibold tracking-tight text-[var(--text-primary)]">
                               {post.title}
                             </h2>
-                            <p className="mt-2 text-sm leading-6 text-slate-600">
+                            <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">
                               {t("adminPages.posts.cardSubtitle")}
                             </p>
                           </div>
@@ -494,49 +484,49 @@ export default function AdminPostsPage() {
                               {getPostTypeLabel(post.type)}
                             </span>
 
-                            <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700">
+                            <span className="rounded-full bg-[var(--bg-surface)] px-3 py-1 text-sm font-medium text-[var(--text-primary)]">
                               {getPostStatusLabel(post.status)}
                             </span>
                           </div>
                         </div>
 
-                        <div className="mt-5 grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm md:grid-cols-2 xl:grid-cols-4">
+                        <div className="mt-5 grid gap-3 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 text-sm md:grid-cols-2 xl:grid-cols-4">
                           <div>
-                            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
                               {t("adminPages.posts.owner")}
                             </p>
-                            <p className="mt-1 font-medium text-slate-700">{post.userFullName}</p>
+                            <p className="mt-1 font-medium text-[var(--text-primary)]">{post.userFullName}</p>
                           </div>
 
                           <div>
-                            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
                               {t("adminPages.posts.category")}
                             </p>
-                            <p className="mt-1 font-medium text-slate-700">{post.categoryName}</p>
+                            <p className="mt-1 font-medium text-[var(--text-primary)]">{post.categoryName}</p>
                           </div>
 
                           <div>
-                            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
                               {t("adminPages.posts.location")}
                             </p>
-                            <p className="mt-1 font-medium text-slate-700">{post.location}</p>
+                            <p className="mt-1 font-medium text-[var(--text-primary)]">{post.location}</p>
                           </div>
 
                           <div>
-                            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
                               {t("adminPages.posts.createdAt")}
                             </p>
-                            <p className="mt-1 font-medium text-slate-700">
+                            <p className="mt-1 font-medium text-[var(--text-primary)]">
                               {formatDateTime(post.createdAt)}
                             </p>
                           </div>
                         </div>
 
-                        <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-5">
-                          <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-slate-500">
+                        <div className="mt-5 rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-5">
+                          <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-[var(--text-secondary)]">
                             {t("adminPages.posts.descriptionTitle")}
                           </h3>
-                          <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-700">
+                          <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-[var(--text-primary)]">
                             {post.description}
                           </p>
                         </div>
@@ -545,7 +535,7 @@ export default function AdminPostsPage() {
                       <div className="mt-6 flex flex-wrap gap-3">
                         <Link
                           to={`/posts/${post.id}`}
-                          className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800"
+                          className="inline-flex items-center justify-center rounded-xl bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[var(--accent-hover)]"
                         >
                           {t("adminPages.posts.viewPost")}
                         </Link>
@@ -554,7 +544,7 @@ export default function AdminPostsPage() {
                           type="button"
                           onClick={() => void handleStatusChange(post.id, 0)}
                           disabled={processingId === post.id}
-                          className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                          className="inline-flex items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-surface)] disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           {processingId === post.id && post.status !== 0
                             ? t("adminPages.posts.processing")
@@ -576,7 +566,7 @@ export default function AdminPostsPage() {
                           type="button"
                           onClick={() => void handleStatusChange(post.id, 2)}
                           disabled={processingId === post.id}
-                          className="inline-flex items-center justify-center rounded-xl border border-amber-200 bg-white px-4 py-2.5 text-sm font-semibold text-amber-700 hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-60"
+                          className="inline-flex items-center justify-center rounded-xl border border-amber-200 bg-[var(--bg-card)] px-4 py-2.5 text-sm font-semibold text-amber-700 hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           {processingId === post.id && post.status !== 2
                             ? t("adminPages.posts.processing")
@@ -587,7 +577,7 @@ export default function AdminPostsPage() {
                           type="button"
                           onClick={() => void handleDelete(post.id)}
                           disabled={processingId === post.id}
-                          className="inline-flex items-center justify-center rounded-xl border border-red-200 bg-white px-4 py-2.5 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                          className="inline-flex items-center justify-center rounded-xl border border-red-200 bg-[var(--bg-card)] px-4 py-2.5 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           {processingId === post.id
                             ? t("adminPages.posts.processing")

@@ -12,6 +12,7 @@ interface DashboardCard {
   value: number;
   description: string;
   to: string;
+  icon: string;
 }
 
 function getPercentage(value: number, total: number) {
@@ -63,48 +64,56 @@ export default function DashboardPage() {
       value: dashboard.myPostsCount,
       description: t("dashboardPage.quickAccess.myPostsDescription"),
       to: "/my-posts",
+      icon: "document-text-outline",
     },
     {
       title: t("dashboardPage.quickAccess.openPosts"),
       value: dashboard.openPostsCount,
       description: t("dashboardPage.quickAccess.openPostsDescription"),
       to: "/my-posts",
+      icon: "radio-button-on-outline",
     },
     {
       title: t("dashboardPage.quickAccess.returnedPosts"),
       value: dashboard.returnedPostsCount,
       description: t("dashboardPage.quickAccess.returnedPostsDescription"),
       to: "/my-posts",
+      icon: "checkmark-circle-outline",
     },
     {
       title: t("dashboardPage.quickAccess.closedPosts"),
       value: dashboard.closedPostsCount,
       description: t("dashboardPage.quickAccess.closedPostsDescription"),
       to: "/my-posts",
+      icon: "archive-outline",
     },
     {
       title: t("dashboardPage.quickAccess.favorites"),
       value: dashboard.favoritesCount,
       description: t("dashboardPage.quickAccess.favoritesDescription"),
       to: "/favorites",
+      icon: "heart-outline",
     },
     {
       title: t("dashboardPage.quickAccess.pendingReceivedRequests"),
       value: dashboard.pendingReceivedContactRequestsCount,
       description: t("dashboardPage.quickAccess.pendingReceivedRequestsDescription"),
       to: "/contact-requests/received",
+      icon: "mail-open-outline",
     },
     {
       title: t("dashboardPage.quickAccess.pendingSentRequests"),
       value: dashboard.pendingSentContactRequestsCount,
       description: t("dashboardPage.quickAccess.pendingSentRequestsDescription"),
       to: "/contact-requests/sent",
+      icon: "paper-plane-outline",
     },
     {
       title: t("dashboardPage.quickAccess.myReports"),
       value: dashboard.myReportsCount,
       description: t("dashboardPage.quickAccess.myReportsDescription"),
       to: "/my-reports",
+      icon: "flag-outline",
     },
   ];
 
@@ -128,16 +137,16 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <section className="rounded-2xl border border-slate-200 bg-white px-6 py-6 shadow-sm sm:px-8 sm:py-7">
+      <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] px-6 py-6 shadow-sm sm:px-8 sm:py-7">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
               {t("dashboardPage.badge")}
             </p>
-            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900 sm:text-[2rem]">
+            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-[var(--text-primary)] sm:text-[2rem]">
               {t("dashboardPage.title")}
             </h1>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600 sm:text-base">
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--text-secondary)] sm:text-base">
               {t("dashboardPage.description")}
             </p>
           </div>
@@ -145,13 +154,13 @@ export default function DashboardPage() {
           <div className="flex flex-wrap gap-3">
             <Link
               to="/create-post"
-              className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800"
+              className="inline-flex items-center justify-center rounded-xl bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[var(--accent-hover)]"
             >
               {t("dashboardPage.actions.createPost")}
             </Link>
             <Link
               to="/my-posts"
-              className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-50"
+              className="inline-flex items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
             >
               {t("dashboardPage.actions.manageMyPosts")}
             </Link>
@@ -159,38 +168,40 @@ export default function DashboardPage() {
         </div>
 
         <div className="mt-6 grid gap-4 md:grid-cols-3">
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
+            <p className="text-sm font-medium text-[var(--text-secondary)]">
               {t("dashboardPage.highlights.totalPosts")}
             </p>
-            <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+            <p className="mt-2 text-3xl font-semibold tracking-tight text-[var(--text-primary)]">
               {dashboard.myPostsCount}
             </p>
-            <p className="mt-3 text-sm leading-6 text-slate-600">
+            <p className="mt-3 text-sm leading-6 text-[var(--text-secondary)]">
               {t("dashboardPage.highlights.totalPostsDescription")}
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">
+          <div
+            className={`rounded-2xl border p-5 ${dashboard.pendingReceivedContactRequestsCount > 0 ? "border-amber-300 bg-amber-50 animate-pulse" : "border-[var(--border)] bg-[var(--bg-surface)]"}`}
+          >
+            <p className="text-sm font-medium text-[var(--text-secondary)]">
               {t("dashboardPage.highlights.requestsWaiting")}
             </p>
-            <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+            <p className="mt-2 text-3xl font-semibold tracking-tight text-[var(--text-primary)]">
               {dashboard.pendingReceivedContactRequestsCount}
             </p>
-            <p className="mt-3 text-sm leading-6 text-slate-600">
+            <p className="mt-3 text-sm leading-6 text-[var(--text-secondary)]">
               {t("dashboardPage.highlights.requestsWaitingDescription")}
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
+            <p className="text-sm font-medium text-[var(--text-secondary)]">
               {t("dashboardPage.highlights.savedAndTracked")}
             </p>
-            <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+            <p className="mt-2 text-3xl font-semibold tracking-tight text-[var(--text-primary)]">
               {dashboard.favoritesCount}
             </p>
-            <p className="mt-3 text-sm leading-6 text-slate-600">
+            <p className="mt-3 text-sm leading-6 text-[var(--text-secondary)]">
               {t("dashboardPage.highlights.savedAndTrackedDescription")}
             </p>
           </div>
@@ -199,10 +210,10 @@ export default function DashboardPage() {
 
       <section>
         <div className="mb-4">
-          <h2 className="text-xl font-semibold tracking-tight text-slate-900">
+          <h2 className="text-xl font-semibold tracking-tight text-[var(--text-primary)]">
             {t("dashboardPage.quickAccess.title")}
           </h2>
-          <p className="mt-1 text-sm text-slate-600">
+          <p className="mt-1 text-sm text-[var(--text-secondary)]">
             {t("dashboardPage.quickAccess.description")}
           </p>
         </div>
@@ -212,15 +223,21 @@ export default function DashboardPage() {
             <Link
               key={card.title}
               to={card.to}
-              className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md"
+              className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--accent)] hover:shadow-md"
             >
-              <p className="text-sm font-medium text-slate-500">{card.title}</p>
-              <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium text-[var(--text-secondary)]">{card.title}</p>
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[var(--bg-surface)] text-[var(--text-secondary)]">
+                  <ion-icon name={card.icon} style={{ fontSize: "16px" }} />
+                </div>
+              </div>
+              <p className="mt-2 text-3xl font-semibold tracking-tight text-[var(--text-primary)]">
                 {card.value}
               </p>
-              <p className="mt-3 text-sm leading-6 text-slate-600">{card.description}</p>
-              <p className="mt-5 text-sm font-medium text-slate-900">
+              <p className="mt-3 text-sm leading-6 text-[var(--text-secondary)]">{card.description}</p>
+              <p className="mt-4 flex items-center gap-1 text-sm font-medium text-[var(--accent)]">
                 {t("dashboardPage.actions.openSection")}
+                <ion-icon name="arrow-forward-outline" style={{ fontSize: "13px" }} />
               </p>
             </Link>
           ))}
@@ -228,22 +245,22 @@ export default function DashboardPage() {
       </section>
 
       <section className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-sm">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h2 className="text-xl font-semibold tracking-tight text-slate-900">
+              <h2 className="text-xl font-semibold tracking-tight text-[var(--text-primary)]">
                 {t("dashboardPage.summary.title")}
               </h2>
-              <p className="mt-1 text-sm text-slate-600">
+              <p className="mt-1 text-sm text-[var(--text-secondary)]">
                 {t("dashboardPage.summary.description")}
               </p>
             </div>
 
-            <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2">
-              <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-500">
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-2">
+              <p className="text-xs font-medium uppercase tracking-[0.16em] text-[var(--text-secondary)]">
                 {t("dashboardPage.summary.baseTotal")}
               </p>
-              <p className="mt-1 text-sm font-semibold text-slate-900">
+              <p className="mt-1 text-sm font-semibold text-[var(--text-primary)]">
                 {t("dashboardPage.summary.baseTotalValue", {
                   count: dashboard.myPostsCount,
                 })}
@@ -256,19 +273,19 @@ export default function DashboardPage() {
               <div key={row.label}>
                 <div className="mb-2 flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-slate-800">{row.label}</p>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-sm font-medium text-[var(--text-primary)]">{row.label}</p>
+                    <p className="text-xs text-[var(--text-secondary)]">
                       {t("dashboardPage.summary.ofAllPosts", {
                         percentage: row.percentage,
                       })}
                     </p>
                   </div>
-                  <p className="text-sm font-semibold text-slate-900">{row.value}</p>
+                  <p className="text-sm font-semibold text-[var(--text-primary)]">{row.value}</p>
                 </div>
 
-                <div className="h-2.5 rounded-full bg-slate-100">
+                <div className="h-2 rounded-full bg-[var(--bg-surface)]">
                   <div
-                    className="h-2.5 rounded-full bg-slate-900"
+                    className="h-2 rounded-full bg-[var(--accent)] transition-all duration-500"
                     style={{ width: `${row.percentage}%` }}
                   />
                 </div>
