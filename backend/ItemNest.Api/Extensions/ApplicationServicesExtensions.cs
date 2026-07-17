@@ -38,14 +38,20 @@ public static class ApplicationServicesExtensions
 
         var awsSection = configuration.GetSection(AwsSettings.SectionName);
         services.AddSingleton<IAmazonS3>(_ =>
-            new AmazonS3Client(
+        {
+            var accountId = awsSection["AccountId"];
+            if (string.IsNullOrEmpty(accountId))
+                return new AmazonS3Client(new AmazonS3Config { RegionEndpoint = Amazon.RegionEndpoint.USEast1 });
+
+            return new AmazonS3Client(
                 awsSection["AccessKeyId"],
                 awsSection["SecretAccessKey"],
                 new AmazonS3Config
                 {
-                    ServiceURL = $"https://{awsSection["AccountId"]}.r2.cloudflarestorage.com",
+                    ServiceURL = $"https://{accountId}.r2.cloudflarestorage.com",
                     ForcePathStyle = true,
-                }));
+                });
+        });
 
         return services;
     }

@@ -258,7 +258,7 @@ export default function HomePage() {
             <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
               <Link
                 to="/register"
-                className="inline-flex items-center gap-2 rounded-xl bg-[var(--accent)] px-6 py-3 text-sm font-semibold text-white shadow-md hover:bg-[var(--accent-hover)]"
+                className="inline-flex items-center gap-2 rounded-xl bg-[var(--accent)] px-6 py-3 text-sm font-semibold text-white hover:bg-[var(--accent-hover)] transition active:scale-[0.98]"
               >
                 <ion-icon name="search-outline" style={{ fontSize: "15px" }} />
                 {t("home.hero.ctaLost")}

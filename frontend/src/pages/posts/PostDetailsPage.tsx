@@ -3,14 +3,8 @@ import { useTranslation } from "react-i18next";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { createContactRequest } from "../../api/contactRequestApi";
 import { addFavorite, removeFavorite } from "../../api/favoriteApi";
-import {
-  deletePost,
-  getPostById,
-  getPostMatches,
-  updatePost,
-} from "../../api/itemPostApi";
+import { deletePost, getPostById, getPostMatches, updatePost } from "../../api/itemPostApi";
 import { createReport } from "../../api/reportApi";
-import DetailRow from "../../components/common/DetailRow";
 import PageState from "../../components/common/PageState";
 import FormTextarea from "../../components/forms/FormTextarea";
 import PostImageGallery from "../../components/posts/PostImageGallery";
@@ -21,19 +15,18 @@ import { buildFileUrl } from "../../utils/api";
 import { getApiErrorMessage } from "../../utils/error";
 import { formatDate, formatDateTime } from "../../utils/format";
 import { getReportReasonOptions } from "../../utils/options";
-import {
-  getItemColorLabel,
-  getPostStatusLabel,
-  getPostTypeLabel,
-} from "../../utils/post";
+import { getItemColorLabel, getPostStatusLabel, getPostTypeLabel } from "../../utils/post";
+
+const itemColorMap: Record<number, string> = {
+  0: "#94a3b8", 1: "#1a1814", 2: "#f0ede8", 3: "#94a3b8",
+  4: "#3b82f6", 5: "#ef4444", 6: "#22c55e", 7: "#eab308",
+  8: "#92400e", 9: "#ec4899", 10: "#a855f7", 11: "#f97316",
+  12: "#c8c8c8", 13: "#ca8a04",
+};
 
 interface LocationState {
   warningMessage?: string;
   successMessage?: string;
-}
-
-function getMatchScoreWidth(score: number) {
-  return `${Math.max(0, Math.min(100, Math.round(score)))}%`;
 }
 
 export default function PostDetailsPage() {
@@ -55,7 +48,6 @@ export default function PostDetailsPage() {
   const [isDeletingPost, setIsDeletingPost] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-
   const [contactMessage, setContactMessage] = useState("");
   const [reportReason, setReportReason] = useState<number>(1);
   const [reportDescription, setReportDescription] = useState("");
@@ -66,247 +58,102 @@ export default function PostDetailsPage() {
 
   useEffect(() => {
     async function loadPost() {
-      if (!id) {
-        setErrorMessage(t("postDetails.errors.postIdMissing"));
-        setIsLoading(false);
-        return;
-      }
-
-      setIsLoading(true);
-      setErrorMessage("");
-      setSuccessMessage("");
-
-      try {
-        const data = await getPostById(id);
-        setPost(data);
-      } catch (error: any) {
-        setErrorMessage(getApiErrorMessage(error));
-      } finally {
-        setIsLoading(false);
-      }
+      if (!id) { setErrorMessage(t("postDetails.errors.postIdMissing")); setIsLoading(false); return; }
+      setIsLoading(true); setErrorMessage(""); setSuccessMessage("");
+      try { setPost(await getPostById(id)); }
+      catch (error: any) { setErrorMessage(getApiErrorMessage(error)); }
+      finally { setIsLoading(false); }
     }
-
     void loadPost();
   }, [id, t]);
 
   useEffect(() => {
     async function loadMatches() {
-      if (!id || !isAuthenticated) {
-        setMatches([]);
-        return;
-      }
-
+      if (!id || !isAuthenticated) { setMatches([]); return; }
       setIsMatchesLoading(true);
-
-      try {
-        const data = await getPostMatches(id);
-        setMatches(data);
-      } catch {
-        setMatches([]);
-      } finally {
-        setIsMatchesLoading(false);
-      }
+      try { setMatches(await getPostMatches(id)); }
+      catch { setMatches([]); }
+      finally { setIsMatchesLoading(false); }
     }
-
     void loadMatches();
   }, [id, isAuthenticated]);
 
   function handleImagesChanged(updatedImages: ItemPost["images"]) {
-    setPost((prev) => {
-      if (!prev) {
-        return prev;
-      }
-
-      return {
-        ...prev,
-        images: updatedImages,
-        primaryImageUrl: updatedImages[0]?.imageUrl ?? "",
-      };
-    });
+    setPost((prev) => prev ? { ...prev, images: updatedImages, primaryImageUrl: updatedImages[0]?.imageUrl ?? "" } : prev);
   }
 
   function buildUpdateRequest(nextStatus: number): UpdatePostRequest | null {
-    if (!post) {
-      return null;
-    }
-
-    return {
-      title: post.title,
-      description: post.description,
-      color: post.color,
-      location: post.location,
-      eventDate: post.eventDate,
-      categoryId: post.categoryId,
-      status: nextStatus,
-    };
+    if (!post) return null;
+    return { title: post.title, description: post.description, color: post.color, location: post.location, eventDate: post.eventDate, categoryId: post.categoryId, status: nextStatus };
   }
 
   async function handleFavoriteToggle() {
-    if (!post || !isAuthenticated || post.isOwner) {
-      return;
-    }
-
-    setErrorMessage("");
-    setSuccessMessage("");
-    setIsFavoriteSubmitting(true);
-
+    if (!post || !isAuthenticated || post.isOwner) return;
+    setErrorMessage(""); setSuccessMessage(""); setIsFavoriteSubmitting(true);
     try {
       if (post.isFavorited) {
         await removeFavorite(post.id);
-        setPost((prev) =>
-          prev
-            ? {
-                ...prev,
-                isFavorited: false,
-              }
-            : prev
-        );
+        setPost((prev) => prev ? { ...prev, isFavorited: false } : prev);
         setSuccessMessage(t("postDetails.messages.removedFromFavorites"));
       } else {
         await addFavorite(post.id);
-        setPost((prev) =>
-          prev
-            ? {
-                ...prev,
-                isFavorited: true,
-              }
-            : prev
-        );
+        setPost((prev) => prev ? { ...prev, isFavorited: true } : prev);
         setSuccessMessage(t("postDetails.messages.addedToFavorites"));
       }
-    } catch (error: any) {
-      setErrorMessage(getApiErrorMessage(error));
-    } finally {
-      setIsFavoriteSubmitting(false);
-    }
+    } catch (error: any) { setErrorMessage(getApiErrorMessage(error)); }
+    finally { setIsFavoriteSubmitting(false); }
   }
 
   async function handleSendContactRequest() {
-    if (!post) {
-      return;
-    }
-
-    setErrorMessage("");
-    setSuccessMessage("");
-    setIsContactSubmitting(true);
-
+    if (!post) return;
+    setErrorMessage(""); setSuccessMessage(""); setIsContactSubmitting(true);
     try {
-      await createContactRequest({
-        itemPostId: post.id,
-        message: contactMessage.trim(),
-      });
-
-      setContactMessage("");
-      setShowContactForm(false);
+      await createContactRequest({ itemPostId: post.id, message: contactMessage.trim() });
+      setContactMessage(""); setShowContactForm(false);
       setSuccessMessage(t("postDetails.messages.contactRequestSent"));
-    } catch (error: any) {
-      setErrorMessage(getApiErrorMessage(error));
-    } finally {
-      setIsContactSubmitting(false);
-    }
+    } catch (error: any) { setErrorMessage(getApiErrorMessage(error)); }
+    finally { setIsContactSubmitting(false); }
   }
 
   async function handleSubmitReport() {
-    if (!post) {
-      return;
-    }
-
-    setErrorMessage("");
-    setSuccessMessage("");
-    setIsReportSubmitting(true);
-
+    if (!post) return;
+    setErrorMessage(""); setSuccessMessage(""); setIsReportSubmitting(true);
     try {
-      await createReport({
-        itemPostId: post.id,
-        reason: reportReason,
-        description: reportDescription.trim(),
-      });
-
-      setReportDescription("");
-      setReportReason(1);
-      setShowReportForm(false);
+      await createReport({ itemPostId: post.id, reason: reportReason, description: reportDescription.trim() });
+      setReportDescription(""); setReportReason(1); setShowReportForm(false);
       setSuccessMessage(t("postDetails.messages.reportSubmitted"));
-    } catch (error: any) {
-      setErrorMessage(getApiErrorMessage(error));
-    } finally {
-      setIsReportSubmitting(false);
-    }
+    } catch (error: any) { setErrorMessage(getApiErrorMessage(error)); }
+    finally { setIsReportSubmitting(false); }
   }
 
   async function handleUpdateStatus(nextStatus: number) {
-    if (!post || !post.isOwner) {
-      return;
-    }
-
+    if (!post || !post.isOwner) return;
     const request = buildUpdateRequest(nextStatus);
-    if (!request) {
-      return;
-    }
-
-    const confirmMessage =
-      nextStatus === 1
-        ? t("postDetails.confirmations.markReturned")
-        : t("postDetails.confirmations.closePost");
-
-    if (!window.confirm(confirmMessage)) {
-      return;
-    }
-
-    setErrorMessage("");
-    setSuccessMessage("");
-    setStatusSubmittingTo(nextStatus);
-
+    if (!request) return;
+    const confirmMsg = nextStatus === 1 ? t("postDetails.confirmations.markReturned") : t("postDetails.confirmations.closePost");
+    if (!window.confirm(confirmMsg)) return;
+    setErrorMessage(""); setSuccessMessage(""); setStatusSubmittingTo(nextStatus);
     try {
-      const updatedPost = await updatePost(post.id, request);
-      setPost(updatedPost);
-      setSuccessMessage(
-        nextStatus === 1
-          ? t("postDetails.messages.markedReturned")
-          : t("postDetails.messages.closed")
-      );
-    } catch (error: any) {
-      setErrorMessage(getApiErrorMessage(error));
-    } finally {
-      setStatusSubmittingTo(null);
-    }
+      setPost(await updatePost(post.id, request));
+      setSuccessMessage(nextStatus === 1 ? t("postDetails.messages.markedReturned") : t("postDetails.messages.closed"));
+    } catch (error: any) { setErrorMessage(getApiErrorMessage(error)); }
+    finally { setStatusSubmittingTo(null); }
   }
 
   async function handleDeletePost() {
-    if (!post || !post.isOwner) {
-      return;
-    }
-
-    const isConfirmed = window.confirm(t("postDetails.confirmations.deletePost"));
-
-    if (!isConfirmed) {
-      return;
-    }
-
-    setErrorMessage("");
-    setSuccessMessage("");
-    setIsDeletingPost(true);
-
+    if (!post || !post.isOwner) return;
+    if (!window.confirm(t("postDetails.confirmations.deletePost"))) return;
+    setErrorMessage(""); setSuccessMessage(""); setIsDeletingPost(true);
     try {
       await deletePost(post.id);
-
-      navigate("/my-posts", {
-        replace: true,
-        state: {
-          successMessage: t("postDetails.messages.deleted"),
-        },
-      });
-    } catch (error: any) {
-      setErrorMessage(getApiErrorMessage(error));
-      setIsDeletingPost(false);
-    }
+      navigate("/my-posts", { replace: true, state: { successMessage: t("postDetails.messages.deleted") } });
+    } catch (error: any) { setErrorMessage(getApiErrorMessage(error)); setIsDeletingPost(false); }
   }
 
-  const reportReasonLabel = useMemo(() => {
-    return (
-      reportReasonOptions.find((option) => option.value === reportReason)?.label ??
-      t("common.unknown")
-    );
-  }, [reportReason, reportReasonOptions, t]);
+  const reportReasonLabel = useMemo(
+    () => reportReasonOptions.find((o) => o.value === reportReason)?.label ?? t("common.unknown"),
+    [reportReason, reportReasonOptions, t]
+  );
 
   if (isLoading || errorMessage || !post) {
     return (
@@ -319,350 +166,353 @@ export default function PostDetailsPage() {
     );
   }
 
+  const isLost = post.type === 0;
+  const typeColor = isLost ? "var(--accent)" : "var(--success)";
+  const statusDot = post.status === 0 ? "#4ade80" : post.status === 1 ? "#60a5fa" : "#94a3b8";
   const canMarkReturned = post.isOwner && post.status !== 1;
   const canClosePost = post.isOwner && post.status !== 2;
-  const isOwnerActionBusy = statusSubmittingTo !== null || isDeletingPost;
+  const isOwnerBusy = statusSubmittingTo !== null || isDeletingPost;
+
+  const btnBase = "inline-flex items-center justify-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-semibold transition-all active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60";
 
   return (
-    <div className="space-y-8">
-      <div>
-        <Link to="/" className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
-          {t("postDetails.backToPosts")}
-        </Link>
-      </div>
+    <div className="space-y-6">
 
+      {/* Back link */}
+      <Link
+        to="/"
+        className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+      >
+        <ion-icon name="arrow-back-outline" style={{ fontSize: "14px" }} />
+        {t("postDetails.backToPosts")}
+      </Link>
+
+      {/* Banners */}
       {routeState.warningMessage && (
         <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
           {routeState.warningMessage}
         </div>
       )}
-
-      {routeState.successMessage && (
+      {(routeState.successMessage || successMessage) && (
         <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-          {routeState.successMessage}
+          {routeState.successMessage || successMessage}
+        </div>
+      )}
+      {errorMessage && (
+        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {errorMessage}
         </div>
       )}
 
-      {successMessage && (
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-          {successMessage}
-        </div>
-      )}
+      {/* ── Hero card ──────────────────────────────────────── */}
+      <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg-card)]">
+        <div className="grid lg:grid-cols-[1.15fr_1fr]">
 
-      <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] px-6 py-6 shadow-sm sm:px-8 sm:py-7">
-        <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
-              {t("postDetails.header.eyebrow")}
-            </p>
-            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-[var(--text-primary)] sm:text-[2rem]">
-              {post.title}
-            </h1>
+          {/* Left — gallery, fills column edge-to-edge */}
+          <div className="border-b border-[var(--border)] lg:border-b-0 lg:border-r lg:border-[var(--border)]">
+            <PostImageGallery title={post.title} images={post.images} />
+          </div>
 
-            <div className="mt-4 flex flex-wrap gap-2">
+          {/* Right — details panel */}
+          <div className="flex flex-col gap-5 p-6 sm:p-8">
+
+            {/* Type stamp + status */}
+            <div className="flex items-center gap-3 flex-wrap">
               <span
-                className={`rounded-full px-3 py-1 text-sm font-medium ${
-                  post.type === 0
-                    ? "bg-red-100 text-red-700"
-                    : "bg-emerald-100 text-emerald-700"
-                }`}
+                className="px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-white"
+                style={{ background: typeColor }}
               >
                 {getPostTypeLabel(post.type)}
               </span>
 
-              <span className="rounded-full bg-[var(--bg-surface)] px-3 py-1 text-sm font-medium text-[var(--text-primary)]">
-                {getPostStatusLabel(post.status)}
-              </span>
+              <div className="flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: statusDot }} />
+                <span className="text-[11px] font-semibold uppercase tracking-widest text-[var(--text-secondary)]">
+                  {getPostStatusLabel(post.status)}
+                </span>
+              </div>
 
               {post.isOwner && (
-                <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700">
+                <span
+                  className="ml-auto text-[11px] font-bold uppercase tracking-widest"
+                  style={{ color: typeColor }}
+                >
                   {t("postDetails.badges.myPost")}
                 </span>
               )}
-
               {post.isFavorited && !post.isOwner && (
-                <span className="rounded-full bg-amber-100 px-3 py-1 text-sm font-medium text-amber-700">
-                  {t("postDetails.badges.favorited")}
+                <span className="ml-auto text-[11px] font-bold uppercase tracking-widest text-amber-600">
+                  ♥ {t("postDetails.badges.favorited")}
                 </span>
               )}
             </div>
 
-            <p className="mt-4 max-w-3xl text-sm leading-6 text-[var(--text-secondary)] sm:text-base">
-              {t("postDetails.header.description")}
-            </p>
-          </div>
-
-          {isAuthenticated && !post.isOwner && (
-            <button
-              type="button"
-              onClick={handleFavoriteToggle}
-              disabled={isFavoriteSubmitting}
-              className={`inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-sm disabled:cursor-not-allowed disabled:opacity-60 ${
-                post.isFavorited
-                  ? "bg-amber-600 hover:bg-amber-700"
-                  : "bg-[var(--accent)] hover:bg-[var(--accent-hover)]"
-              }`}
+            {/* Title */}
+            <h1
+              className="text-2xl font-bold leading-snug tracking-tight text-[var(--text-primary)] sm:text-3xl"
+              style={{ fontFamily: "var(--font-display)" }}
             >
-              {isFavoriteSubmitting
-                ? t("common.saving")
-                : post.isFavorited
-                ? t("postDetails.actions.removeFavorite")
-                : t("postDetails.actions.addToFavorites")}
-            </button>
-          )}
-        </div>
-      </section>
+              {post.title}
+            </h1>
 
-      <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
-        <PostImageGallery title={post.title} images={post.images} />
-
-        <div className="space-y-6">
-          <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-sm">
-            <div className="border-b border-[var(--border)] pb-5">
-              <h2 className="text-xl font-semibold tracking-tight text-[var(--text-primary)]">
-                {t("postDetails.sections.description.title")}
-              </h2>
-              <p className="mt-1 text-sm text-[var(--text-secondary)]">
-                {t("postDetails.sections.description.subtitle")}
-              </p>
-            </div>
-
-            <p className="mt-5 whitespace-pre-wrap text-sm leading-7 text-[var(--text-primary)] sm:text-base">
+            {/* Description */}
+            <p className="text-sm leading-7 text-[var(--text-secondary)] sm:text-[15px]">
               {post.description}
             </p>
-          </section>
 
-          <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-sm">
-            <div className="border-b border-[var(--border)] pb-5">
-              <h2 className="text-xl font-semibold tracking-tight text-[var(--text-primary)]">
-                {t("postDetails.sections.information.title")}
-              </h2>
-              <p className="mt-1 text-sm text-[var(--text-secondary)]">
-                {t("postDetails.sections.information.subtitle")}
-              </p>
-            </div>
+            <div className="border-t border-[var(--border)]" />
 
-            <div className="mt-4">
-              <DetailRow label={t("postDetails.fields.category")} value={post.categoryName} />
-              <DetailRow label={t("postDetails.fields.location")} value={post.location} />
-              <DetailRow
-                label={t("postDetails.fields.color")}
-                value={getItemColorLabel(post.color)}
-              />
-              <DetailRow
-                label={t("postDetails.fields.eventDate")}
-                value={formatDate(post.eventDate)}
-              />
-              <DetailRow
-                label={t("postDetails.fields.postedBy")}
-                value={post.userFullName}
-              />
-              <DetailRow
-                label={t("postDetails.fields.createdAt")}
-                value={formatDateTime(post.createdAt)}
-              />
+            {/* Fact stamp grid */}
+            <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
+                  {t("postDetails.fields.location")}
+                </p>
+                <p className="mt-1 text-sm font-medium text-[var(--text-primary)] leading-snug">{post.location}</p>
+              </div>
+
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
+                  {t("postDetails.fields.eventDate")}
+                </p>
+                <p className="mt-1 text-sm font-medium text-[var(--text-primary)]">{formatDate(post.eventDate)}</p>
+              </div>
+
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
+                  {t("postDetails.fields.category")}
+                </p>
+                <p className="mt-1 text-sm font-medium text-[var(--text-primary)]">{post.categoryName}</p>
+              </div>
+
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
+                  {t("postDetails.fields.color")}
+                </p>
+                <div className="mt-1 flex items-center gap-1.5">
+                  <span
+                    className="h-3 w-3 flex-shrink-0 rounded-full border border-[var(--border)] shadow-sm"
+                    style={{ backgroundColor: itemColorMap[post.color] ?? "#94a3b8" }}
+                  />
+                  <span className="text-sm font-medium text-[var(--text-primary)]">
+                    {getItemColorLabel(post.color)}
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
+                  {t("postDetails.fields.postedBy")}
+                </p>
+                <p className="mt-1 text-sm font-medium text-[var(--text-primary)]">{post.userFullName}</p>
+              </div>
+
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
+                  {t("postDetails.fields.createdAt")}
+                </p>
+                <p className="mt-1 text-sm font-medium text-[var(--text-primary)]">{formatDateTime(post.createdAt)}</p>
+              </div>
+
               {post.updatedAt && (
-                <DetailRow
-                  label={t("postDetails.fields.updatedAt")}
-                  value={formatDateTime(post.updatedAt)}
-                />
+                <div className="col-span-2">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
+                    {t("postDetails.fields.updatedAt")}
+                  </p>
+                  <p className="mt-1 text-sm font-medium text-[var(--text-primary)]">{formatDateTime(post.updatedAt)}</p>
+                </div>
               )}
             </div>
-          </section>
 
-          {post.isOwner && (
-            <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-sm">
-              <div className="border-b border-[var(--border)] pb-5">
-                <h2 className="text-xl font-semibold tracking-tight text-[var(--text-primary)]">
-                  {t("postDetails.sections.ownerActions.title")}
-                </h2>
-                <p className="mt-1 text-sm text-[var(--text-secondary)]">
-                  {t("postDetails.sections.ownerActions.subtitle")}
-                </p>
-              </div>
+            <div className="border-t border-[var(--border)]" />
 
-              <div className="mt-6 flex flex-wrap gap-3">
+            {/* Actions */}
+            <div className="mt-auto">
+
+              {/* Owner actions */}
+              {post.isOwner && (
+                <div className="flex flex-wrap gap-2">
+                  <Link
+                    to={`/posts/${post.id}/edit`}
+                    className={`${btnBase} border border-[var(--border)] bg-[var(--bg-card)] text-[var(--text-primary)] hover:bg-[var(--bg-surface)]`}
+                  >
+                    <ion-icon name="create-outline" style={{ fontSize: "14px" }} />
+                    {t("postDetails.actions.editPost")}
+                  </Link>
+
+                  {canMarkReturned && (
+                    <button
+                      type="button"
+                      onClick={() => void handleUpdateStatus(1)}
+                      disabled={isOwnerBusy}
+                      className={`${btnBase} bg-emerald-600 text-white hover:bg-emerald-700`}
+                    >
+                      <ion-icon name="checkmark-circle-outline" style={{ fontSize: "14px" }} />
+                      {statusSubmittingTo === 1 ? t("common.saving") : t("postDetails.actions.markAsReturned")}
+                    </button>
+                  )}
+
+                  {canClosePost && (
+                    <button
+                      type="button"
+                      onClick={() => void handleUpdateStatus(2)}
+                      disabled={isOwnerBusy}
+                      className={`${btnBase} border border-[var(--border)] bg-[var(--bg-card)] text-[var(--text-primary)] hover:bg-[var(--bg-surface)]`}
+                    >
+                      {statusSubmittingTo === 2 ? t("common.saving") : t("postDetails.actions.closePost")}
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => void handleDeletePost()}
+                    disabled={isOwnerBusy}
+                    className={`${btnBase} border border-red-200 text-red-700 hover:bg-red-50`}
+                  >
+                    <ion-icon name="trash-outline" style={{ fontSize: "14px" }} />
+                    {isDeletingPost ? t("common.deleting") : t("postDetails.actions.deletePost")}
+                  </button>
+                </div>
+              )}
+
+              {/* Visitor actions */}
+              {isAuthenticated && !post.isOwner && (
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => void handleFavoriteToggle()}
+                    disabled={isFavoriteSubmitting}
+                    className={`${btnBase} border ${
+                      post.isFavorited
+                        ? "border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100"
+                        : "border-[var(--border)] bg-[var(--bg-card)] text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
+                    }`}
+                  >
+                    <ion-icon name={post.isFavorited ? "heart" : "heart-outline"} style={{ fontSize: "14px" }} />
+                    {isFavoriteSubmitting
+                      ? t("common.saving")
+                      : post.isFavorited
+                      ? t("postDetails.actions.removeFavorite")
+                      : t("postDetails.actions.addToFavorites")}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => { setShowContactForm((p) => !p); setShowReportForm(false); setErrorMessage(""); setSuccessMessage(""); }}
+                    className={`${btnBase} text-white`}
+                    style={{ background: typeColor }}
+                    onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.88")}
+                    onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+                  >
+                    <ion-icon name={showContactForm ? "close-outline" : "mail-outline"} style={{ fontSize: "14px" }} />
+                    {showContactForm ? t("postDetails.actions.closeContactForm") : t("postDetails.actions.sendContactRequest")}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => { setShowReportForm((p) => !p); setShowContactForm(false); setErrorMessage(""); setSuccessMessage(""); }}
+                    className={`${btnBase} border border-red-200 text-red-700 hover:bg-red-50`}
+                  >
+                    <ion-icon name="flag-outline" style={{ fontSize: "14px" }} />
+                    {showReportForm ? t("postDetails.actions.closeReportForm") : t("postDetails.actions.reportPost")}
+                  </button>
+                </div>
+              )}
+
+              {/* Not authenticated */}
+              {!isAuthenticated && (
                 <Link
-                  to={`/posts/${post.id}/edit`}
-                  className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700"
+                  to="/login"
+                  className={`${btnBase} text-white`}
+                  style={{ background: typeColor }}
                 >
-                  {t("postDetails.actions.editPost")}
+                  <ion-icon name="log-in-outline" style={{ fontSize: "14px" }} />
+                  {t("postDetails.actions.loginToContact")}
                 </Link>
-
-                {canMarkReturned && (
-                  <button
-                    type="button"
-                    onClick={() => void handleUpdateStatus(1)}
-                    disabled={isOwnerActionBusy}
-                    className="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    {statusSubmittingTo === 1
-                      ? t("common.saving")
-                      : t("postDetails.actions.markAsReturned")}
-                  </button>
-                )}
-
-                {canClosePost && (
-                  <button
-                    type="button"
-                    onClick={() => void handleUpdateStatus(2)}
-                    disabled={isOwnerActionBusy}
-                    className="inline-flex items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-surface)] disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    {statusSubmittingTo === 2
-                      ? t("common.saving")
-                      : t("postDetails.actions.closePost")}
-                  </button>
-                )}
-
-                <button
-                  type="button"
-                  onClick={() => void handleDeletePost()}
-                  disabled={isOwnerActionBusy}
-                  className="inline-flex items-center justify-center rounded-xl border border-red-200 bg-[var(--bg-card)] px-4 py-2.5 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {isDeletingPost
-                    ? t("common.deleting")
-                    : t("postDetails.actions.deletePost")}
-                </button>
-              </div>
-            </section>
-          )}
-
-          {isAuthenticated && !post.isOwner && (
-            <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-sm">
-              <div className="border-b border-[var(--border)] pb-5">
-                <h2 className="text-xl font-semibold tracking-tight text-[var(--text-primary)]">
-                  {t("postDetails.sections.actions.title")}
-                </h2>
-                <p className="mt-1 text-sm text-[var(--text-secondary)]">
-                  {t("postDetails.sections.actions.subtitle")}
-                </p>
-              </div>
-
-              <div className="mt-6 flex flex-wrap gap-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowContactForm((prev) => !prev);
-                    setShowReportForm(false);
-                    setErrorMessage("");
-                    setSuccessMessage("");
-                  }}
-                  className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700"
-                >
-                  {showContactForm
-                    ? t("postDetails.actions.closeContactForm")
-                    : t("postDetails.actions.sendContactRequest")}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowReportForm((prev) => !prev);
-                    setShowContactForm(false);
-                    setErrorMessage("");
-                    setSuccessMessage("");
-                  }}
-                  className="inline-flex items-center justify-center rounded-xl border border-red-200 bg-[var(--bg-card)] px-4 py-2.5 text-sm font-semibold text-red-700 hover:bg-red-50"
-                >
-                  {showReportForm
-                    ? t("postDetails.actions.closeReportForm")
-                    : t("postDetails.actions.reportPost")}
-                </button>
-              </div>
-
-              {showContactForm && (
-                <div className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
-                  <h3 className="text-lg font-semibold tracking-tight text-[var(--text-primary)]">
-                    {t("postDetails.contactForm.title")}
-                  </h3>
-                  <p className="mt-1 text-sm leading-6 text-[var(--text-secondary)]">
-                    {t("postDetails.contactForm.subtitle")}
-                  </p>
-
-                  <div className="mt-5">
-                    <FormTextarea
-                      label={t("postDetails.contactForm.messageLabel")}
-                      value={contactMessage}
-                      onChange={setContactMessage}
-                      placeholder={t("postDetails.contactForm.messagePlaceholder")}
-                      rows={4}
-                    />
-                  </div>
-
-                  <div className="mt-5">
-                    <button
-                      type="button"
-                      onClick={() => void handleSendContactRequest()}
-                      disabled={isContactSubmitting}
-                      className="inline-flex items-center justify-center rounded-xl bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[var(--accent-hover)] disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      {isContactSubmitting
-                        ? t("common.sending")
-                        : t("postDetails.contactForm.submit")}
-                    </button>
-                  </div>
-                </div>
               )}
-
-              {showReportForm && (
-                <div className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
-                  <h3 className="text-lg font-semibold tracking-tight text-[var(--text-primary)]">
-                    {t("postDetails.reportForm.title")}
-                  </h3>
-
-                  <div className="mt-5">
-                    <label className="mb-1.5 block text-sm font-medium text-[var(--text-primary)]">
-                      {t("postDetails.reportForm.reasonLabel")}
-                    </label>
-                    <select
-                      value={reportReason}
-                      onChange={(e) => setReportReason(Number(e.target.value))}
-                      className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-3.5 py-2.5 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
-                    >
-                      {reportReasonOptions.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                    <p className="mt-2 text-xs text-[var(--text-secondary)]">
-                      {t("postDetails.reportForm.selectedReason", {
-                        reason: reportReasonLabel,
-                      })}
-                    </p>
-                  </div>
-
-                  <div className="mt-5">
-                    <FormTextarea
-                      label={t("postDetails.reportForm.descriptionLabel")}
-                      value={reportDescription}
-                      onChange={setReportDescription}
-                      placeholder={t("postDetails.reportForm.descriptionPlaceholder")}
-                      rows={4}
-                    />
-                  </div>
-
-                  <div className="mt-5">
-                    <button
-                      type="button"
-                      onClick={() => void handleSubmitReport()}
-                      disabled={isReportSubmitting}
-                      className="inline-flex items-center justify-center rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      {isReportSubmitting
-                        ? t("common.submitting")
-                        : t("postDetails.reportForm.submit")}
-                    </button>
-                  </div>
-                </div>
-              )}
-            </section>
-          )}
+            </div>
+          </div>
         </div>
       </div>
 
+      {/* ── Contact form ────────────────────────────────────── */}
+      {showContactForm && (
+        <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-6">
+          <h2 className="text-lg font-semibold tracking-tight text-[var(--text-primary)]">
+            {t("postDetails.contactForm.title")}
+          </h2>
+          <p className="mt-1 text-sm text-[var(--text-secondary)]">
+            {t("postDetails.contactForm.subtitle")}
+          </p>
+          <div className="mt-5">
+            <FormTextarea
+              label={t("postDetails.contactForm.messageLabel")}
+              value={contactMessage}
+              onChange={setContactMessage}
+              placeholder={t("postDetails.contactForm.messagePlaceholder")}
+              rows={4}
+            />
+          </div>
+          <div className="mt-4">
+            <button
+              type="button"
+              onClick={() => void handleSendContactRequest()}
+              disabled={isContactSubmitting}
+              className={`${btnBase} text-white disabled:opacity-60`}
+              style={{ background: typeColor }}
+            >
+              {isContactSubmitting ? t("common.sending") : t("postDetails.contactForm.submit")}
+            </button>
+          </div>
+        </section>
+      )}
+
+      {/* ── Report form ─────────────────────────────────────── */}
+      {showReportForm && (
+        <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-6">
+          <h2 className="text-lg font-semibold tracking-tight text-[var(--text-primary)]">
+            {t("postDetails.reportForm.title")}
+          </h2>
+          <div className="mt-5 space-y-4">
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-[var(--text-primary)]">
+                {t("postDetails.reportForm.reasonLabel")}
+              </label>
+              <select
+                value={reportReason}
+                onChange={(e) => setReportReason(Number(e.target.value))}
+                className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-3.5 py-2.5 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
+              >
+                {reportReasonOptions.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
+              <p className="mt-1.5 text-xs text-[var(--text-secondary)]">
+                {t("postDetails.reportForm.selectedReason", { reason: reportReasonLabel })}
+              </p>
+            </div>
+            <FormTextarea
+              label={t("postDetails.reportForm.descriptionLabel")}
+              value={reportDescription}
+              onChange={setReportDescription}
+              placeholder={t("postDetails.reportForm.descriptionPlaceholder")}
+              rows={4}
+            />
+          </div>
+          <div className="mt-5">
+            <button
+              type="button"
+              onClick={() => void handleSubmitReport()}
+              disabled={isReportSubmitting}
+              className={`${btnBase} bg-red-600 text-white hover:bg-red-700 disabled:opacity-60`}
+            >
+              {isReportSubmitting ? t("common.submitting") : t("postDetails.reportForm.submit")}
+            </button>
+          </div>
+        </section>
+      )}
+
+      {/* ── Image manager (owner only) ───────────────────────── */}
       {post.isOwner && (
         <PostImageManager
           itemPostId={post.id}
@@ -671,21 +521,22 @@ export default function PostDetailsPage() {
         />
       )}
 
+      {/* ── Potential matches ────────────────────────────────── */}
       {isAuthenticated && (
-        <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-sm">
-          <div className="flex flex-col gap-2 border-b border-[var(--border)] pb-5 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <h2 className="text-xl font-semibold tracking-tight text-[var(--text-primary)]">
-                {t("postDetails.matches.title")}
-              </h2>
-              <p className="mt-1 text-sm text-[var(--text-secondary)]">
-                {t("postDetails.matches.subtitle")}
-              </p>
-            </div>
+        <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-6">
+          <div className="border-b border-[var(--border)] pb-5">
+            <h2 className="text-xl font-semibold tracking-tight text-[var(--text-primary)]"
+                style={{ fontFamily: "var(--font-display)" }}>
+              {t("postDetails.matches.title")}
+            </h2>
+            <p className="mt-1 text-sm text-[var(--text-secondary)]">
+              {t("postDetails.matches.subtitle")}
+            </p>
           </div>
 
           {isMatchesLoading ? (
-            <div className="mt-5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-3 text-sm text-[var(--text-secondary)]">
+            <div className="mt-5 flex items-center gap-2 text-sm text-[var(--text-secondary)]">
+              <ion-icon name="sync-outline" style={{ fontSize: "14px" }} />
               {t("postDetails.matches.loading")}
             </div>
           ) : matches.length === 0 ? (
@@ -693,106 +544,65 @@ export default function PostDetailsPage() {
               {t("postDetails.matches.empty")}
             </div>
           ) : (
-            <div className="mt-6 grid gap-4 lg:grid-cols-2">
+            <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {matches.map((match) => (
-                <article
+                <Link
                   key={match.id}
-                  className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)]"
+                  to={`/posts/${match.id}`}
+                  className="group overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[var(--accent)]/50 hover:shadow-[0_6px_20px_rgba(0,0,0,0.07)]"
                 >
-                  <div className="relative h-48 bg-[var(--bg-surface)]">
+                  {/* Match image */}
+                  <div className="relative h-36 overflow-hidden bg-[var(--bg-card)]">
                     {match.images.length > 0 ? (
                       <img
                         src={buildFileUrl(match.images[0].imageUrl)}
                         alt={match.title}
-                        className="h-full w-full object-cover"
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
                       />
                     ) : (
-                      <div className="flex h-full items-center justify-center text-sm text-[var(--text-secondary)]">
-                        {t("common.noImage")}
+                      <div className="flex h-full items-center justify-center">
+                        <ion-icon name="image-outline" style={{ fontSize: "28px", color: "var(--border)" }} />
                       </div>
                     )}
+                    {/* Score badge */}
+                    <div
+                      className="absolute right-2 top-2 rounded-full px-2.5 py-1 text-[11px] font-bold text-white"
+                      style={{ background: typeColor }}
+                    >
+                      {Math.round(match.matchScore)}%
+                    </div>
                   </div>
 
-                  <div className="p-5">
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <h3 className="text-lg font-semibold tracking-tight text-[var(--text-primary)]">
-                          {match.title}
-                        </h3>
-                        <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">
-                          {match.description}
-                        </p>
-                      </div>
-                    </div>
+                  <div className="p-4 space-y-2.5">
+                    <h3 className="line-clamp-1 text-sm font-semibold text-[var(--text-primary)]">
+                      {match.title}
+                    </h3>
 
-                    <div className="mt-4 space-y-2">
-                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-secondary)]">
-                        {t("postDetails.matches.score")}
-                      </p>
-                      <div className="flex items-center gap-2">
-                        <div className="h-2 flex-1 rounded-full bg-[var(--bg-surface)]">
-                          <div
-                            className="h-2 rounded-full bg-[var(--accent)] transition-all"
-                            style={{ width: getMatchScoreWidth(match.matchScore) }}
-                          />
-                        </div>
-                        <span className="text-sm font-semibold text-[var(--text-primary)]">{Math.round(match.matchScore)}</span>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)]">
+                        <ion-icon name="location-outline" style={{ fontSize: "11px" }} />
+                        <span className="line-clamp-1">{match.location}</span>
                       </div>
-                    </div>
-
-                    <div className="mt-5 grid gap-3 rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-4 text-sm">
-                      <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
-                          {t("postDetails.fields.category")}
-                        </p>
-                        <p className="mt-1 font-medium text-[var(--text-primary)]">{match.categoryName}</p>
-                      </div>
-
-                      <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
-                          {t("postDetails.fields.location")}
-                        </p>
-                        <p className="mt-1 font-medium text-[var(--text-primary)]">{match.location}</p>
-                      </div>
-
-                      <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
-                          {t("postDetails.fields.eventDate")}
-                        </p>
-                        <p className="mt-1 font-medium text-[var(--text-primary)]">
-                          {formatDate(match.eventDate)}
-                        </p>
+                      <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)]">
+                        <ion-icon name="calendar-outline" style={{ fontSize: "11px" }} />
+                        <span>{formatDate(match.eventDate)}</span>
                       </div>
                     </div>
 
                     {match.matchReasons.length > 0 && (
-                      <div className="mt-5">
-                        <p className="text-sm font-medium text-[var(--text-primary)]">
-                          {t("postDetails.matches.matchReasons")}
-                        </p>
-                        <div className="mt-3 flex flex-wrap gap-2">
-                          {match.matchReasons.map((reason, index) => (
-                            <span
-                              key={`${match.id}-${index}-${reason}`}
-                              className="rounded-full bg-[var(--bg-surface)] px-3 py-1 text-xs font-medium text-[var(--text-primary)]"
-                            >
-                              {reason}
-                            </span>
-                          ))}
-                        </div>
+                      <div className="flex flex-wrap gap-1.5 pt-1">
+                        {match.matchReasons.slice(0, 3).map((reason, i) => (
+                          <span
+                            key={`${match.id}-${i}`}
+                            className="rounded-full bg-[var(--bg-card)] border border-[var(--border)] px-2 py-0.5 text-[10px] font-medium text-[var(--text-secondary)]"
+                          >
+                            {reason}
+                          </span>
+                        ))}
                       </div>
                     )}
-
-                    <div className="mt-5">
-                      <Link
-                        to={`/posts/${match.id}`}
-                        className="text-sm font-semibold text-[var(--text-primary)] hover:text-[var(--text-secondary)]"
-                      >
-                        {t("postDetails.matches.viewMatchedPost")}
-                      </Link>
-                    </div>
                   </div>
-                </article>
+                </Link>
               ))}
             </div>
           )}

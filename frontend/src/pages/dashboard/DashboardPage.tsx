@@ -223,7 +223,7 @@ export default function DashboardPage() {
             <Link
               key={card.title}
               to={card.to}
-              className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--accent)] hover:shadow-md"
+              className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-5 transition hover:-translate-y-0.5 hover:border-[var(--accent)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)]"
             >
               <div className="flex items-center justify-between">
                 <p className="text-sm font-medium text-[var(--text-secondary)]">{card.title}</p>

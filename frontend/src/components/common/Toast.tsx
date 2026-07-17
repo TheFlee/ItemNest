@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useToast } from "../../context/ToastContext";
 
 const iconMap = {
@@ -13,6 +14,7 @@ const colorMap = {
 } as const;
 
 export default function Toast() {
+  const { t } = useTranslation();
   const { toasts, dismiss } = useToast();
 
   if (toasts.length === 0) return null;
@@ -22,14 +24,14 @@ export default function Toast() {
       {toasts.map((toast) => (
         <div
           key={toast.id}
-          className={`flex max-w-sm items-start gap-3 rounded-xl border px-4 py-3 shadow-lg ${colorMap[toast.type]}`}
+          className={`flex max-w-sm items-start gap-3 rounded-xl border px-4 py-3 shadow-[0_2px_8px_rgba(0,0,0,0.06)] ${colorMap[toast.type]}`}
         >
           <ion-icon name={iconMap[toast.type]} style={{ fontSize: "18px", marginTop: "1px", flexShrink: 0 }} />
           <p className="flex-1 text-sm font-medium leading-5">{toast.message}</p>
           <button
             onClick={() => dismiss(toast.id)}
-            className="ml-1 opacity-60 hover:opacity-100"
-            aria-label="Dismiss"
+            className="ml-1 opacity-60 hover:opacity-100 transition-opacity"
+            aria-label={t("common.dismiss")}
           >
             <ion-icon name="close" style={{ fontSize: "16px" }} />
           </button>

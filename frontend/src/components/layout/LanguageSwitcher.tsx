@@ -16,11 +16,11 @@ export default function LanguageSwitcher() {
 
   return (
     <div className="flex items-center gap-2">
-      <label className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+      <label className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-secondary)]">
         {t("language.label")}
       </label>
 
-      <div className="flex rounded-xl border border-slate-200 bg-white p-1">
+      <div className="flex rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-1">
         {languageOptions.map((option) => {
           const isActive = option.value === activeLanguage;
 
@@ -32,8 +32,8 @@ export default function LanguageSwitcher() {
               className={[
                 "rounded-lg px-3 py-1.5 text-sm font-medium transition",
                 isActive
-                  ? "bg-slate-900 text-white shadow-sm"
-                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
+                  ? "bg-[var(--accent)] text-white"
+                  : "text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]",
               ].join(" ")}
             >
               {option.value.toUpperCase()}

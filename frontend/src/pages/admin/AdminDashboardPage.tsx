@@ -219,7 +219,7 @@ export default function AdminDashboardPage() {
               <Link
                 key={card.title}
                 to={card.to}
-                className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--border)] hover:shadow-md"
+                className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-5 transition hover:-translate-y-0.5 hover:border-[var(--accent)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)]"
               >
                 <p className="text-sm font-medium text-[var(--text-secondary)]">{card.title}</p>
                 <p className="mt-2 text-3xl font-semibold tracking-tight text-[var(--text-primary)]">

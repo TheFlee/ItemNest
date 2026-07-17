@@ -33,6 +33,9 @@ function getVisiblePages(pageNumber: number, totalPages: number): number[] {
   );
 }
 
+const btnBase =
+  "inline-flex items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-card)] text-sm font-medium text-[var(--text-primary)] hover:border-[var(--accent)] hover:bg-[var(--bg-surface)] transition disabled:cursor-not-allowed disabled:opacity-50";
+
 export default function Pagination({
   pageNumber,
   totalPages,
@@ -40,20 +43,14 @@ export default function Pagination({
 }: PaginationProps) {
   const { t } = useTranslation();
 
-  if (totalPages <= 1) {
-    return null;
-  }
+  if (totalPages <= 1) return null;
 
   function goToPreviousPage() {
-    if (pageNumber > 1) {
-      onPageChange(pageNumber - 1);
-    }
+    if (pageNumber > 1) onPageChange(pageNumber - 1);
   }
 
   function goToNextPage() {
-    if (pageNumber < totalPages) {
-      onPageChange(pageNumber + 1);
-    }
+    if (pageNumber < totalPages) onPageChange(pageNumber + 1);
   }
 
   const pages = getVisiblePages(pageNumber, totalPages);
@@ -69,7 +66,7 @@ export default function Pagination({
           type="button"
           onClick={goToPreviousPage}
           disabled={pageNumber === 1}
-          className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:border-slate-400 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+          className={`${btnBase} px-4 py-2.5`}
         >
           {t("common.previous")}
         </button>
@@ -79,26 +76,25 @@ export default function Pagination({
             <button
               type="button"
               onClick={() => onPageChange(1)}
-              className="inline-flex h-10 min-w-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-3 text-sm font-medium text-slate-700 hover:border-slate-400 hover:bg-slate-50"
+              className={`${btnBase} h-10 min-w-10 px-3`}
             >
               1
             </button>
-            <span className="px-1 text-sm text-slate-400">...</span>
+            <span className="px-1 text-sm text-[var(--text-secondary)]">...</span>
           </>
         )}
 
         {pages.map((page) => {
           const isActive = page === pageNumber;
-
           return (
             <button
               key={page}
               type="button"
               onClick={() => onPageChange(page)}
-              className={`inline-flex h-10 min-w-10 items-center justify-center rounded-xl px-3 text-sm font-medium ${
+              className={`inline-flex h-10 min-w-10 items-center justify-center rounded-xl px-3 text-sm font-medium transition ${
                 isActive
-                  ? "bg-slate-900 text-white shadow-sm"
-                  : "border border-slate-300 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-50"
+                  ? "bg-[var(--accent)] text-white"
+                  : `${btnBase}`
               }`}
             >
               {page}
@@ -108,11 +104,11 @@ export default function Pagination({
 
         {showLastPageShortcut && (
           <>
-            <span className="px-1 text-sm text-slate-400">...</span>
+            <span className="px-1 text-sm text-[var(--text-secondary)]">...</span>
             <button
               type="button"
               onClick={() => onPageChange(totalPages)}
-              className="inline-flex h-10 min-w-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-3 text-sm font-medium text-slate-700 hover:border-slate-400 hover:bg-slate-50"
+              className={`${btnBase} h-10 min-w-10 px-3`}
             >
               {totalPages}
             </button>
@@ -123,13 +119,13 @@ export default function Pagination({
           type="button"
           onClick={goToNextPage}
           disabled={pageNumber === totalPages}
-          className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:border-slate-400 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+          className={`${btnBase} px-4 py-2.5`}
         >
           {t("common.next")}
         </button>
       </div>
 
-      <p className="text-center text-sm text-slate-500">
+      <p className="text-center text-sm text-[var(--text-secondary)]">
         {t("common.pageOf", { page: pageNumber, total: totalPages })}
       </p>
     </div>

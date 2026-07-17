@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { ItemImage } from "../../types/post";
 import { buildFileUrl } from "../../utils/api";
 
@@ -7,10 +8,8 @@ interface PostImageGalleryProps {
   images: ItemImage[];
 }
 
-export default function PostImageGallery({
-  title,
-  images,
-}: PostImageGalleryProps) {
+export default function PostImageGallery({ title, images }: PostImageGalleryProps) {
+  const { t } = useTranslation();
   const [selectedImageUrl, setSelectedImageUrl] = useState(images[0]?.imageUrl ?? "");
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
@@ -20,151 +19,110 @@ export default function PostImageGallery({
   }, [images]);
 
   useEffect(() => {
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        setIsLightboxOpen(false);
-      }
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setIsLightboxOpen(false);
     }
-
     if (isLightboxOpen) {
       window.addEventListener("keydown", handleKeyDown);
       document.body.style.overflow = "hidden";
     }
-
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = "";
     };
   }, [isLightboxOpen]);
 
-  function handleSelectImage(imageUrl: string) {
-    setSelectedImageUrl(imageUrl);
-  }
-
-  function openLightbox(imageUrl?: string) {
-    if (imageUrl) {
-      setSelectedImageUrl(imageUrl);
-    }
-
-    setIsLightboxOpen(true);
-  }
-
-  function closeLightbox() {
-    setIsLightboxOpen(false);
-  }
-
   if (!images.length) {
     return (
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="flex h-105 items-center justify-center rounded-2xl bg-slate-100 text-sm text-slate-500">
-          No images available
-        </div>
-      </section>
+      <div className="flex h-full min-h-[340px] flex-col items-center justify-center gap-3 bg-[var(--bg-surface)]">
+        <ion-icon name="image-outline" style={{ fontSize: "44px", color: "var(--border)" }} />
+        <p className="text-sm text-[var(--text-secondary)]">{t("postImageGallery.noImages")}</p>
+      </div>
     );
   }
 
   return (
     <>
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="border-b border-slate-200 pb-5">
-          <h2 className="text-xl font-semibold tracking-tight text-slate-900">Images</h2>
-          <p className="mt-1 text-sm text-slate-600">
-            Review the uploaded item images in a cleaner gallery layout.
-          </p>
-        </div>
+      <div className="flex h-full flex-col">
+        {/* Main image */}
+        <button
+          type="button"
+          onClick={() => setIsLightboxOpen(true)}
+          className="group relative block min-h-[340px] flex-1 overflow-hidden bg-[var(--bg-surface)] text-left"
+        >
+          <img
+            src={buildFileUrl(selectedImageUrl)}
+            alt={title}
+            className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+          />
+          <div className="absolute inset-0 flex items-end justify-end p-4 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+            <span className="flex items-center gap-1.5 rounded-full bg-black/55 px-3 py-1.5 text-[11px] font-semibold text-white backdrop-blur-sm">
+              <ion-icon name="expand-outline" style={{ fontSize: "12px" }} />
+              {t("postImageGallery.hint")}
+            </span>
+          </div>
+        </button>
 
-        <div className="mt-6 space-y-4">
-          <button
-            type="button"
-            onClick={() => openLightbox()}
-            className="block w-full overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 text-left"
-          >
-            <img
-              src={buildFileUrl(selectedImageUrl)}
-              alt={title}
-              className="h-105 w-full object-cover"
-            />
-          </button>
+        {/* Thumbnails */}
+        {images.length > 1 && (
+          <div className="flex gap-2 border-t border-[var(--border)] p-3">
+            {images.map((image) => {
+              const active = image.imageUrl === selectedImageUrl;
+              return (
+                <button
+                  key={image.id}
+                  type="button"
+                  onClick={() => setSelectedImageUrl(image.imageUrl)}
+                  className={`h-14 w-14 flex-shrink-0 overflow-hidden rounded-md border-2 transition-all duration-150 ${
+                    active
+                      ? "border-[var(--accent)] opacity-100"
+                      : "border-transparent opacity-60 hover:opacity-90"
+                  }`}
+                >
+                  <img src={buildFileUrl(image.imageUrl)} alt="" className="h-full w-full object-cover" />
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
 
-          {images.length > 1 && (
-            <div className="grid grid-cols-4 gap-3 sm:grid-cols-5">
-              {images.map((image) => {
-                const isSelected = image.imageUrl === selectedImageUrl;
-
-                return (
-                  <button
-                    key={image.id}
-                    type="button"
-                    onClick={() => handleSelectImage(image.imageUrl)}
-                    className={`overflow-hidden rounded-xl border ${
-                      isSelected
-                        ? "border-slate-900 ring-2 ring-slate-200"
-                        : "border-slate-200 hover:border-slate-400"
-                    }`}
-                  >
-                    <img
-                      src={buildFileUrl(image.imageUrl)}
-                      alt={title}
-                      className="h-20 w-full object-cover"
-                    />
-                  </button>
-                );
-              })}
-            </div>
-          )}
-
-          <p className="text-sm text-slate-500">
-            Click the main image to open a larger preview.
-          </p>
-        </div>
-      </section>
-
+      {/* Lightbox */}
       {isLightboxOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
-          onClick={closeLightbox}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm"
+          onClick={() => setIsLightboxOpen(false)}
         >
-          <div
-            className="relative w-full max-w-6xl"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="relative w-full max-w-5xl" onClick={(e) => e.stopPropagation()}>
             <button
               type="button"
-              onClick={closeLightbox}
-              className="absolute right-0 top-0 z-10 inline-flex h-11 w-11 -translate-y-14 items-center justify-center rounded-full bg-white text-lg font-semibold text-slate-900 shadow-sm hover:bg-slate-100"
+              onClick={() => setIsLightboxOpen(false)}
+              aria-label={t("common.dismiss")}
+              className="absolute right-0 top-0 z-10 inline-flex h-9 w-9 -translate-y-11 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition hover:bg-white/20"
             >
-              ×
+              <ion-icon name="close" style={{ fontSize: "18px" }} />
             </button>
-
-            <div className="overflow-hidden rounded-2xl bg-black">
+            <div className="overflow-hidden rounded-xl bg-black">
               <img
                 src={buildFileUrl(selectedImageUrl)}
                 alt={title}
-                className="max-h-[85vh] w-full object-contain"
+                className="max-h-[82vh] w-full object-contain"
               />
             </div>
-
             {images.length > 1 && (
-              <div className="mt-4 grid grid-cols-4 gap-3 rounded-2xl bg-white/95 p-3 shadow-sm sm:grid-cols-5 md:grid-cols-6">
+              <div className="mt-3 flex flex-wrap justify-center gap-2">
                 {images.map((image) => {
-                  const isSelected = image.imageUrl === selectedImageUrl;
-
+                  const active = image.imageUrl === selectedImageUrl;
                   return (
                     <button
                       key={image.id}
                       type="button"
-                      onClick={() => handleSelectImage(image.imageUrl)}
-                      className={`overflow-hidden rounded-xl border ${
-                        isSelected
-                          ? "border-slate-900 ring-2 ring-slate-200"
-                          : "border-slate-200 hover:border-slate-400"
+                      onClick={() => setSelectedImageUrl(image.imageUrl)}
+                      className={`h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg border-2 transition-all ${
+                        active ? "border-white opacity-100" : "border-transparent opacity-50 hover:opacity-80"
                       }`}
                     >
-                      <img
-                        src={buildFileUrl(image.imageUrl)}
-                        alt={title}
-                        className="h-20 w-full object-cover"
-                      />
+                      <img src={buildFileUrl(image.imageUrl)} alt="" className="h-full w-full object-cover" />
                     </button>
                   );
                 })}

@@ -34,6 +34,13 @@ const az = {
   },
   authLayout: {
     badge: "Hesaba giriş",
+    headline: "Bir şey itirdiniz?\nBir şey tapdınız?",
+    tagline: "İnsanları bir-birinə bağlayırıq.",
+    features: {
+      browse: "İtmiş və tapılmış əşyalara baxın",
+      matching: "Ağıllı əşya uyğunlaşdırması",
+      moderated: "Moderasiya edilmiş və etibarlı icma",
+    },
   },
   auth: {
     login: {
@@ -115,6 +122,7 @@ const az = {
     delete: "Sil",
     edit: "Redaktə et",
     confirm: "Təsdiqlə",
+    dismiss: "Bağla",
   },
   home: {
     title: "Elanlara bax",
@@ -138,6 +146,38 @@ const az = {
     },
     showFilters: "Filtrləri göstər",
     hideFilters: "Filtrləri gizlət",
+  },
+  postImageManager: {
+    title: "Şəkilləri idarə et",
+    description: "Bu elan üçün şəkil yükləyin və ya silin. Maksimum: {{max}}.",
+    uploadButton: "Şəkil yüklə",
+    uploading: "Yüklənir...",
+    imageLabel: "Şəkil {{index}}",
+    imageNote: "Bu elan üçün yüklənib",
+    noImages: "Hələ yüklənmiş şəkil yoxdur.",
+    maxImagesError: "Ən çox {{max}} şəkil yükləyə bilərsiniz.",
+  },
+  imagePicker: {
+    label: "Şəkillər",
+    uploadLabel: "{{max}}-ə qədər şəkil yükləyin",
+    formatsNote: "JPG, JPEG, PNG və ya WEBP formatları dəstəklənir.",
+    selectButton: "Şəkillər seçin",
+    remove: "Sil",
+    noImages: "Hələ şəkil seçilməyib.",
+  },
+  postImageGallery: {
+    noImages: "Şəkil mövcud deyil",
+    title: "Şəkillər",
+    description: "Yüklənmiş əşya şəkillərini nəzərdən keçirin.",
+    hint: "Daha böyük önizləmə üçün əsas şəkilə klikləyin.",
+  },
+  footer: {
+    navigation: "Naviqasiya",
+    platform: "Platforma",
+    browsePosts: "İtmiş və tapılmış elanları gözdən keçirin",
+    matching: "Ağıllı əşya uyğunlaşdırması",
+    moderation: "İcma moderasiyası",
+    rights: "Bütün hüquqlar qorunur.",
   },
   post: {
     lost: "İtmiş",
@@ -261,6 +301,7 @@ const az = {
       deletePost: "Elanı sil",
       sendContactRequest: "Əlaqə sorğusu göndər",
       closeContactForm: "Əlaqə formasını bağla",
+      loginToContact: "Elan sahibi ilə əlaqə üçün daxil olun",
       reportPost: "Elanı şikayət et",
       closeReportForm: "Şikayət formasını bağla",
     },

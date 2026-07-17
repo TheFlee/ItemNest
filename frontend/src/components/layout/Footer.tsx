@@ -24,7 +24,7 @@ export default function Footer() {
           {/* Navigation */}
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
-              Navigation
+              {t("footer.navigation")}
             </p>
             <ul className="mt-3 space-y-2">
               {[
@@ -35,7 +35,7 @@ export default function Footer() {
                 <li key={link.to}>
                   <Link
                     to={link.to}
-                    className="text-sm text-[var(--text-secondary)] hover:text-[var(--accent)]"
+                    className="text-sm text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors"
                   >
                     {link.label}
                   </Link>
@@ -47,20 +47,20 @@ export default function Footer() {
           {/* Platform info */}
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
-              Platform
+              {t("footer.platform")}
             </p>
             <ul className="mt-3 space-y-2 text-sm text-[var(--text-secondary)]">
               <li className="flex items-center gap-2">
                 <ion-icon name="search-outline" style={{ fontSize: "14px" }} />
-                Browse lost &amp; found posts
+                {t("footer.browsePosts")}
               </li>
               <li className="flex items-center gap-2">
                 <ion-icon name="git-compare-outline" style={{ fontSize: "14px" }} />
-                Smart item matching
+                {t("footer.matching")}
               </li>
               <li className="flex items-center gap-2">
                 <ion-icon name="shield-checkmark-outline" style={{ fontSize: "14px" }} />
-                Community moderation
+                {t("footer.moderation")}
               </li>
             </ul>
           </div>
@@ -68,7 +68,7 @@ export default function Footer() {
 
         <div className="mt-8 border-t border-[var(--border)] pt-6">
           <p className="text-sm text-[var(--text-secondary)]">
-            © {new Date().getFullYear()} {t("brand.name")}. All rights reserved.
+            © {new Date().getFullYear()} {t("brand.name")}. {t("footer.rights")}
           </p>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { deleteImage, uploadImage } from "../../api/itemImageApi";
 import type { ItemImage } from "../../types/post";
 import { getApiErrorMessage } from "../../utils/error";
@@ -17,20 +18,19 @@ export default function PostImageManager({
   maxImages = 5,
   onImagesChanged,
 }: PostImageManagerProps) {
+  const { t } = useTranslation();
   const [isUploading, setIsUploading] = useState(false);
   const [deletingImageId, setDeletingImageId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
 
   async function handleUpload(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
-    if (!file) {
-      return;
-    }
+    if (!file) return;
 
     event.target.value = "";
 
     if (images.length >= maxImages) {
-      setErrorMessage(`You can upload at most ${maxImages} images.`);
+      setErrorMessage(t("postImageManager.maxImagesError", { max: maxImages }));
       return;
     }
 
@@ -61,32 +61,34 @@ export default function PostImageManager({
     }
   }
 
+  const atLimit = images.length >= maxImages;
+
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-      <div className="flex flex-col gap-4 border-b border-slate-200 pb-5 sm:flex-row sm:items-center sm:justify-between">
+    <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-6">
+      <div className="flex flex-col gap-4 border-b border-[var(--border)] pb-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-xl font-semibold tracking-tight text-slate-900">
-            Manage Images
+          <h2 className="text-xl font-semibold tracking-tight text-[var(--text-primary)]">
+            {t("postImageManager.title")}
           </h2>
-          <p className="mt-1 text-sm text-slate-600">
-            Upload or remove images for this post. Maximum: {maxImages}.
+          <p className="mt-1 text-sm text-[var(--text-secondary)]">
+            {t("postImageManager.description", { max: maxImages })}
           </p>
         </div>
 
         <label
-          className={`inline-flex cursor-pointer items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-sm ${
-            images.length >= maxImages || isUploading
-              ? "bg-slate-400"
-              : "bg-slate-900 hover:bg-slate-800"
+          className={`inline-flex cursor-pointer items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition ${
+            atLimit || isUploading
+              ? "bg-[var(--text-secondary)] opacity-60 cursor-not-allowed"
+              : "bg-[var(--accent)] hover:bg-[var(--accent-hover)]"
           }`}
         >
-          {isUploading ? "Uploading..." : "Upload Image"}
+          {isUploading ? t("postImageManager.uploading") : t("postImageManager.uploadButton")}
           <input
             type="file"
             accept="image/*"
             className="hidden"
             onChange={handleUpload}
-            disabled={images.length >= maxImages || isUploading}
+            disabled={atLimit || isUploading}
           />
         </label>
       </div>
@@ -102,37 +104,39 @@ export default function PostImageManager({
           {images.map((image, index) => (
             <div
               key={image.id}
-              className="overflow-hidden rounded-2xl border border-slate-200 bg-white"
+              className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg-card)]"
             >
               <img
                 src={buildFileUrl(image.imageUrl)}
-                alt={`Post image ${index + 1}`}
+                alt={t("postImageManager.imageLabel", { index: index + 1 })}
                 className="h-44 w-full object-cover"
               />
 
               <div className="flex items-center justify-between gap-3 p-4">
                 <div>
-                  <p className="text-sm font-semibold text-slate-900">
-                    Image {index + 1}
+                  <p className="text-sm font-semibold text-[var(--text-primary)]">
+                    {t("postImageManager.imageLabel", { index: index + 1 })}
                   </p>
-                  <p className="text-xs text-slate-500">Uploaded for this post</p>
+                  <p className="text-xs text-[var(--text-secondary)]">
+                    {t("postImageManager.imageNote")}
+                  </p>
                 </div>
 
                 <button
                   type="button"
                   onClick={() => handleDelete(image.id)}
                   disabled={deletingImageId === image.id}
-                  className="inline-flex items-center justify-center rounded-xl border border-red-200 bg-white px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center justify-center rounded-xl border border-red-200 bg-white px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60 transition"
                 >
-                  {deletingImageId === image.id ? "Deleting..." : "Delete"}
+                  {deletingImageId === image.id ? t("common.deleting") : t("common.delete")}
                 </button>
               </div>
             </div>
           ))}
         </div>
       ) : (
-        <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
-          No uploaded images yet.
+        <div className="mt-6 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-3 text-sm text-[var(--text-secondary)]">
+          {t("postImageManager.noImages")}
         </div>
       )}
     </section>

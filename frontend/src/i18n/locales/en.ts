@@ -34,6 +34,13 @@ const en = {
   },
   authLayout: {
     badge: "Account access",
+    headline: "Lost something?\nFound something?",
+    tagline: "We connect people.",
+    features: {
+      browse: "Browse lost & found items",
+      matching: "Smart item matching",
+      moderated: "Moderated & safe community",
+    },
   },
   auth: {
     login: {
@@ -115,6 +122,7 @@ const en = {
     delete: "Delete",
     edit: "Edit",
     confirm: "Confirm",
+    dismiss: "Dismiss",
   },
   home: {
     title: "Browse posts",
@@ -138,6 +146,38 @@ const en = {
     },
     showFilters: "Show Filters",
     hideFilters: "Hide Filters",
+  },
+  postImageManager: {
+    title: "Manage Images",
+    description: "Upload or remove images for this post. Maximum: {{max}}.",
+    uploadButton: "Upload Image",
+    uploading: "Uploading...",
+    imageLabel: "Image {{index}}",
+    imageNote: "Uploaded for this post",
+    noImages: "No uploaded images yet.",
+    maxImagesError: "You can upload at most {{max}} images.",
+  },
+  imagePicker: {
+    label: "Images",
+    uploadLabel: "Upload up to {{max}} images",
+    formatsNote: "JPG, JPEG, PNG, or WEBP formats are supported.",
+    selectButton: "Select Images",
+    remove: "Remove",
+    noImages: "No images selected yet.",
+  },
+  postImageGallery: {
+    noImages: "No images available",
+    title: "Images",
+    description: "Review the uploaded item images.",
+    hint: "Click the main image to open a larger preview.",
+  },
+  footer: {
+    navigation: "Navigation",
+    platform: "Platform",
+    browsePosts: "Browse lost & found posts",
+    matching: "Smart item matching",
+    moderation: "Community moderation",
+    rights: "All rights reserved.",
   },
   post: {
     lost: "Lost",
@@ -261,6 +301,7 @@ const en = {
       deletePost: "Delete Post",
       sendContactRequest: "Send Contact Request",
       closeContactForm: "Close Contact Form",
+      loginToContact: "Log in to Contact Owner",
       reportPost: "Report Post",
       closeReportForm: "Close Report Form",
     },

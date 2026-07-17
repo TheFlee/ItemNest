@@ -52,8 +52,7 @@ export default function Navbar() {
     { to: "/admin/posts", label: t("nav.adminPosts") },
     { to: "/admin/reports", label: t("nav.adminReports") },
     { to: "/admin/users", label: t("nav.adminUsers") },
-    // nav.adminCategories i18n key will be added in Task 10; hardcoded for now
-    { to: "/admin/categories", label: "Categories" },
+    { to: "/admin/categories", label: t("nav.adminCategories") },
   ];
 
   function renderNavLink(to: string, label: string, iconMap: Record<string, string>) {
@@ -91,7 +90,7 @@ export default function Navbar() {
                 <button
                   onClick={() => setMenuOpen((o) => !o)}
                   className="flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] lg:hidden"
-                  aria-label={menuOpen ? "Close menu" : "Open menu"}
+                  aria-label={t(menuOpen ? "nav.closeMenu" : "nav.openMenu")}
                 >
                   <ion-icon name={menuOpen ? "close-outline" : "menu-outline"} style={{ fontSize: "18px" }} />
                 </button>

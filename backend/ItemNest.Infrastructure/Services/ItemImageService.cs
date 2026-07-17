@@ -7,6 +7,7 @@ using ItemNest.Application.Exceptions;
 using ItemNest.Application.Interfaces;
 using ItemNest.Domain.Entities;
 using ItemNest.Infrastructure.Data;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -18,6 +19,7 @@ public class ItemImageService : IItemImageService
     private readonly IAmazonS3 _s3Client;
     private readonly AwsSettings _awsSettings;
     private readonly IMapper _mapper;
+    private readonly IWebHostEnvironment _env;
 
     private static readonly string[] AllowedContentTypes =
     {
@@ -37,16 +39,20 @@ public class ItemImageService : IItemImageService
     private const long MaxFileSize = 5 * 1024 * 1024;
     private const int MaxImageCountPerPost = 5;
 
+    private bool UseLocalStorage => string.IsNullOrEmpty(_awsSettings.AccessKeyId);
+
     public ItemImageService(
         ItemNestDbContext context,
         IAmazonS3 s3Client,
         IOptions<AwsSettings> awsSettings,
-        IMapper mapper)
+        IMapper mapper,
+        IWebHostEnvironment env)
     {
         _context = context;
         _s3Client = s3Client;
         _awsSettings = awsSettings.Value;
         _mapper = mapper;
+        _env = env;
     }
 
     public async Task<ItemImageDto> UploadAsync(
@@ -94,28 +100,44 @@ public class ItemImageService : IItemImageService
             throw new InvalidOperationException("A post can have a maximum of 5 images.");
 
         var storedFileName = $"{Guid.NewGuid()}{extension}";
-        var s3Key = $"uploads/itemposts/{storedFileName}";
+        var relativeKey = $"uploads/itemposts/{storedFileName}";
 
-        var uploadRequest = new PutObjectRequest
+        string imageUrl;
+
+        if (UseLocalStorage)
         {
-            BucketName = _awsSettings.BucketName,
-            Key = s3Key,
-            InputStream = stream,
-            ContentType = contentType,
-            AutoCloseStream = false,
-            DisablePayloadSigning = true,
-        };
+            var localDir = Path.Combine(_env.WebRootPath, "uploads", "itemposts");
+            Directory.CreateDirectory(localDir);
+            var localPath = Path.Combine(localDir, storedFileName);
 
-        await _s3Client.PutObjectAsync(uploadRequest, cancellationToken);
+            await using var fileStream = File.Create(localPath);
+            await stream.CopyToAsync(fileStream, cancellationToken);
 
-        var imageUrl = $"{_awsSettings.PublicUrl}/{s3Key}";
+            imageUrl = $"/{relativeKey}";
+        }
+        else
+        {
+            var uploadRequest = new PutObjectRequest
+            {
+                BucketName = _awsSettings.BucketName,
+                Key = relativeKey,
+                InputStream = stream,
+                ContentType = contentType,
+                AutoCloseStream = false,
+                DisablePayloadSigning = true,
+            };
+
+            await _s3Client.PutObjectAsync(uploadRequest, cancellationToken);
+
+            imageUrl = $"{_awsSettings.PublicUrl}/{relativeKey}";
+        }
 
         var image = new ItemImage
         {
             Id = Guid.NewGuid(),
             ItemPostId = itemPostId,
             ImageUrl = imageUrl,
-            StoredFileName = s3Key,
+            StoredFileName = relativeKey,
             ContentType = contentType,
             FileSize = length,
             CreatedAt = DateTimeOffset.UtcNow
@@ -161,13 +183,22 @@ public class ItemImageService : IItemImageService
         if (image.ItemPost.UserId != userId)
             throw new ForbiddenException("You are not allowed to delete this image.");
 
-        var deleteRequest = new DeleteObjectRequest
+        if (UseLocalStorage)
         {
-            BucketName = _awsSettings.BucketName,
-            Key = image.StoredFileName
-        };
+            var localPath = Path.Combine(_env.WebRootPath, image.StoredFileName.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+            if (File.Exists(localPath))
+                File.Delete(localPath);
+        }
+        else
+        {
+            var deleteRequest = new DeleteObjectRequest
+            {
+                BucketName = _awsSettings.BucketName,
+                Key = image.StoredFileName
+            };
 
-        await _s3Client.DeleteObjectAsync(deleteRequest, cancellationToken);
+            await _s3Client.DeleteObjectAsync(deleteRequest, cancellationToken);
+        }
 
         _context.ItemImages.Remove(image);
         await _context.SaveChangesAsync(cancellationToken);
