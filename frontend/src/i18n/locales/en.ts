@@ -412,9 +412,9 @@ const en = {
     highlights: {
       totalPosts: "Total posts",
       totalPostsDescription: "All item posts currently created under your account.",
-      requestsWaiting: "Requests waiting",
-      requestsWaitingDescription:
-        "Pending received requests that still need your decision.",
+      unreadChats: "Unread chats",
+      unreadChatsDescription:
+        "Conversations with unread messages waiting for your reply.",
       savedAndTracked: "Saved and tracked",
       savedAndTrackedDescription:
         "Favorite posts saved for later review and follow-up.",
@@ -432,12 +432,9 @@ const en = {
       closedPostsDescription: "Posts that are no longer active.",
       favorites: "Favorites",
       favoritesDescription: "Posts you saved for later review.",
-      pendingReceivedRequests: "Pending Received Requests",
-      pendingReceivedRequestsDescription:
-        "Contact requests waiting for your response.",
-      pendingSentRequests: "Pending Sent Requests",
-      pendingSentRequestsDescription:
-        "Requests you sent and still waiting on.",
+      chatsDescription: "Total active chat conversations in your account.",
+      unreadChats: "Unread Chats",
+      unreadChatsDescription: "Conversations with messages you have not read yet.",
       myReports: "My Reports",
       myReportsDescription: "Reports you submitted for posts.",
     },
@@ -858,6 +855,13 @@ const en = {
   },
   chat: {
     inbox: "Chats",
+    noConversations: "No conversations yet",
+    startChat: "Chat",
+    connected: "Connected",
+    connecting: "Connecting...",
+    noMessages: "No messages yet. Say hello!",
+    inputPlaceholder: "Type a message...",
+    send: "Send",
   },
   chatPage: {
     title: "Chat",

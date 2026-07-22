@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useLocation, useParams } from "react-router-dom";
 import { LLink } from "../../components/common/LLink";
 import { useLangNavigate } from "../../hooks/useLangPath";
-import { createContactRequest } from "../../api/contactRequestApi";
+import { getOrCreateChat } from "../../api/chatApi";
 import { addFavorite, removeFavorite } from "../../api/favoriteApi";
 import { deletePost, getPostBySlug, getPostMatches, updatePost } from "../../api/itemPostApi";
 import { createReport } from "../../api/reportApi";
@@ -44,16 +44,14 @@ export default function PostDetailsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isMatchesLoading, setIsMatchesLoading] = useState(false);
   const [isFavoriteSubmitting, setIsFavoriteSubmitting] = useState(false);
-  const [isContactSubmitting, setIsContactSubmitting] = useState(false);
+  const [isChatStarting, setIsChatStarting] = useState(false);
   const [isReportSubmitting, setIsReportSubmitting] = useState(false);
   const [statusSubmittingTo, setStatusSubmittingTo] = useState<number | null>(null);
   const [isDeletingPost, setIsDeletingPost] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-  const [contactMessage, setContactMessage] = useState("");
   const [reportReason, setReportReason] = useState<number>(1);
   const [reportDescription, setReportDescription] = useState("");
-  const [showContactForm, setShowContactForm] = useState(false);
   const [showReportForm, setShowReportForm] = useState(false);
 
   const reportReasonOptions = useMemo(() => getReportReasonOptions(), [t]);
@@ -106,15 +104,14 @@ export default function PostDetailsPage() {
     finally { setIsFavoriteSubmitting(false); }
   }
 
-  async function handleSendContactRequest() {
+  async function handleChat() {
     if (!post) return;
-    setErrorMessage(""); setSuccessMessage(""); setIsContactSubmitting(true);
+    setErrorMessage(""); setIsChatStarting(true);
     try {
-      await createContactRequest({ itemPostId: post.id, message: contactMessage.trim() });
-      setContactMessage(""); setShowContactForm(false);
-      setSuccessMessage(t("postDetails.messages.contactRequestSent"));
+      const chat = await getOrCreateChat(post.id);
+      langNavigate(`/chats/${chat.id}`);
     } catch (error: any) { setErrorMessage(getApiErrorMessage(error)); }
-    finally { setIsContactSubmitting(false); }
+    finally { setIsChatStarting(false); }
   }
 
   async function handleSubmitReport() {
@@ -410,14 +407,15 @@ export default function PostDetailsPage() {
 
                   <button
                     type="button"
-                    onClick={() => { setShowContactForm((p) => !p); setShowReportForm(false); setErrorMessage(""); setSuccessMessage(""); }}
+                    onClick={() => { setShowReportForm(false); setErrorMessage(""); setSuccessMessage(""); void handleChat(); }}
+                    disabled={isChatStarting}
                     className={`${btnBase} text-white`}
                     style={{ background: typeColor }}
                     onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.88")}
                     onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
                   >
-                    <ion-icon name={showContactForm ? "close-outline" : "mail-outline"} style={{ fontSize: "14px" }} />
-                    {showContactForm ? t("postDetails.actions.closeContactForm") : t("postDetails.actions.sendContactRequest")}
+                    <ion-icon name="chatbubble-outline" style={{ fontSize: "14px" }} />
+                    {isChatStarting ? t("common.loading") : t("chat.startChat")}
                   </button>
 
                   <button
@@ -447,37 +445,6 @@ export default function PostDetailsPage() {
         </div>
       </div>
 
-      {/* ── Contact form ────────────────────────────────────── */}
-      {showContactForm && (
-        <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-6">
-          <h2 className="text-lg font-semibold tracking-tight text-[var(--text-primary)]">
-            {t("postDetails.contactForm.title")}
-          </h2>
-          <p className="mt-1 text-sm text-[var(--text-secondary)]">
-            {t("postDetails.contactForm.subtitle")}
-          </p>
-          <div className="mt-5">
-            <FormTextarea
-              label={t("postDetails.contactForm.messageLabel")}
-              value={contactMessage}
-              onChange={setContactMessage}
-              placeholder={t("postDetails.contactForm.messagePlaceholder")}
-              rows={4}
-            />
-          </div>
-          <div className="mt-4">
-            <button
-              type="button"
-              onClick={() => void handleSendContactRequest()}
-              disabled={isContactSubmitting}
-              className={`${btnBase} text-white disabled:opacity-60`}
-              style={{ background: typeColor }}
-            >
-              {isContactSubmitting ? t("common.sending") : t("postDetails.contactForm.submit")}
-            </button>
-          </div>
-        </section>
-      )}
 
       {/* ── Report form ─────────────────────────────────────── */}
       {showReportForm && (

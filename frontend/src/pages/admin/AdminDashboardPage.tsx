@@ -92,11 +92,6 @@ export default function AdminDashboardPage() {
       description: t("adminPages.dashboard.cards.pendingReportsDescription"),
       to: "/admin/reports",
     },
-    {
-      title: t("adminPages.dashboard.cards.pendingContactRequests"),
-      value: dashboard.pendingContactRequestsCount,
-      description: t("adminPages.dashboard.cards.pendingContactRequestsDescription"),
-    },
   ];
 
   const moderationRows = [

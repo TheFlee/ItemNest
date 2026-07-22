@@ -10,8 +10,6 @@ import AdminReportsPage from "../pages/admin/AdminReportsPage";
 import AdminUsersPage from "../pages/admin/AdminUsersPage";
 import AdminCategoriesPage from "../pages/admin/AdminCategoriesPage";
 import AccountPage from "../pages/account/AccountPage";
-import ReceivedContactRequestsPage from "../pages/contactRequests/ReceivedContactRequestsPage";
-import SentContactRequestsPage from "../pages/contactRequests/SentContactRequestsPage";
 import DashboardPage from "../pages/dashboard/DashboardPage";
 import FavoritesPage from "../pages/favorites/FavoritesPage";
 import CreatePostPage from "../pages/posts/CreatePostPage";
@@ -55,8 +53,6 @@ export default function AppRouter() {
               <Route path="my-posts" element={<MyPostsPage />} />
               <Route path="create-post" element={<CreatePostPage />} />
               <Route path="posts/:slug/edit" element={<EditPostPage />} />
-              <Route path="contact-requests/sent" element={<SentContactRequestsPage />} />
-              <Route path="contact-requests/received" element={<ReceivedContactRequestsPage />} />
               <Route path="my-reports" element={<MyReportsPage />} />
               <Route path="chats" element={<ChatsPage />} />
               <Route path="chats/:chatId" element={<ChatPage />} />

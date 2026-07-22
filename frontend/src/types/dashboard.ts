@@ -4,8 +4,6 @@ export interface MyDashboard {
   returnedPostsCount: number;
   closedPostsCount: number;
   favoritesCount: number;
-  pendingReceivedContactRequestsCount: number;
-  pendingSentContactRequestsCount: number;
   myReportsCount: number;
 }
 
@@ -17,5 +15,4 @@ export interface AdminDashboard {
   closedPostsCount: number;
   totalCategoriesCount: number;
   pendingReportsCount: number;
-  pendingContactRequestsCount: number;
 }

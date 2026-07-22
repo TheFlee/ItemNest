@@ -414,9 +414,9 @@ const az = {
     highlights: {
       totalPosts: "Ümumi elanlar",
       totalPostsDescription: "Hesabınız altında yaradılmış bütün elanlar.",
-      requestsWaiting: "Gözləyən sorğular",
-      requestsWaitingDescription:
-        "Hələ qərar vermədiyiniz gələn sorğular.",
+      unreadChats: "Oxunmamış söhbətlər",
+      unreadChatsDescription:
+        "Cavabınızı gözləyən oxunmamış mesajları olan söhbətlər.",
       savedAndTracked: "İzlənilən elanlar",
       savedAndTrackedDescription:
         "Sonradan baxmaq üçün saxladığınız seçilmiş elanlar.",
@@ -434,12 +434,9 @@ const az = {
       closedPostsDescription: "Artıq aktiv olmayan elanlar.",
       favorites: "Seçilmişlər",
       favoritesDescription: "Sonradan baxmaq üçün saxladığınız elanlar.",
-      pendingReceivedRequests: "Gözləyən gələn sorğular",
-      pendingReceivedRequestsDescription:
-        "Cavabınızı gözləyən əlaqə sorğuları.",
-      pendingSentRequests: "Gözləyən göndərilən sorğular",
-      pendingSentRequestsDescription:
-        "Sizin göndərdiyiniz və cavab gözləyən sorğular.",
+      chatsDescription: "Hesabınızdakı ümumi aktiv söhbət sayı.",
+      unreadChats: "Oxunmamış söhbətlər",
+      unreadChatsDescription: "Hələ oxumadığınız mesajları olan söhbətlər.",
       myReports: "Mənim şikayətlərim",
       myReportsDescription: "Elanlar üçün göndərdiyiniz şikayətlər.",
     },
@@ -860,6 +857,13 @@ const az = {
   },
   chat: {
     inbox: "Söhbətlər",
+    noConversations: "Hələ söhbət yoxdur",
+    startChat: "Söhbət et",
+    connected: "Bağlı",
+    connecting: "Bağlanır...",
+    noMessages: "Hələ mesaj yoxdur. Salam de!",
+    inputPlaceholder: "Mesaj yazın...",
+    send: "Göndər",
   },
   chatPage: {
     title: "Söhbət",

@@ -2,8 +2,10 @@ import { LLink } from "../../components/common/LLink";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getMyDashboard } from "../../api/dashboardApi";
+import { getUserChats } from "../../api/chatApi";
 import PageState from "../../components/common/PageState";
 import type { MyDashboard } from "../../types/dashboard";
+import type { ChatItem } from "../../types/chat";
 import { getApiErrorMessage } from "../../utils/error";
 import { getPostStatusLabel } from "../../utils/post";
 
@@ -26,6 +28,7 @@ function getPercentage(value: number, total: number) {
 export default function DashboardPage() {
   const { t } = useTranslation();
   const [dashboard, setDashboard] = useState<MyDashboard | null>(null);
+  const [chats, setChats] = useState<ChatItem[]>([]);
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
@@ -45,6 +48,10 @@ export default function DashboardPage() {
     }
 
     void loadDashboard();
+  }, []);
+
+  useEffect(() => {
+    getUserChats().then(setChats).catch(console.error);
   }, []);
 
   if (isLoading || errorMessage || !dashboard) {
@@ -95,18 +102,18 @@ export default function DashboardPage() {
       icon: "heart-outline",
     },
     {
-      title: t("dashboardPage.quickAccess.pendingReceivedRequests"),
-      value: dashboard.pendingReceivedContactRequestsCount,
-      description: t("dashboardPage.quickAccess.pendingReceivedRequestsDescription"),
-      to: "/contact-requests/received",
-      icon: "mail-open-outline",
+      title: t("chat.inbox"),
+      value: chats.length,
+      description: t("dashboardPage.quickAccess.chatsDescription"),
+      to: "/chats",
+      icon: "chatbubbles-outline",
     },
     {
-      title: t("dashboardPage.quickAccess.pendingSentRequests"),
-      value: dashboard.pendingSentContactRequestsCount,
-      description: t("dashboardPage.quickAccess.pendingSentRequestsDescription"),
-      to: "/contact-requests/sent",
-      icon: "paper-plane-outline",
+      title: t("dashboardPage.quickAccess.unreadChats"),
+      value: chats.filter((c) => c.unreadCount > 0).length,
+      description: t("dashboardPage.quickAccess.unreadChatsDescription"),
+      to: "/chats",
+      icon: "chatbubble-ellipses-outline",
     },
     {
       title: t("dashboardPage.quickAccess.myReports"),
@@ -116,6 +123,9 @@ export default function DashboardPage() {
       icon: "flag-outline",
     },
   ];
+
+  const totalChats = chats.length;
+  const unreadChats = chats.filter((c) => c.unreadCount > 0).length;
 
   const summaryRows = [
     {
@@ -181,16 +191,16 @@ export default function DashboardPage() {
           </div>
 
           <div
-            className={`rounded-2xl border p-5 ${dashboard.pendingReceivedContactRequestsCount > 0 ? "border-amber-300 bg-amber-50 animate-pulse" : "border-[var(--border)] bg-[var(--bg-surface)]"}`}
+            className={`rounded-2xl border p-5 ${unreadChats > 0 ? "border-amber-300 bg-amber-50 animate-pulse" : "border-[var(--border)] bg-[var(--bg-surface)]"}`}
           >
             <p className="text-sm font-medium text-[var(--text-secondary)]">
-              {t("dashboardPage.highlights.requestsWaiting")}
+              {t("dashboardPage.highlights.unreadChats")}
             </p>
             <p className="mt-2 text-3xl font-semibold tracking-tight text-[var(--text-primary)]">
-              {dashboard.pendingReceivedContactRequestsCount}
+              {unreadChats}
             </p>
             <p className="mt-3 text-sm leading-6 text-[var(--text-secondary)]">
-              {t("dashboardPage.highlights.requestsWaitingDescription")}
+              {t("dashboardPage.highlights.unreadChatsDescription")}
             </p>
           </div>
 

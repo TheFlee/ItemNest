@@ -9,8 +9,7 @@ const navIconMap: Record<string, string> = {
   "/dashboard": "grid-outline",
   "/my-posts": "document-text-outline",
   "/favorites": "heart-outline",
-  "/contact-requests/sent": "paper-plane-outline",
-  "/contact-requests/received": "mail-open-outline",
+  "/chats": "chatbubbles-outline",
   "/my-reports": "flag-outline",
 };
 
@@ -42,8 +41,7 @@ export default function Navbar() {
     { to: "/dashboard", label: t("nav.dashboard") },
     { to: "/my-posts", label: t("nav.myPosts") },
     { to: "/favorites", label: t("nav.favorites") },
-    { to: "/contact-requests/sent", label: t("nav.sentRequests") },
-    { to: "/contact-requests/received", label: t("nav.receivedRequests") },
+    { to: "/chats", label: t("chat.inbox") },
     { to: "/my-reports", label: t("nav.myReports") },
   ];
 
