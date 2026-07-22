@@ -1,5 +1,6 @@
 using dotenv.net;
 using ItemNest.Api.Extensions;
+using ItemNest.Api.Hubs;
 using ItemNest.Api.Middlewares;
 using ItemNest.Domain.Entities;
 using ItemNest.Infrastructure.Data;
@@ -29,13 +30,15 @@ builder.Services.AddCors(options =>
         policy
             .WithOrigins(allowedOrigins)
             .AllowAnyHeader()
-            .AllowAnyMethod();
+            .AllowAnyMethod()
+            .AllowCredentials();
     });
 });
 builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddAuthorization();
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 
@@ -88,6 +91,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<ChatHub>("/hubs/chat");
 app.MapFallbackToFile("index.html");
 
 app.Run();

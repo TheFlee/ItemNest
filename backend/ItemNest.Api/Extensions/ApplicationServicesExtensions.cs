@@ -24,6 +24,8 @@ public static class ApplicationServicesExtensions
         services.AddScoped<IFavoriteService, FavoriteService>();
         services.AddScoped<IReportService, ReportService>();
         services.AddScoped<IContactRequestService, ContactRequestService>();
+        services.AddScoped<IChatService, ChatService>();
+        services.AddHostedService<ChatCleanupService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IDashboardService, DashboardService>();
         services.AddScoped<TestDataSeeder>();
