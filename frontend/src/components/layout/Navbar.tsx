@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../context/AuthContext";
 import { LLink, LNavLink } from "../common/LLink";
 import LanguageSwitcher from "./LanguageSwitcher";
+import { getUserChats } from "../../api/chatApi";
 
 const navIconMap: Record<string, string> = {
   "/": "home-outline",
@@ -34,7 +35,25 @@ export default function Navbar() {
   const { t } = useTranslation();
   const { isAuthenticated, user, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [totalUnread, setTotalUnread] = useState(0);
   const isAdmin = user?.roles.includes("Admin") ?? false;
+
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchUnread = async () => {
+      try {
+        const chats = await getUserChats();
+        setTotalUnread(chats.reduce((sum, c) => sum + c.unreadCount, 0));
+      } catch {
+        // ignore polling errors
+      }
+    };
+
+    void fetchUnread();
+    const id = setInterval(() => { void fetchUnread(); }, 30_000);
+    return () => clearInterval(id);
+  }, [user]);
 
   const memberLinks = [
     { to: "/", label: t("nav.home") },
@@ -53,7 +72,7 @@ export default function Navbar() {
     { to: "/admin/categories", label: t("nav.adminCategories") },
   ];
 
-  function renderNavLink(to: string, label: string, iconMap: Record<string, string>) {
+  function renderNavLink(to: string, label: string, iconMap: Record<string, string>, badge?: number) {
     return (
       <LNavLink
         key={to}
@@ -63,6 +82,11 @@ export default function Navbar() {
       >
         <ion-icon name={iconMap[to] ?? "ellipse-outline"} style={{ fontSize: "15px" }} />
         {label}
+        {badge != null && badge > 0 && (
+          <span className="ml-1.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+            {badge > 99 ? "99+" : badge}
+          </span>
+        )}
       </LNavLink>
     );
   }
@@ -156,7 +180,7 @@ export default function Navbar() {
               <div className="hidden lg:block">
                 <div className="flex flex-col gap-3 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] px-3 py-3">
                   <div className="flex flex-wrap gap-2">
-                    {memberLinks.map((link) => renderNavLink(link.to, link.label, navIconMap))}
+                    {memberLinks.map((link) => renderNavLink(link.to, link.label, navIconMap, link.to === "/chats" ? totalUnread : undefined))}
                   </div>
                   {isAdmin && (
                     <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-3">
@@ -175,7 +199,7 @@ export default function Navbar() {
                 {isAuthenticated ? (
                   <div className="flex flex-col gap-3">
                     <div className="flex flex-col gap-1">
-                      {memberLinks.map((link) => renderNavLink(link.to, link.label, navIconMap))}
+                      {memberLinks.map((link) => renderNavLink(link.to, link.label, navIconMap, link.to === "/chats" ? totalUnread : undefined))}
                     </div>
                     {isAdmin && (
                       <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-3">

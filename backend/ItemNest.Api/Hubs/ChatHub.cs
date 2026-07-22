@@ -62,6 +62,8 @@ public class ChatHub : Hub
         if (string.IsNullOrWhiteSpace(claim))
             throw new HubException("Unauthorized.");
 
-        return Guid.Parse(claim);
+        if (!Guid.TryParse(claim, out var userId))
+            throw new HubException("Invalid user identifier.");
+        return userId;
     }
 }

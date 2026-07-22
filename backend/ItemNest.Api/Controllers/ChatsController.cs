@@ -54,6 +54,8 @@ public class ChatsController : ControllerBase
         if (string.IsNullOrWhiteSpace(claim))
             throw new UnauthorizedAccessException("User information was not found in the token.");
 
-        return Guid.Parse(claim);
+        if (!Guid.TryParse(claim, out var userId))
+            throw new UnauthorizedAccessException("Invalid user identifier.");
+        return userId;
     }
 }

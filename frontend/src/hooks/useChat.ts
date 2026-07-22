@@ -21,7 +21,10 @@ export function useChat(chatId: string, token: string | null) {
       .build();
 
     connection.on('ReceiveMessage', (message: ChatMessageItem) => {
-      setMessages((prev) => [...prev, message]);
+      setMessages((prev) => {
+        if (prev.some((m) => m.id === message.id)) return prev;
+        return [...prev, message];
+      });
     });
 
     connection.on('MessagesRead', () => {

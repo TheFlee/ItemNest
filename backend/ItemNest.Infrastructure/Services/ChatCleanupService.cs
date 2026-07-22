@@ -47,28 +47,19 @@ public class ChatCleanupService : BackgroundService
 
         var cutoff = DateTimeOffset.UtcNow.AddDays(-60);
 
-        var oldMessages = await context.ChatMessages
+        // Delete messages older than 60 days
+        var deletedMessages = await context.ChatMessages
             .Where(x => x.SentAt < cutoff)
-            .ToListAsync(ct);
+            .ExecuteDeleteAsync(ct);
 
-        context.ChatMessages.RemoveRange(oldMessages);
-        await context.SaveChangesAsync(ct);
-
-        // Delete chats that now have no messages
-        var emptyChatIds = await context.Chats
-            .Where(x => !context.ChatMessages.Any(m => m.ChatId == x.Id))
-            .Select(x => x.Id)
-            .ToListAsync(ct);
-
-        var emptyChats = await context.Chats
-            .Where(x => emptyChatIds.Contains(x.Id))
-            .ToListAsync(ct);
-
-        context.Chats.RemoveRange(emptyChats);
-        await context.SaveChangesAsync(ct);
+        // Delete chats with no remaining messages
+        var activeChats = context.ChatMessages.Select(x => x.ChatId).Distinct();
+        var deletedChats = await context.Chats
+            .Where(c => !activeChats.Contains(c.Id))
+            .ExecuteDeleteAsync(ct);
 
         _logger.LogInformation(
             "Chat cleanup complete: {Messages} messages and {Chats} empty chats deleted",
-            oldMessages.Count, emptyChats.Count);
+            deletedMessages, deletedChats);
     }
 }
