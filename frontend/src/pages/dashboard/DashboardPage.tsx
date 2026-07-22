@@ -1,9 +1,11 @@
-import { Link } from "react-router-dom";
+import { LLink } from "../../components/common/LLink";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getMyDashboard } from "../../api/dashboardApi";
+import { getUserChats } from "../../api/chatApi";
 import PageState from "../../components/common/PageState";
 import type { MyDashboard } from "../../types/dashboard";
+import type { ChatItem } from "../../types/chat";
 import { getApiErrorMessage } from "../../utils/error";
 import { getPostStatusLabel } from "../../utils/post";
 
@@ -26,6 +28,7 @@ function getPercentage(value: number, total: number) {
 export default function DashboardPage() {
   const { t } = useTranslation();
   const [dashboard, setDashboard] = useState<MyDashboard | null>(null);
+  const [chats, setChats] = useState<ChatItem[]>([]);
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
@@ -45,6 +48,10 @@ export default function DashboardPage() {
     }
 
     void loadDashboard();
+  }, []);
+
+  useEffect(() => {
+    getUserChats().then(setChats).catch(console.error);
   }, []);
 
   if (isLoading || errorMessage || !dashboard) {
@@ -95,18 +102,18 @@ export default function DashboardPage() {
       icon: "heart-outline",
     },
     {
-      title: t("dashboardPage.quickAccess.pendingReceivedRequests"),
-      value: dashboard.pendingReceivedContactRequestsCount,
-      description: t("dashboardPage.quickAccess.pendingReceivedRequestsDescription"),
-      to: "/contact-requests/received",
-      icon: "mail-open-outline",
+      title: t("chat.inbox"),
+      value: chats.length,
+      description: t("dashboardPage.quickAccess.chatsDescription"),
+      to: "/chats",
+      icon: "chatbubbles-outline",
     },
     {
-      title: t("dashboardPage.quickAccess.pendingSentRequests"),
-      value: dashboard.pendingSentContactRequestsCount,
-      description: t("dashboardPage.quickAccess.pendingSentRequestsDescription"),
-      to: "/contact-requests/sent",
-      icon: "paper-plane-outline",
+      title: t("dashboardPage.quickAccess.unreadChats"),
+      value: chats.filter((c) => c.unreadCount > 0).length,
+      description: t("dashboardPage.quickAccess.unreadChatsDescription"),
+      to: "/chats",
+      icon: "chatbubble-ellipses-outline",
     },
     {
       title: t("dashboardPage.quickAccess.myReports"),
@@ -116,6 +123,8 @@ export default function DashboardPage() {
       icon: "flag-outline",
     },
   ];
+
+  const unreadChats = chats.filter((c) => c.unreadCount > 0).length;
 
   const summaryRows = [
     {
@@ -152,18 +161,18 @@ export default function DashboardPage() {
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <Link
+            <LLink
               to="/create-post"
               className="inline-flex items-center justify-center rounded-xl bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[var(--accent-hover)]"
             >
               {t("dashboardPage.actions.createPost")}
-            </Link>
-            <Link
+            </LLink>
+            <LLink
               to="/my-posts"
               className="inline-flex items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
             >
               {t("dashboardPage.actions.manageMyPosts")}
-            </Link>
+            </LLink>
           </div>
         </div>
 
@@ -181,16 +190,16 @@ export default function DashboardPage() {
           </div>
 
           <div
-            className={`rounded-2xl border p-5 ${dashboard.pendingReceivedContactRequestsCount > 0 ? "border-amber-300 bg-amber-50 animate-pulse" : "border-[var(--border)] bg-[var(--bg-surface)]"}`}
+            className={`rounded-2xl border p-5 ${unreadChats > 0 ? "border-amber-300 bg-amber-50 animate-pulse" : "border-[var(--border)] bg-[var(--bg-surface)]"}`}
           >
             <p className="text-sm font-medium text-[var(--text-secondary)]">
-              {t("dashboardPage.highlights.requestsWaiting")}
+              {t("dashboardPage.highlights.unreadChats")}
             </p>
             <p className="mt-2 text-3xl font-semibold tracking-tight text-[var(--text-primary)]">
-              {dashboard.pendingReceivedContactRequestsCount}
+              {unreadChats}
             </p>
             <p className="mt-3 text-sm leading-6 text-[var(--text-secondary)]">
-              {t("dashboardPage.highlights.requestsWaitingDescription")}
+              {t("dashboardPage.highlights.unreadChatsDescription")}
             </p>
           </div>
 
@@ -220,10 +229,10 @@ export default function DashboardPage() {
 
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {cards.map((card) => (
-            <Link
+            <LLink
               key={card.title}
               to={card.to}
-              className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--accent)] hover:shadow-md"
+              className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-5 transition hover:-translate-y-0.5 hover:border-[var(--accent)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)]"
             >
               <div className="flex items-center justify-between">
                 <p className="text-sm font-medium text-[var(--text-secondary)]">{card.title}</p>
@@ -239,7 +248,7 @@ export default function DashboardPage() {
                 {t("dashboardPage.actions.openSection")}
                 <ion-icon name="arrow-forward-outline" style={{ fontSize: "13px" }} />
               </p>
-            </Link>
+            </LLink>
           ))}
         </div>
       </section>

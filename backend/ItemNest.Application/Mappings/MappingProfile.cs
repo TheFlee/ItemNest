@@ -44,28 +44,24 @@ public class MappingProfile : Profile
 
         CreateMap<UpdateItemPostDto, ItemPost>()
             .ForMember(dest => dest.UpdatedAt,
-                        opt => opt.MapFrom(_ => DateTimeOffset.UtcNow));
+                        opt => opt.MapFrom(_ => DateTimeOffset.UtcNow))
+            .ForMember(dest => dest.Status,
+                        opt => opt.Ignore());
         // ItemImage
         CreateMap<ItemImage, ItemImageDto>();
+
+        // Chat
+        CreateMap<ChatMessage, ChatMessageDto>()
+            .ForMember(dest => dest.SenderFullName,
+                opt => opt.MapFrom(src => src.Sender.FullName));
 
         // Report
         CreateMap<Report, ReportDto>()
             .ForMember(dest => dest.ReporterFullName,
                         opt => opt.MapFrom(src => src.ReporterUser.FullName))
             .ForMember(dest => dest.ItemPostTitle,
-                        opt => opt.MapFrom(src => src.ItemPost.Title));
-
-        // ContactRequest
-        CreateMap<ContactRequest, ContactRequestDto>()
-            .ForMember(dest => dest.ItemPostTitle,
                         opt => opt.MapFrom(src => src.ItemPost.Title))
-            .ForMember(dest => dest.RequesterFullName,
-                        opt => opt.MapFrom(src => src.RequesterUser.FullName))
-            .ForMember(dest => dest.RequesterEmail,
-                        opt => opt.MapFrom(src => src.RequesterUser.Email))
-            .ForMember(dest => dest.PostOwnerFullName,
-                        opt => opt.MapFrom(src => src.PostOwnerUser.FullName))
-            .ForMember(dest => dest.PostOwnerEmail,
-                        opt => opt.MapFrom(src => src.PostOwnerUser.Email));
+            .ForMember(dest => dest.ItemPostSlug,
+                        opt => opt.MapFrom(src => src.ItemPost.Slug));
     }
 }

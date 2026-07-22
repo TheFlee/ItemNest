@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Link, useNavigate } from "react-router-dom";
 import { getCategories } from "../../api/categoryApi";
 import { uploadImages } from "../../api/itemImageApi";
 import { createPost } from "../../api/itemPostApi";
@@ -12,6 +11,8 @@ import type { Category } from "../../types/category";
 import { getApiErrorMessage } from "../../utils/error";
 import { getItemColorOptions, getPostTypeOptions } from "../../utils/options";
 import { useToast } from "../../context/ToastContext";
+import { useLangNavigate } from "../../hooks/useLangPath";
+import { LLink } from "../../components/common/LLink";
 
 interface CreatePostFormState {
   title: string;
@@ -28,7 +29,7 @@ const MAX_FILE_SIZE_MB = 5;
 
 export default function CreatePostPage() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const navigate = useLangNavigate();
   const { show } = useToast();
 
   const [categories, setCategories] = useState<Category[]>([]);
@@ -174,9 +175,9 @@ export default function CreatePostPage() {
         }
 
         show(t("createPostPage.successMessage") ?? "Post created successfully", "success");
-        navigate(`/posts/${createdPost.id}`);
+        navigate(`/posts/${createdPost.slug}`);
       } catch {
-        navigate(`/posts/${createdPost.id}`, {
+        navigate(`/posts/${createdPost.slug}`, {
           state: {
             warningMessage: t("createPostPage.form.imageUploadWarning"),
           },
@@ -201,12 +202,12 @@ export default function CreatePostPage() {
   return (
     <div className="mx-auto max-w-5xl space-y-8">
       <div>
-        <Link
+        <LLink
           to="/dashboard"
           className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
         >
           {t("createPostPage.backToDashboard")}
-        </Link>
+        </LLink>
       </div>
 
       <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] px-6 py-6 shadow-sm sm:px-8 sm:py-7">
@@ -344,12 +345,12 @@ export default function CreatePostPage() {
               {isSubmitting ? t("createPostPage.submitting") : t("createPostPage.submit")}
             </button>
 
-            <Link
+            <LLink
               to="/dashboard"
               className="inline-flex items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] hover:border-[var(--border)] hover:bg-[var(--bg-surface)]"
             >
               {t("createPostPage.cancel")}
-            </Link>
+            </LLink>
           </div>
         </section>
 

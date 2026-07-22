@@ -33,6 +33,14 @@ public class ItemPostsController : ControllerBase
         return Ok(post);
     }
 
+    [HttpGet("slug/{slug}")]
+    public async Task<ActionResult<ItemPostDto>> GetBySlug(string slug)
+    {
+        var currentUserId = TryGetCurrentUserId();
+        var post = await _itemPostService.GetBySlugAsync(slug, currentUserId);
+        return Ok(post);
+    }
+
     [HttpGet("my")]
     [Authorize]
     public async Task<ActionResult<IReadOnlyList<ItemPostDto>>> GetMyPosts()
@@ -73,7 +81,8 @@ public class ItemPostsController : ControllerBase
     [Authorize]
     public async Task<ActionResult<IReadOnlyCollection<MatchedItemPostDto>>> GetMatches(Guid id)
     {
-        var matches = await _itemPostService.GetMatchesAsync(id);
+        var userId = GetCurrentUserId();
+        var matches = await _itemPostService.GetMatchesAsync(id, userId);
         return Ok(matches);
     }
 

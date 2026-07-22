@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
+import { LLink } from "../../components/common/LLink";
 import { useTranslation } from "react-i18next";
 import { getMyPosts } from "../../api/itemPostApi";
 import PageState from "../../components/common/PageState";
@@ -94,18 +95,18 @@ export default function MyPostsPage() {
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <Link
+            <LLink
               to="/create-post"
               className="inline-flex items-center justify-center rounded-xl bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[var(--accent-hover)]"
             >
               {t("myPostsPage.actions.createPost")}
-            </Link>
-            <Link
+            </LLink>
+            <LLink
               to="/dashboard"
               className="inline-flex items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] hover:border-[var(--border)] hover:bg-[var(--bg-surface)]"
             >
               {t("myPostsPage.actions.backToDashboard")}
-            </Link>
+            </LLink>
           </div>
         </div>
 

@@ -33,6 +33,7 @@ public class FavoriteDto
     /// URL of the first image attached to the post.
     /// </summary>
     /// <example>/uploads/itemposts/2c276912-318f-4526-ae59-2d3d704f5571.webp</example>
+    public string ItemPostSlug { get; set; } = string.Empty;
     public string FirstImageUrl { get; set; } = string.Empty;
 
     /// <summary>

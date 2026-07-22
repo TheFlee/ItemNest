@@ -160,44 +160,70 @@ namespace ItemNest.Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("ItemNest.Domain.Entities.ContactRequest", b =>
+            modelBuilder.Entity("ItemNest.Domain.Entities.Chat", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("InitiatorUserId")
+                        .HasColumnType("uuid");
 
                     b.Property<Guid>("ItemPostId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
-
-                    b.Property<Guid>("PostOwnerUserId")
+                    b.Property<Guid>("RecipientUserId")
                         .HasColumnType("uuid");
-
-                    b.Property<Guid>("RequesterUserId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("RespondedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ItemPostId");
+                    b.HasIndex("InitiatorUserId");
 
-                    b.HasIndex("PostOwnerUserId");
+                    b.HasIndex("RecipientUserId");
 
-                    b.HasIndex("RequesterUserId", "ItemPostId", "Status");
+                    b.HasIndex("ItemPostId", "InitiatorUserId", "RecipientUserId")
+                        .IsUnique();
 
-                    b.ToTable("ContactRequests");
+                    b.ToTable("Chats");
+                });
+
+            modelBuilder.Entity("ItemNest.Domain.Entities.ChatMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ChatId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<bool>("IsRead")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<Guid>("SenderId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("SentAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChatId");
+
+                    b.HasIndex("SenderId");
+
+                    b.HasIndex("SentAt");
+
+                    b.ToTable("ChatMessages");
                 });
 
             modelBuilder.Entity("ItemNest.Domain.Entities.Favorite", b =>
@@ -290,6 +316,11 @@ namespace ItemNest.Infrastructure.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasMaxLength(220)
+                        .HasColumnType("character varying(220)");
+
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
@@ -310,6 +341,9 @@ namespace ItemNest.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
+
+                    b.HasIndex("Slug")
+                        .IsUnique();
 
                     b.HasIndex("UserId");
 
@@ -490,31 +524,50 @@ namespace ItemNest.Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("ItemNest.Domain.Entities.ContactRequest", b =>
+            modelBuilder.Entity("ItemNest.Domain.Entities.Chat", b =>
                 {
+                    b.HasOne("ItemNest.Domain.Entities.AppUser", "InitiatorUser")
+                        .WithMany()
+                        .HasForeignKey("InitiatorUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("ItemNest.Domain.Entities.ItemPost", "ItemPost")
-                        .WithMany("ContactRequests")
+                        .WithMany()
                         .HasForeignKey("ItemPostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ItemNest.Domain.Entities.AppUser", "RecipientUser")
+                        .WithMany()
+                        .HasForeignKey("RecipientUserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("ItemNest.Domain.Entities.AppUser", "PostOwnerUser")
-                        .WithMany("ReceivedContactRequests")
-                        .HasForeignKey("PostOwnerUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("ItemNest.Domain.Entities.AppUser", "RequesterUser")
-                        .WithMany("SentContactRequests")
-                        .HasForeignKey("RequesterUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                    b.Navigation("InitiatorUser");
 
                     b.Navigation("ItemPost");
 
-                    b.Navigation("PostOwnerUser");
+                    b.Navigation("RecipientUser");
+                });
 
-                    b.Navigation("RequesterUser");
+            modelBuilder.Entity("ItemNest.Domain.Entities.ChatMessage", b =>
+                {
+                    b.HasOne("ItemNest.Domain.Entities.Chat", "Chat")
+                        .WithMany("Messages")
+                        .HasForeignKey("ChatId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ItemNest.Domain.Entities.AppUser", "Sender")
+                        .WithMany()
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Chat");
+
+                    b.Navigation("Sender");
                 });
 
             modelBuilder.Entity("ItemNest.Domain.Entities.Favorite", b =>
@@ -647,13 +700,9 @@ namespace ItemNest.Infrastructure.Migrations
                 {
                     b.Navigation("ItemPosts");
 
-                    b.Navigation("ReceivedContactRequests");
-
                     b.Navigation("Reports");
 
                     b.Navigation("ReviewedReports");
-
-                    b.Navigation("SentContactRequests");
                 });
 
             modelBuilder.Entity("ItemNest.Domain.Entities.Category", b =>
@@ -661,10 +710,13 @@ namespace ItemNest.Infrastructure.Migrations
                     b.Navigation("ItemPosts");
                 });
 
+            modelBuilder.Entity("ItemNest.Domain.Entities.Chat", b =>
+                {
+                    b.Navigation("Messages");
+                });
+
             modelBuilder.Entity("ItemNest.Domain.Entities.ItemPost", b =>
                 {
-                    b.Navigation("ContactRequests");
-
                     b.Navigation("Images");
 
                     b.Navigation("Reports");

@@ -34,6 +34,13 @@ const az = {
   },
   authLayout: {
     badge: "Hesaba giriş",
+    headline: "Bir şey itirdiniz?\nBir şey tapdınız?",
+    tagline: "İnsanları bir-birinə bağlayırıq.",
+    features: {
+      browse: "İtmiş və tapılmış əşyalara baxın",
+      matching: "Ağıllı əşya uyğunlaşdırması",
+      moderated: "Moderasiya edilmiş və etibarlı icma",
+    },
   },
   auth: {
     login: {
@@ -115,6 +122,7 @@ const az = {
     delete: "Sil",
     edit: "Redaktə et",
     confirm: "Təsdiqlə",
+    dismiss: "Bağla",
   },
   home: {
     title: "Elanlara bax",
@@ -138,6 +146,38 @@ const az = {
     },
     showFilters: "Filtrləri göstər",
     hideFilters: "Filtrləri gizlət",
+  },
+  postImageManager: {
+    title: "Şəkilləri idarə et",
+    description: "Bu elan üçün şəkil yükləyin və ya silin. Maksimum: {{max}}.",
+    uploadButton: "Şəkil yüklə",
+    uploading: "Yüklənir...",
+    imageLabel: "Şəkil {{index}}",
+    imageNote: "Bu elan üçün yüklənib",
+    noImages: "Hələ yüklənmiş şəkil yoxdur.",
+    maxImagesError: "Ən çox {{max}} şəkil yükləyə bilərsiniz.",
+  },
+  imagePicker: {
+    label: "Şəkillər",
+    uploadLabel: "{{max}}-ə qədər şəkil yükləyin",
+    formatsNote: "JPG, JPEG, PNG və ya WEBP formatları dəstəklənir.",
+    selectButton: "Şəkillər seçin",
+    remove: "Sil",
+    noImages: "Hələ şəkil seçilməyib.",
+  },
+  postImageGallery: {
+    noImages: "Şəkil mövcud deyil",
+    title: "Şəkillər",
+    description: "Yüklənmiş əşya şəkillərini nəzərdən keçirin.",
+    hint: "Daha böyük önizləmə üçün əsas şəkilə klikləyin.",
+  },
+  footer: {
+    navigation: "Naviqasiya",
+    platform: "Platforma",
+    browsePosts: "İtmiş və tapılmış elanları gözdən keçirin",
+    matching: "Ağıllı əşya uyğunlaşdırması",
+    moderation: "İcma moderasiyası",
+    rights: "Bütün hüquqlar qorunur.",
   },
   post: {
     lost: "İtmiş",
@@ -261,6 +301,7 @@ const az = {
       deletePost: "Elanı sil",
       sendContactRequest: "Əlaqə sorğusu göndər",
       closeContactForm: "Əlaqə formasını bağla",
+      loginToContact: "Elan sahibi ilə əlaqə üçün daxil olun",
       reportPost: "Elanı şikayət et",
       closeReportForm: "Şikayət formasını bağla",
     },
@@ -373,9 +414,9 @@ const az = {
     highlights: {
       totalPosts: "Ümumi elanlar",
       totalPostsDescription: "Hesabınız altında yaradılmış bütün elanlar.",
-      requestsWaiting: "Gözləyən sorğular",
-      requestsWaitingDescription:
-        "Hələ qərar vermədiyiniz gələn sorğular.",
+      unreadChats: "Oxunmamış söhbətlər",
+      unreadChatsDescription:
+        "Cavabınızı gözləyən oxunmamış mesajları olan söhbətlər.",
       savedAndTracked: "İzlənilən elanlar",
       savedAndTrackedDescription:
         "Sonradan baxmaq üçün saxladığınız seçilmiş elanlar.",
@@ -393,12 +434,9 @@ const az = {
       closedPostsDescription: "Artıq aktiv olmayan elanlar.",
       favorites: "Seçilmişlər",
       favoritesDescription: "Sonradan baxmaq üçün saxladığınız elanlar.",
-      pendingReceivedRequests: "Gözləyən gələn sorğular",
-      pendingReceivedRequestsDescription:
-        "Cavabınızı gözləyən əlaqə sorğuları.",
-      pendingSentRequests: "Gözləyən göndərilən sorğular",
-      pendingSentRequestsDescription:
-        "Sizin göndərdiyiniz və cavab gözləyən sorğular.",
+      chatsDescription: "Hesabınızdakı ümumi aktiv söhbət sayı.",
+      unreadChats: "Oxunmamış söhbətlər",
+      unreadChatsDescription: "Hələ oxumadığınız mesajları olan söhbətlər.",
       myReports: "Mənim şikayətlərim",
       myReportsDescription: "Elanlar üçün göndərdiyiniz şikayətlər.",
     },
@@ -816,6 +854,42 @@ const az = {
     submitting: "Saxlanılır...",
     cancel: "Ləğv et",
     successMessage: "Elan uğurla yeniləndi.",
+  },
+  chat: {
+    inbox: "Söhbətlər",
+    noConversations: "Hələ söhbət yoxdur",
+    startChat: "Söhbət et",
+    connected: "Bağlı",
+    connecting: "Bağlanır...",
+    noMessages: "Hələ mesaj yoxdur. Salam de!",
+    inputPlaceholder: "Mesaj yazın...",
+    send: "Göndər",
+  },
+  chatPage: {
+    title: "Söhbət",
+    connected: "Qoşuldu",
+    connecting: "Qoşulur...",
+    placeholder: "Mesaj yazın...",
+    empty: "Hələ mesaj yoxdur. Salam deyin!",
+  },
+  chatsPage: {
+    badge: "Mesajlaşma",
+    title: "Söhbətlər",
+    description:
+      "Aktiv söhbətlərinizə baxın, mesajlaşmaya davam etmək üçün istənilən söhbəti açın və maraqlandığınız elanları izləyin.",
+    empty: "Hələ heç bir söhbətiniz yoxdur.",
+    actions: {
+      backToDashboard: "Panelə qayıt",
+    },
+    cards: {
+      conversations: "Söhbətlər",
+      conversationsDescription: "Hesabınızdakı ümumi aktiv söhbət sayı.",
+    },
+    list: {
+      title: "Bütün söhbətlər",
+      description: "Söhbəti açmaq və davam etdirmək üçün kartı basın.",
+      noMessages: "Hələ mesaj yoxdur",
+    },
   },
   contactRequestsPages: {
     common: {

@@ -46,6 +46,7 @@ public class ReportDto
 
     public Guid ItemPostId { get; set; }
     public string ItemPostTitle { get; set; } = string.Empty;
+    public string ItemPostSlug { get; set; } = string.Empty;
 
     public ReportReason Reason { get; set; }
     public string Description { get; set; } = string.Empty;

@@ -24,16 +24,21 @@ export default function AuthLayout() {
             className="mt-4 text-4xl font-bold italic leading-tight text-[var(--text-primary)]"
             style={{ fontFamily: "var(--font-display)" }}
           >
-            Lost something?<br />Found something?<br />
-            <span className="not-italic font-normal text-3xl text-[var(--text-secondary)]">We connect people.</span>
+            {t("authLayout.headline").split("\n").map((line, i, arr) => (
+              <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
+            ))}
+            <br />
+            <span className="not-italic font-normal text-3xl text-[var(--text-secondary)]">
+              {t("authLayout.tagline")}
+            </span>
           </h2>
         </div>
 
         <div className="space-y-3">
           {[
-            { icon: "search-outline", text: "Browse lost & found items" },
-            { icon: "git-compare-outline", text: "Smart item matching" },
-            { icon: "shield-checkmark-outline", text: "Moderated & safe community" },
+            { icon: "search-outline", text: t("authLayout.features.browse") },
+            { icon: "git-compare-outline", text: t("authLayout.features.matching") },
+            { icon: "shield-checkmark-outline", text: t("authLayout.features.moderated") },
           ].map((item) => (
             <div key={item.text} className="flex items-center gap-3 text-sm text-[var(--text-secondary)]">
               <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/60">

@@ -34,6 +34,13 @@ const en = {
   },
   authLayout: {
     badge: "Account access",
+    headline: "Lost something?\nFound something?",
+    tagline: "We connect people.",
+    features: {
+      browse: "Browse lost & found items",
+      matching: "Smart item matching",
+      moderated: "Moderated & safe community",
+    },
   },
   auth: {
     login: {
@@ -115,6 +122,7 @@ const en = {
     delete: "Delete",
     edit: "Edit",
     confirm: "Confirm",
+    dismiss: "Dismiss",
   },
   home: {
     title: "Browse posts",
@@ -138,6 +146,38 @@ const en = {
     },
     showFilters: "Show Filters",
     hideFilters: "Hide Filters",
+  },
+  postImageManager: {
+    title: "Manage Images",
+    description: "Upload or remove images for this post. Maximum: {{max}}.",
+    uploadButton: "Upload Image",
+    uploading: "Uploading...",
+    imageLabel: "Image {{index}}",
+    imageNote: "Uploaded for this post",
+    noImages: "No uploaded images yet.",
+    maxImagesError: "You can upload at most {{max}} images.",
+  },
+  imagePicker: {
+    label: "Images",
+    uploadLabel: "Upload up to {{max}} images",
+    formatsNote: "JPG, JPEG, PNG, or WEBP formats are supported.",
+    selectButton: "Select Images",
+    remove: "Remove",
+    noImages: "No images selected yet.",
+  },
+  postImageGallery: {
+    noImages: "No images available",
+    title: "Images",
+    description: "Review the uploaded item images.",
+    hint: "Click the main image to open a larger preview.",
+  },
+  footer: {
+    navigation: "Navigation",
+    platform: "Platform",
+    browsePosts: "Browse lost & found posts",
+    matching: "Smart item matching",
+    moderation: "Community moderation",
+    rights: "All rights reserved.",
   },
   post: {
     lost: "Lost",
@@ -261,6 +301,7 @@ const en = {
       deletePost: "Delete Post",
       sendContactRequest: "Send Contact Request",
       closeContactForm: "Close Contact Form",
+      loginToContact: "Log in to Contact Owner",
       reportPost: "Report Post",
       closeReportForm: "Close Report Form",
     },
@@ -371,9 +412,9 @@ const en = {
     highlights: {
       totalPosts: "Total posts",
       totalPostsDescription: "All item posts currently created under your account.",
-      requestsWaiting: "Requests waiting",
-      requestsWaitingDescription:
-        "Pending received requests that still need your decision.",
+      unreadChats: "Unread chats",
+      unreadChatsDescription:
+        "Conversations with unread messages waiting for your reply.",
       savedAndTracked: "Saved and tracked",
       savedAndTrackedDescription:
         "Favorite posts saved for later review and follow-up.",
@@ -391,12 +432,9 @@ const en = {
       closedPostsDescription: "Posts that are no longer active.",
       favorites: "Favorites",
       favoritesDescription: "Posts you saved for later review.",
-      pendingReceivedRequests: "Pending Received Requests",
-      pendingReceivedRequestsDescription:
-        "Contact requests waiting for your response.",
-      pendingSentRequests: "Pending Sent Requests",
-      pendingSentRequestsDescription:
-        "Requests you sent and still waiting on.",
+      chatsDescription: "Total active chat conversations in your account.",
+      unreadChats: "Unread Chats",
+      unreadChatsDescription: "Conversations with messages you have not read yet.",
       myReports: "My Reports",
       myReportsDescription: "Reports you submitted for posts.",
     },
@@ -814,6 +852,42 @@ const en = {
     submitting: "Saving...",
     cancel: "Cancel",
     successMessage: "Post was updated successfully.",
+  },
+  chat: {
+    inbox: "Chats",
+    noConversations: "No conversations yet",
+    startChat: "Chat",
+    connected: "Connected",
+    connecting: "Connecting...",
+    noMessages: "No messages yet. Say hello!",
+    inputPlaceholder: "Type a message...",
+    send: "Send",
+  },
+  chatPage: {
+    title: "Chat",
+    connected: "Connected",
+    connecting: "Connecting...",
+    placeholder: "Type a message...",
+    empty: "No messages yet. Say hello!",
+  },
+  chatsPage: {
+    badge: "Messaging",
+    title: "Chats",
+    description:
+      "View your active conversations, open any chat to continue messaging, and follow up on posts you are interested in.",
+    empty: "You do not have any conversations yet.",
+    actions: {
+      backToDashboard: "Back to Dashboard",
+    },
+    cards: {
+      conversations: "Conversations",
+      conversationsDescription: "Total active chat conversations in your account.",
+    },
+    list: {
+      title: "All conversations",
+      description: "Click a card to open the chat and continue the conversation.",
+      noMessages: "No messages yet",
+    },
   },
   contactRequestsPages: {
     common: {

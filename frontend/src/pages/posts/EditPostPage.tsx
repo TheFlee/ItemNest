@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { getCategories } from "../../api/categoryApi";
-import { getPostById, updatePost } from "../../api/itemPostApi";
+import { getPostBySlug, updatePost } from "../../api/itemPostApi";
 import PageState from "../../components/common/PageState";
 import FormInput from "../../components/forms/FormInput";
 import FormSelect from "../../components/forms/FormSelect";
@@ -13,6 +13,8 @@ import { getApiErrorMessage } from "../../utils/error";
 import { getItemColorOptions, getPostStatusOptions } from "../../utils/options";
 import { getPostStatusLabel } from "../../utils/post";
 import { useToast } from "../../context/ToastContext";
+import { useLangNavigate } from "../../hooks/useLangPath";
+import { LLink } from "../../components/common/LLink";
 
 interface EditPostFormState {
   title: string;
@@ -32,8 +34,9 @@ function toDateTimeLocalValue(value: string): string {
 
 export default function EditPostPage() {
   const { t } = useTranslation();
-  const { id } = useParams();
-  const navigate = useNavigate();
+  const { slug } = useParams();
+  const [postId, setPostId] = useState<string>("");
+  const navigate = useLangNavigate();
   const { show } = useToast();
 
   const [categories, setCategories] = useState<Category[]>([]);
@@ -53,7 +56,7 @@ export default function EditPostPage() {
 
   useEffect(() => {
     async function loadData() {
-      if (!id) {
+      if (!slug) {
         setErrorMessage(t("postDetails.errors.postIdMissing"));
         setIsLoading(false);
         return;
@@ -63,7 +66,7 @@ export default function EditPostPage() {
       setErrorMessage("");
 
       try {
-        const [post, categoryData] = await Promise.all([getPostById(id), getCategories()]);
+        const [post, categoryData] = await Promise.all([getPostBySlug(slug), getCategories()]);
 
         if (!post.isOwner) {
           setErrorMessage(t("postDetails.errors.postIdMissing"));
@@ -71,6 +74,7 @@ export default function EditPostPage() {
           return;
         }
 
+        setPostId(post.id);
         setCategories(categoryData);
         setForm({
           title: post.title,
@@ -89,7 +93,7 @@ export default function EditPostPage() {
     }
 
     void loadData();
-  }, [id]);
+  }, [slug]);
 
   const postStatusOptions = useMemo(() => getPostStatusOptions(), [t]);
   const itemColorOptions = useMemo(() => getItemColorOptions(), [t]);
@@ -117,7 +121,7 @@ export default function EditPostPage() {
     e.preventDefault();
     setErrorMessage("");
 
-    if (!id) {
+    if (!postId) {
       setErrorMessage(t("postDetails.errors.postIdMissing"));
       return;
     }
@@ -170,10 +174,10 @@ export default function EditPostPage() {
         status: Number(form.status),
       };
 
-      await updatePost(id, request);
+      const updatedPost = await updatePost(postId, request);
 
       show(t("editPostPage.successMessage"), "success");
-      navigate(`/posts/${id}`, { replace: true });
+      navigate(`/posts/${updatedPost.slug}`, { replace: true });
     } catch (error: any) {
       setErrorMessage(getApiErrorMessage(error));
     } finally {
@@ -188,12 +192,12 @@ export default function EditPostPage() {
   return (
     <div className="mx-auto max-w-5xl space-y-8">
       <div>
-        <Link
-          to={`/posts/${id}`}
+        <LLink
+          to={`/posts/${slug ?? ""}`}
           className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
         >
           {t("editPostPage.backToPost")}
-        </Link>
+        </LLink>
       </div>
 
       <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] px-6 py-6 shadow-sm sm:px-8 sm:py-7">
@@ -342,12 +346,12 @@ export default function EditPostPage() {
               {isSubmitting ? t("editPostPage.submitting") : t("editPostPage.submit")}
             </button>
 
-            <Link
-              to={`/posts/${id}`}
+            <LLink
+              to={`/posts/${slug ?? ""}`}
               className="inline-flex items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] hover:border-[var(--border)] hover:bg-[var(--bg-surface)]"
             >
               {t("editPostPage.cancel")}
-            </Link>
+            </LLink>
           </div>
         </section>
 

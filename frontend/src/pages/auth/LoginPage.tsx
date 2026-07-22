@@ -1,13 +1,14 @@
 import { useCallback, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import GoogleLoginButton from "../../components/auth/GoogleLoginButton";
 import { useAuth } from "../../context/AuthContext";
 import { getApiErrorMessage } from "../../utils/error";
+import { useLangNavigate } from "../../hooks/useLangPath";
+import { LLink } from "../../components/common/LLink";
 
 export default function LoginPage() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const navigate = useLangNavigate();
   const { login, googleLogin } = useAuth();
 
   const [form, setForm] = useState({
@@ -130,9 +131,9 @@ export default function LoginPage() {
       <div className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-4">
         <p className="text-sm text-[var(--text-secondary)]">
           {t("auth.login.noAccount")} {" "}
-          <Link to="/register" className="font-semibold text-[var(--text-primary)] hover:underline">
+          <LLink to="/register" className="font-semibold text-[var(--text-primary)] hover:underline">
             {t("auth.login.register")}
-          </Link>
+          </LLink>
         </p>
       </div>
     </div>

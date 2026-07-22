@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { LLink } from "../../components/common/LLink";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getMyFavorites, removeFavorite } from "../../api/favoriteApi";
@@ -92,18 +92,18 @@ export default function FavoritesPage() {
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <Link
+            <LLink
               to="/"
               className="inline-flex items-center justify-center rounded-xl bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[var(--accent-hover)]"
             >
               {t("favoritesPage.actions.browsePosts")}
-            </Link>
-            <Link
+            </LLink>
+            <LLink
               to="/dashboard"
               className="inline-flex items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] hover:border-[var(--border)] hover:bg-[var(--bg-surface)]"
             >
               {t("favoritesPage.actions.backToDashboard")}
-            </Link>
+            </LLink>
           </div>
         </div>
 
@@ -211,12 +211,12 @@ export default function FavoritesPage() {
                 </div>
 
                 <div className="mt-6 flex flex-wrap gap-3">
-                  <Link
-                    to={`/posts/${favorite.itemPostId}`}
+                  <LLink
+                    to={`/posts/${favorite.itemPostSlug}`}
                     className="inline-flex items-center justify-center rounded-xl bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[var(--accent-hover)]"
                   >
                     {t("favoritesPage.actions.viewPost")}
-                  </Link>
+                  </LLink>
 
                   <button
                     type="button"

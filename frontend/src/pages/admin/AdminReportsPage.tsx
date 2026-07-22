@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
+import { LLink } from "../../components/common/LLink";
 import { getAllReports, reviewReport } from "../../api/reportApi";
 import PageState from "../../components/common/PageState";
 import FormSelect from "../../components/forms/FormSelect";
@@ -122,19 +122,19 @@ export default function AdminReportsPage() {
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <Link
+            <LLink
               to="/admin/dashboard"
               className="inline-flex items-center justify-center rounded-xl bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[var(--accent-hover)]"
             >
               {t("adminPages.reports.backToDashboard")}
-            </Link>
+            </LLink>
 
-            <Link
+            <LLink
               to="/admin/posts"
               className="inline-flex items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
             >
               {t("adminPages.reports.openPosts")}
-            </Link>
+            </LLink>
           </div>
         </div>
 
@@ -303,12 +303,12 @@ export default function AdminReportsPage() {
                 </div>
 
                 <div className="mt-6 flex flex-wrap gap-3">
-                  <Link
-                    to={`/posts/${report.itemPostId}`}
+                  <LLink
+                    to={`/posts/${report.itemPostSlug}`}
                     className="inline-flex items-center justify-center rounded-xl bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[var(--accent-hover)]"
                   >
                     {t("adminPages.reports.viewPost")}
-                  </Link>
+                  </LLink>
 
                   {isPending && (
                     <>

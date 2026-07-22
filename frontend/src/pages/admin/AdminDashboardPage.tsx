@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { LLink } from "../../components/common/LLink";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getAdminDashboard } from "../../api/dashboardApi";
@@ -92,11 +92,6 @@ export default function AdminDashboardPage() {
       description: t("adminPages.dashboard.cards.pendingReportsDescription"),
       to: "/admin/reports",
     },
-    {
-      title: t("adminPages.dashboard.cards.pendingContactRequests"),
-      value: dashboard.pendingContactRequestsCount,
-      description: t("adminPages.dashboard.cards.pendingContactRequestsDescription"),
-    },
   ];
 
   const moderationRows = [
@@ -139,25 +134,25 @@ export default function AdminDashboardPage() {
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <Link
+            <LLink
               to="/admin/reports"
               className="inline-flex items-center justify-center rounded-xl bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[var(--accent-hover)]"
             >
               {t("adminPages.dashboard.reviewReports")}
-            </Link>
-            <Link
+            </LLink>
+            <LLink
               to="/admin/posts"
               className="inline-flex items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
             >
               {t("adminPages.dashboard.managePosts")}
-            </Link>
-            <Link
+            </LLink>
+            <LLink
               to="/admin/categories"
               className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
             >
               <ion-icon name="pricetag-outline" style={{ fontSize: "15px" }} />
               {t("nav.adminCategories")}
-            </Link>
+            </LLink>
           </div>
         </div>
 
@@ -216,10 +211,10 @@ export default function AdminDashboardPage() {
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {cards.map((card) =>
             card.to ? (
-              <Link
+              <LLink
                 key={card.title}
                 to={card.to}
-                className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--border)] hover:shadow-md"
+                className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-5 transition hover:-translate-y-0.5 hover:border-[var(--accent)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)]"
               >
                 <p className="text-sm font-medium text-[var(--text-secondary)]">{card.title}</p>
                 <p className="mt-2 text-3xl font-semibold tracking-tight text-[var(--text-primary)]">
@@ -229,7 +224,7 @@ export default function AdminDashboardPage() {
                 <p className="mt-5 text-sm font-medium text-[var(--text-primary)]">
                   {t("adminPages.dashboard.openSection")}
                 </p>
-              </Link>
+              </LLink>
             ) : (
               <div
                 key={card.title}
@@ -303,37 +298,37 @@ export default function AdminDashboardPage() {
           </p>
 
           <div className="mt-5 space-y-3">
-            <Link
+            <LLink
               to="/admin/reports"
               className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-3 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
             >
               <span>{t("adminPages.dashboard.actions.reviewReports")}</span>
               <span>{dashboard.pendingReportsCount}</span>
-            </Link>
+            </LLink>
 
-            <Link
+            <LLink
               to="/admin/posts"
               className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-3 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
             >
               <span>{t("adminPages.dashboard.actions.managePosts")}</span>
               <span>{dashboard.totalPostsCount}</span>
-            </Link>
+            </LLink>
 
-            <Link
+            <LLink
               to="/admin/users"
               className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-3 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
             >
               <span>{t("adminPages.dashboard.actions.manageUsers")}</span>
               <span>{dashboard.totalUsersCount}</span>
-            </Link>
+            </LLink>
 
-            <Link
+            <LLink
               to="/dashboard"
               className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-3 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
             >
               <span>{t("adminPages.dashboard.actions.openUserDashboard")}</span>
               <span>{t("adminPages.dashboard.actions.go")}</span>
-            </Link>
+            </LLink>
           </div>
         </div>
       </section>

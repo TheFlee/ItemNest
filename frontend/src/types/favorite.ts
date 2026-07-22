@@ -1,6 +1,7 @@
 export interface FavoriteItem {
   id: string;
   itemPostId: string;
+  itemPostSlug: string;
   title: string;
   categoryName: string;
   firstImageUrl: string;

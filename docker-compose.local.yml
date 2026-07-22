@@ -25,12 +25,14 @@ services:
       AdminSeed__Password: "Admin@123456"
       AdminSeed__FullName: "Local Admin"
       Cors__AllowedOrigins__0: "http://localhost:8080"
-      # AWS/R2 left empty — image upload will return errors but rest of app works
+      # AWS/R2 left empty — service falls back to local filesystem storage
       Aws__AccessKeyId: ""
       Aws__SecretAccessKey: ""
       Aws__AccountId: ""
       Aws__BucketName: ""
       Aws__PublicUrl: ""
+    volumes:
+      - ./local-uploads:/app/wwwroot/uploads
 
   postgres:
     image: postgres:17-alpine

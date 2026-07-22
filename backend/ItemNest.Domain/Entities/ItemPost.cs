@@ -14,11 +14,11 @@ public class ItemPost
     public DateTimeOffset EventDate { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset? UpdatedAt { get; set; }
+    public string Slug { get; set; } = null!;
     public Guid UserId { get; set; }
     public AppUser User { get; set; } = null!;
     public int CategoryId { get; set; }
     public Category Category { get; set; } = null!;
     public ICollection<ItemImage> Images { get; set; } = new List<ItemImage>();
     public ICollection<Report> Reports { get; set; } = new List<Report>();
-    public ICollection<ContactRequest> ContactRequests { get; set; } = new List<ContactRequest>();
 }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { LLink } from "../../components/common/LLink";
 import { useTranslation } from "react-i18next";
 import {
   getCategories,
@@ -103,13 +103,13 @@ export default function AdminCategoriesPage() {
               {t("adminPages.categories.description")}
             </p>
           </div>
-          <Link
+          <LLink
             to="/admin/dashboard"
             className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
           >
             <ion-icon name="arrow-back-outline" style={{ fontSize: "14px" }} />
             {t("adminPages.categories.backToDashboard")}
-          </Link>
+          </LLink>
         </div>
 
         <div className="mt-5 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-4">
