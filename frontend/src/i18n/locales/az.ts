@@ -858,6 +858,9 @@ const az = {
     cancel: "Ləğv et",
     successMessage: "Elan uğurla yeniləndi.",
   },
+  chat: {
+    inbox: "Söhbətlər",
+  },
   chatsPage: {
     badge: "Mesajlaşma",
     title: "Söhbətlər",

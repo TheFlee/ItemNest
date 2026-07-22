@@ -7,7 +7,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useLangNavigate } from "../../hooks/useLangPath";
 import type { ChatItem } from "../../types/chat";
 import { getApiErrorMessage } from "../../utils/error";
-import { formatDateTime } from "../../utils/format";
+import { formatRelativeTime } from "../../utils/format";
 
 function truncate(text: string, max: number): string {
   return text.length > max ? text.slice(0, max) + "…" : text;
@@ -67,7 +67,7 @@ export default function ChatsPage() {
             </p>
             <h1 className="mt-2 flex items-center gap-2 text-3xl font-semibold tracking-tight text-[var(--text-primary)] sm:text-[2rem]">
               <ion-icon name="chatbubbles-outline" style={{ fontSize: "32px" }} />
-              {t("chatsPage.title")}
+              {t("chat.inbox")}
             </h1>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--text-secondary)] sm:text-base">
               {t("chatsPage.description")}
@@ -161,7 +161,7 @@ export default function ChatsPage() {
               {/* Right: timestamp */}
               <div className="shrink-0 text-right">
                 <p className="text-xs text-[var(--text-secondary)]">
-                  {formatDateTime(chat.lastMessageAt ?? chat.createdAt)}
+                  {formatRelativeTime(chat.lastMessageAt ?? chat.createdAt)}
                 </p>
               </div>
             </div>

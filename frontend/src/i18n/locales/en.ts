@@ -856,6 +856,9 @@ const en = {
     cancel: "Cancel",
     successMessage: "Post was updated successfully.",
   },
+  chat: {
+    inbox: "Chats",
+  },
   chatsPage: {
     badge: "Messaging",
     title: "Chats",
