@@ -20,6 +20,8 @@ import HomePage from "../pages/posts/HomePage";
 import MyPostsPage from "../pages/posts/MyPostsPage";
 import PostDetailsPage from "../pages/posts/PostDetailsPage";
 import MyReportsPage from "../pages/reports/MyReportsPage";
+import ChatsPage from "../pages/chat/ChatsPage";
+import ChatPage from "../pages/chat/ChatPage";
 import LocaleLayout from "./LocaleLayout";
 import i18n from "../i18n";
 
@@ -56,6 +58,8 @@ export default function AppRouter() {
               <Route path="contact-requests/sent" element={<SentContactRequestsPage />} />
               <Route path="contact-requests/received" element={<ReceivedContactRequestsPage />} />
               <Route path="my-reports" element={<MyReportsPage />} />
+              <Route path="chats" element={<ChatsPage />} />
+              <Route path="chats/:chatId" element={<ChatPage />} />
             </Route>
           </Route>
 

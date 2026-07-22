@@ -859,6 +859,13 @@ const en = {
   chat: {
     inbox: "Chats",
   },
+  chatPage: {
+    title: "Chat",
+    connected: "Connected",
+    connecting: "Connecting...",
+    placeholder: "Type a message...",
+    empty: "No messages yet. Say hello!",
+  },
   chatsPage: {
     badge: "Messaging",
     title: "Chats",

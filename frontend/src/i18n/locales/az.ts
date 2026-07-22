@@ -861,6 +861,13 @@ const az = {
   chat: {
     inbox: "Söhbətlər",
   },
+  chatPage: {
+    title: "Söhbət",
+    connected: "Qoşuldu",
+    connecting: "Qoşulur...",
+    placeholder: "Mesaj yazın...",
+    empty: "Hələ mesaj yoxdur. Salam deyin!",
+  },
   chatsPage: {
     badge: "Mesajlaşma",
     title: "Söhbətlər",
