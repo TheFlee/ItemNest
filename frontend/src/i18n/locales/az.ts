@@ -858,6 +858,25 @@ const az = {
     cancel: "Ləğv et",
     successMessage: "Elan uğurla yeniləndi.",
   },
+  chatsPage: {
+    badge: "Mesajlaşma",
+    title: "Söhbətlər",
+    description:
+      "Aktiv söhbətlərinizə baxın, mesajlaşmaya davam etmək üçün istənilən söhbəti açın və maraqlandığınız elanları izləyin.",
+    empty: "Hələ heç bir söhbətiniz yoxdur.",
+    actions: {
+      backToDashboard: "Panelə qayıt",
+    },
+    cards: {
+      conversations: "Söhbətlər",
+      conversationsDescription: "Hesabınızdakı ümumi aktiv söhbət sayı.",
+    },
+    list: {
+      title: "Bütün söhbətlər",
+      description: "Söhbəti açmaq və davam etdirmək üçün kartı basın.",
+      noMessages: "Hələ mesaj yoxdur",
+    },
+  },
   contactRequestsPages: {
     common: {
       viewPost: "Elana bax",

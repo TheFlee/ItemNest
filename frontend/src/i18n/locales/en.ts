@@ -856,6 +856,25 @@ const en = {
     cancel: "Cancel",
     successMessage: "Post was updated successfully.",
   },
+  chatsPage: {
+    badge: "Messaging",
+    title: "Chats",
+    description:
+      "View your active conversations, open any chat to continue messaging, and follow up on posts you are interested in.",
+    empty: "You do not have any conversations yet.",
+    actions: {
+      backToDashboard: "Back to Dashboard",
+    },
+    cards: {
+      conversations: "Conversations",
+      conversationsDescription: "Total active chat conversations in your account.",
+    },
+    list: {
+      title: "All conversations",
+      description: "Click a card to open the chat and continue the conversation.",
+      noMessages: "No messages yet",
+    },
+  },
   contactRequestsPages: {
     common: {
       viewPost: "View Post",
