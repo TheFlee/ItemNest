@@ -190,7 +190,7 @@ public DbSet<Chat> Chats => Set<Chat>();
                   .IsUnique();
         });
 
-builder.Entity<Chat>(entity =>
+        builder.Entity<Chat>(entity =>
         {
             entity.HasKey(x => x.Id);
             entity.Property(x => x.CreatedAt).IsRequired();
