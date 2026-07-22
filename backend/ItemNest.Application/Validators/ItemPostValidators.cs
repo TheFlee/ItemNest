@@ -55,9 +55,6 @@ public class UpdateItemPostDtoValidator : AbstractValidator<UpdateItemPostDto>
         RuleFor(x => x.EventDate)
             .NotEmpty().WithMessage("EventDate is required.");
 
-        RuleFor(x => x.Status)
-            .IsInEnum().WithMessage("Invalid post status.");
-
         RuleFor(x => x.Color)
             .IsInEnum().WithMessage("Invalid item color.");
     }

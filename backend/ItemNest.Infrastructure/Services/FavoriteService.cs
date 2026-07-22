@@ -68,6 +68,7 @@ public class FavoriteService : IFavoriteService
         {
             Id = x.Id,
             ItemPostId = x.ItemPostId,
+            ItemPostSlug = x.ItemPost.Slug,
             Title = x.ItemPost.Title,
             CategoryName = x.ItemPost.Category.Name,
             FirstImageUrl = x.ItemPost.Images.FirstOrDefault()?.ImageUrl ?? string.Empty,

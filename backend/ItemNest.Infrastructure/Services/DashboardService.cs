@@ -41,18 +41,6 @@ public class DashboardService : IDashboardService
             .AsNoTracking()
             .CountAsync(x => x.UserId == userId);
 
-        var pendingReceivedContactRequestsCount = await _context.ContactRequests
-            .AsNoTracking()
-            .CountAsync(x =>
-                x.PostOwnerUserId == userId &&
-                x.Status == ContactRequestStatus.Pending);
-
-        var pendingSentContactRequestsCount = await _context.ContactRequests
-            .AsNoTracking()
-            .CountAsync(x =>
-                x.RequesterUserId == userId &&
-                x.Status == ContactRequestStatus.Pending);
-
         var myReportsCount = await _context.Reports
             .AsNoTracking()
             .CountAsync(x => x.ReporterUserId == userId);
@@ -64,8 +52,6 @@ public class DashboardService : IDashboardService
             ReturnedPostsCount = returnedPostsCount,
             ClosedPostsCount = closedPostsCount,
             FavoritesCount = favoritesCount,
-            PendingReceivedContactRequestsCount = pendingReceivedContactRequestsCount,
-            PendingSentContactRequestsCount = pendingSentContactRequestsCount,
             MyReportsCount = myReportsCount
         };
     }
@@ -100,10 +86,6 @@ public class DashboardService : IDashboardService
             .AsNoTracking()
             .CountAsync(x => x.Status == ReportStatus.Pending);
 
-        var pendingContactRequestsCount = await _context.ContactRequests
-            .AsNoTracking()
-            .CountAsync(x => x.Status == ContactRequestStatus.Pending);
-
         return new AdminDashboardDto
         {
             TotalUsersCount = totalUsersCount,
@@ -112,8 +94,7 @@ public class DashboardService : IDashboardService
             ReturnedPostsCount = returnedPostsCount,
             ClosedPostsCount = closedPostsCount,
             TotalCategoriesCount = totalCategoriesCount,
-            PendingReportsCount = pendingReportsCount,
-            PendingContactRequestsCount = pendingContactRequestsCount
+            PendingReportsCount = pendingReportsCount
         };
     }
 }

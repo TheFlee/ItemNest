@@ -23,8 +23,7 @@ public static class ApplicationServicesExtensions
         services.AddScoped<IItemImageService, ItemImageService>();
         services.AddScoped<IFavoriteService, FavoriteService>();
         services.AddScoped<IReportService, ReportService>();
-        services.AddScoped<IContactRequestService, ContactRequestService>();
-        services.AddScoped<IChatService, ChatService>();
+services.AddScoped<IChatService, ChatService>();
         services.AddHostedService<ChatCleanupService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IDashboardService, DashboardService>();

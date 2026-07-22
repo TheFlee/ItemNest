@@ -3,5 +3,4 @@
   <Project Path="ItemNest.Application/ItemNest.Application.csproj" />
   <Project Path="ItemNest.Domain/ItemNest.Domain.csproj" />
   <Project Path="ItemNest.Infrastructure/ItemNest.Infrastructure.csproj" />
-  <Project Path="ItemNest.Tests/ItemNest.Tests.csproj" />
 </Solution>

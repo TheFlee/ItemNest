@@ -6,6 +6,7 @@ export interface ItemImage {
 
 export interface ItemPost {
   id: string;
+  slug: string;
   title: string;
   description: string;
   type: number;
@@ -68,6 +69,7 @@ export interface UpdatePostRequest {
 
 export interface MatchedItemPost {
   id: string;
+  slug: string;
   title: string;
   description: string;
   location: string;

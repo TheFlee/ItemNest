@@ -1,5 +1,6 @@
-import { Navigate, Outlet } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { LNavigate } from "./LLink";
 
 interface ProtectedRouteProps {
   allowedRoles?: string[];
@@ -17,7 +18,7 @@ export default function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <LNavigate to="/login" replace />;
   }
 
   if (
@@ -25,7 +26,7 @@ export default function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
     allowedRoles.length > 0 &&
     !allowedRoles.some((role) => user?.roles.includes(role))
   ) {
-    return <Navigate to="/" replace />;
+    return <LNavigate to="/" replace />;
   }
 
   return <Outlet />;

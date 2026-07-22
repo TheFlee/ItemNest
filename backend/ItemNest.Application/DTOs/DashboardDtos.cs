@@ -36,18 +36,6 @@ public class MyDashboardDto
     public int FavoritesCount { get; set; }
 
     /// <summary>
-    /// Number of pending contact requests received by the user as a post owner.
-    /// </summary>
-    /// <example>3</example>
-    public int PendingReceivedContactRequestsCount { get; set; }
-
-    /// <summary>
-    /// Number of pending contact requests sent by the user.
-    /// </summary>
-    /// <example>2</example>
-    public int PendingSentContactRequestsCount { get; set; }
-
-    /// <summary>
     /// Total number of reports created by the user.
     /// </summary>
     /// <example>4</example>
@@ -101,9 +89,4 @@ public class AdminDashboardDto
     /// <example>8</example>
     public int PendingReportsCount { get; set; }
 
-    /// <summary>
-    /// Number of pending contact requests in the system.
-    /// </summary>
-    /// <example>16</example>
-    public int PendingContactRequestsCount { get; set; }
 }

@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { LLink } from "../../components/common/LLink";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getMyDashboard } from "../../api/dashboardApi";
@@ -152,18 +152,18 @@ export default function DashboardPage() {
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <Link
+            <LLink
               to="/create-post"
               className="inline-flex items-center justify-center rounded-xl bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[var(--accent-hover)]"
             >
               {t("dashboardPage.actions.createPost")}
-            </Link>
-            <Link
+            </LLink>
+            <LLink
               to="/my-posts"
               className="inline-flex items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
             >
               {t("dashboardPage.actions.manageMyPosts")}
-            </Link>
+            </LLink>
           </div>
         </div>
 
@@ -220,7 +220,7 @@ export default function DashboardPage() {
 
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {cards.map((card) => (
-            <Link
+            <LLink
               key={card.title}
               to={card.to}
               className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-5 transition hover:-translate-y-0.5 hover:border-[var(--accent)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)]"
@@ -239,7 +239,7 @@ export default function DashboardPage() {
                 {t("dashboardPage.actions.openSection")}
                 <ion-icon name="arrow-forward-outline" style={{ fontSize: "13px" }} />
               </p>
-            </Link>
+            </LLink>
           ))}
         </div>
       </section>

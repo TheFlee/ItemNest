@@ -20,6 +20,11 @@ export async function getPostById(id: string): Promise<ItemPost> {
   return response.data;
 }
 
+export async function getPostBySlug(slug: string): Promise<ItemPost> {
+  const response = await api.get<ItemPost>(`/itemposts/slug/${slug}`);
+  return response.data;
+}
+
 export async function getMyPosts(): Promise<ItemPost[]> {
   const response = await api.get<ItemPost[]>("/itemposts/my");
   return response.data;

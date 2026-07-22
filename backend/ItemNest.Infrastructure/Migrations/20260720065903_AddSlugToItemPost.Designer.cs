@@ -3,6 +3,7 @@ using System;
 using ItemNest.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ItemNest.Infrastructure.Migrations
 {
     [DbContext(typeof(ItemNestDbContext))]
-    partial class ItemNestDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260720065903_AddSlugToItemPost")]
+    partial class AddSlugToItemPost
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -160,70 +163,44 @@ namespace ItemNest.Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("ItemNest.Domain.Entities.Chat", b =>
+            modelBuilder.Entity("ItemNest.Domain.Entities.ContactRequest", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("InitiatorUserId")
-                        .HasColumnType("uuid");
 
                     b.Property<Guid>("ItemPostId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("RecipientUserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("InitiatorUserId");
-
-                    b.HasIndex("RecipientUserId");
-
-                    b.HasIndex("ItemPostId", "InitiatorUserId", "RecipientUserId")
-                        .IsUnique();
-
-                    b.ToTable("Chats");
-                });
-
-            modelBuilder.Entity("ItemNest.Domain.Entities.ChatMessage", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("ChatId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Content")
+                    b.Property<string>("Message")
                         .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("character varying(2000)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
 
-                    b.Property<bool>("IsRead")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false);
-
-                    b.Property<Guid>("SenderId")
+                    b.Property<Guid>("PostOwnerUserId")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset>("SentAt")
+                    b.Property<Guid>("RequesterUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("RespondedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("ChatId");
+                    b.HasIndex("ItemPostId");
 
-                    b.HasIndex("SenderId");
+                    b.HasIndex("PostOwnerUserId");
 
-                    b.HasIndex("SentAt");
+                    b.HasIndex("RequesterUserId", "ItemPostId", "Status");
 
-                    b.ToTable("ChatMessages");
+                    b.ToTable("ContactRequests");
                 });
 
             modelBuilder.Entity("ItemNest.Domain.Entities.Favorite", b =>
@@ -524,50 +501,31 @@ namespace ItemNest.Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("ItemNest.Domain.Entities.Chat", b =>
+            modelBuilder.Entity("ItemNest.Domain.Entities.ContactRequest", b =>
                 {
-                    b.HasOne("ItemNest.Domain.Entities.AppUser", "InitiatorUser")
-                        .WithMany()
-                        .HasForeignKey("InitiatorUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("ItemNest.Domain.Entities.ItemPost", "ItemPost")
-                        .WithMany()
+                        .WithMany("ContactRequests")
                         .HasForeignKey("ItemPostId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ItemNest.Domain.Entities.AppUser", "RecipientUser")
-                        .WithMany()
-                        .HasForeignKey("RecipientUserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("InitiatorUser");
+                    b.HasOne("ItemNest.Domain.Entities.AppUser", "PostOwnerUser")
+                        .WithMany("ReceivedContactRequests")
+                        .HasForeignKey("PostOwnerUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ItemNest.Domain.Entities.AppUser", "RequesterUser")
+                        .WithMany("SentContactRequests")
+                        .HasForeignKey("RequesterUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("ItemPost");
 
-                    b.Navigation("RecipientUser");
-                });
+                    b.Navigation("PostOwnerUser");
 
-            modelBuilder.Entity("ItemNest.Domain.Entities.ChatMessage", b =>
-                {
-                    b.HasOne("ItemNest.Domain.Entities.Chat", "Chat")
-                        .WithMany("Messages")
-                        .HasForeignKey("ChatId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ItemNest.Domain.Entities.AppUser", "Sender")
-                        .WithMany()
-                        .HasForeignKey("SenderId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Chat");
-
-                    b.Navigation("Sender");
+                    b.Navigation("RequesterUser");
                 });
 
             modelBuilder.Entity("ItemNest.Domain.Entities.Favorite", b =>
@@ -700,9 +658,13 @@ namespace ItemNest.Infrastructure.Migrations
                 {
                     b.Navigation("ItemPosts");
 
+                    b.Navigation("ReceivedContactRequests");
+
                     b.Navigation("Reports");
 
                     b.Navigation("ReviewedReports");
+
+                    b.Navigation("SentContactRequests");
                 });
 
             modelBuilder.Entity("ItemNest.Domain.Entities.Category", b =>
@@ -710,13 +672,10 @@ namespace ItemNest.Infrastructure.Migrations
                     b.Navigation("ItemPosts");
                 });
 
-            modelBuilder.Entity("ItemNest.Domain.Entities.Chat", b =>
-                {
-                    b.Navigation("Messages");
-                });
-
             modelBuilder.Entity("ItemNest.Domain.Entities.ItemPost", b =>
                 {
+                    b.Navigation("ContactRequests");
+
                     b.Navigation("Images");
 
                     b.Navigation("Reports");

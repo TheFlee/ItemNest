@@ -91,11 +91,6 @@ public class UpdateItemPostDto
     /// <example>1</example>
     public int CategoryId { get; set; }
 
-    /// <summary>
-    /// Current status of the post.
-    /// </summary>
-    /// <example>Open</example>
-    public PostStatus Status { get; set; }
 }
 
 /// <summary>
@@ -108,6 +103,12 @@ public class ItemPostDto
     /// </summary>
     /// <example>3f10e9c2-f8c3-4f92-a7a2-9306c6a1d123</example>
     public Guid Id { get; set; }
+
+    /// <summary>
+    /// URL-friendly slug for the post.
+    /// </summary>
+    /// <example>lost-black-wallet-near-genclik-mall-a1b2c3</example>
+    public string Slug { get; set; } = string.Empty;
 
     /// <summary>
     /// Title of the post.

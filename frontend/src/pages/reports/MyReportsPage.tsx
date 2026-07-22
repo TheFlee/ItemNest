@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { LLink } from "../../components/common/LLink";
 import { useTranslation } from "react-i18next";
 import { getMyReports } from "../../api/reportApi";
 import PageState from "../../components/common/PageState";
@@ -81,19 +81,19 @@ export default function MyReportsPage() {
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <Link
+            <LLink
               to="/dashboard"
               className="inline-flex items-center justify-center rounded-xl bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[var(--accent-hover)]"
             >
               {t("myReportsPage.actions.backToDashboard")}
-            </Link>
+            </LLink>
 
-            <Link
+            <LLink
               to="/"
               className="inline-flex items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] hover:border-[var(--border)] hover:bg-[var(--bg-surface)]"
             >
               {t("myReportsPage.actions.browsePosts")}
-            </Link>
+            </LLink>
           </div>
         </div>
 
@@ -218,12 +218,12 @@ export default function MyReportsPage() {
             </div>
 
             <div className="mt-6 flex flex-wrap gap-3">
-              <Link
-                to={`/posts/${report.itemPostId}`}
+              <LLink
+                to={`/posts/${report.itemPostSlug}`}
                 className="inline-flex items-center justify-center rounded-xl bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[var(--accent-hover)]"
               >
                 {t("myReportsPage.actions.viewPost")}
-              </Link>
+              </LLink>
             </div>
           </article>
         ))}

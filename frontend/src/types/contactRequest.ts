@@ -7,6 +7,7 @@ export interface ContactRequestItem {
   id: string;
   itemPostId: string;
   itemPostTitle: string;
+  itemPostSlug: string;
   requesterUserId: string;
   requesterFullName: string;
   requesterEmail: string | null;

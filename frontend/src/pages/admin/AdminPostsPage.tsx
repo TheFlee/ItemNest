@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
+import { LLink } from "../../components/common/LLink";
 import { getCategories } from "../../api/categoryApi";
 import {
   deleteAdminPost,
@@ -269,18 +269,18 @@ export default function AdminPostsPage() {
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <Link
+            <LLink
               to="/admin/dashboard"
               className="inline-flex items-center justify-center rounded-xl bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[var(--accent-hover)]"
             >
               {t("adminPages.posts.backToDashboard")}
-            </Link>
-            <Link
+            </LLink>
+            <LLink
               to="/admin/reports"
               className="inline-flex items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
             >
               {t("adminPages.posts.openReports")}
-            </Link>
+            </LLink>
           </div>
         </div>
 
@@ -533,12 +533,12 @@ export default function AdminPostsPage() {
                       </div>
 
                       <div className="mt-6 flex flex-wrap gap-3">
-                        <Link
-                          to={`/posts/${post.id}`}
+                        <LLink
+                          to={`/posts/${post.slug}`}
                           className="inline-flex items-center justify-center rounded-xl bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[var(--accent-hover)]"
                         >
                           {t("adminPages.posts.viewPost")}
-                        </Link>
+                        </LLink>
 
                         <button
                           type="button"

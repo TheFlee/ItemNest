@@ -1,5 +1,5 @@
-import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { LLink } from "../common/LLink";
 import type { ItemPost } from "../../types/post";
 import { buildFileUrl } from "../../utils/api";
 import { formatDate } from "../../utils/format";
@@ -168,17 +168,17 @@ export default function PostCard({ post, showOwnerActions = false }: PostCardPro
 
           <div className="flex shrink-0 items-center gap-2">
             {showOwnerActions && post.isOwner && (
-              <Link
-                to={`/posts/${post.id}/edit`}
+              <LLink
+                to={`/posts/${post.slug}/edit`}
                 className="inline-flex items-center gap-1 text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
               >
                 <ion-icon name="create-outline" style={{ fontSize: "12px" }} />
                 {t("post.edit")}
-              </Link>
+              </LLink>
             )}
 
-            <Link
-              to={`/posts/${post.id}`}
+            <LLink
+              to={`/posts/${post.slug}`}
               className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-white transition-all active:scale-[0.97]"
               style={{ background: isLost ? "var(--accent)" : "var(--success)" }}
               onMouseEnter={e => (e.currentTarget.style.opacity = "0.88")}
@@ -186,7 +186,7 @@ export default function PostCard({ post, showOwnerActions = false }: PostCardPro
             >
               {t("post.viewDetails")}
               <ion-icon name="arrow-forward-outline" style={{ fontSize: "11px" }} />
-            </Link>
+            </LLink>
           </div>
         </div>
       </div>

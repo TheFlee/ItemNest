@@ -14,6 +14,7 @@ export interface ReportItem {
   reporterFullName: string;
   itemPostId: string;
   itemPostTitle: string;
+  itemPostSlug: string;
   reason: number;
   description: string;
   status: number;

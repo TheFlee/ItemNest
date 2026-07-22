@@ -63,20 +63,5 @@ public class MappingProfile : Profile
                         opt => opt.MapFrom(src => src.ItemPost.Title))
             .ForMember(dest => dest.ItemPostSlug,
                         opt => opt.MapFrom(src => src.ItemPost.Slug));
-
-        // ContactRequest
-        CreateMap<ContactRequest, ContactRequestDto>()
-            .ForMember(dest => dest.ItemPostTitle,
-                        opt => opt.MapFrom(src => src.ItemPost.Title))
-            .ForMember(dest => dest.ItemPostSlug,
-                        opt => opt.MapFrom(src => src.ItemPost.Slug))
-            .ForMember(dest => dest.RequesterFullName,
-                        opt => opt.MapFrom(src => src.RequesterUser.FullName))
-            .ForMember(dest => dest.RequesterEmail,
-                        opt => opt.MapFrom(src => src.RequesterUser.Email))
-            .ForMember(dest => dest.PostOwnerFullName,
-                        opt => opt.MapFrom(src => src.PostOwnerUser.FullName))
-            .ForMember(dest => dest.PostOwnerEmail,
-                        opt => opt.MapFrom(src => src.PostOwnerUser.Email));
     }
 }

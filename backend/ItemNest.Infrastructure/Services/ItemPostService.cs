@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Text.RegularExpressions;
+using AutoMapper;
 using ItemNest.Application.DTOs;
 using ItemNest.Application.Exceptions;
 using ItemNest.Application.Interfaces;
@@ -107,6 +108,24 @@ public class ItemPostService : IItemPostService
         return dto;
     }
 
+    public async Task<ItemPostDto> GetBySlugAsync(string slug, Guid? currentUserId = null)
+    {
+        var post = await _context.ItemPosts
+            .AsNoTracking()
+            .Include(x => x.Category)
+            .Include(x => x.User)
+            .Include(x => x.Images)
+            .FirstOrDefaultAsync(x => x.Slug == slug);
+
+        if (post is null)
+            throw new KeyNotFoundException("Post not found.");
+
+        var dto = _mapper.Map<ItemPostDto>(post);
+        await EnrichPostDtosAsync([dto], currentUserId);
+
+        return dto;
+    }
+
     public async Task<ItemPostDto> CreateAsync(Guid userId, CreateItemPostDto dto)
     {
         var categoryExists = await _context.Categories.AnyAsync(x => x.Id == dto.CategoryId);
@@ -120,6 +139,7 @@ public class ItemPostService : IItemPostService
         var post = _mapper.Map<ItemPost>(dto);
         post.Id = Guid.NewGuid();
         post.UserId = userId;
+        post.Slug = await GenerateUniqueSlugAsync(dto.Title);
 
         _context.ItemPosts.Add(post);
         await _context.SaveChangesAsync();
@@ -181,7 +201,7 @@ public class ItemPostService : IItemPostService
         return dtos;
     }
 
-    public async Task<IReadOnlyCollection<MatchedItemPostDto>> GetMatchesAsync(Guid postId)
+    public async Task<IReadOnlyCollection<MatchedItemPostDto>> GetMatchesAsync(Guid postId, Guid requestingUserId)
     {
         var sourcePost = await _context.ItemPosts
             .AsNoTracking()
@@ -191,6 +211,9 @@ public class ItemPostService : IItemPostService
 
         if (sourcePost is null)
             throw new KeyNotFoundException("Item post not found.");
+
+        if (sourcePost.UserId != requestingUserId)
+            throw new ForbiddenException("You are not allowed to view matches for this post.");
 
         var oppositeType = sourcePost.Type == PostType.Lost
             ? PostType.Found
@@ -261,6 +284,7 @@ public class ItemPostService : IItemPostService
             matches.Add(new MatchedItemPostDto
             {
                 Id = candidate.Id,
+                Slug = candidate.Slug,
                 Title = candidate.Title,
                 Description = candidate.Description,
                 Location = candidate.Location,
@@ -334,10 +358,6 @@ public class ItemPostService : IItemPostService
             .Where(x => x.ItemPostId == post.Id)
             .ToListAsync();
 
-        var contactRequests = await _context.ContactRequests
-            .Where(x => x.ItemPostId == post.Id)
-            .ToListAsync();
-
         var images = await _context.ItemImages
             .Where(x => x.ItemPostId == post.Id)
             .ToListAsync();
@@ -350,11 +370,6 @@ public class ItemPostService : IItemPostService
         if (reports.Count > 0)
         {
             _context.Reports.RemoveRange(reports);
-        }
-
-        if (contactRequests.Count > 0)
-        {
-            _context.ContactRequests.RemoveRange(contactRequests);
         }
 
         if (images.Count > 0)
@@ -428,5 +443,33 @@ public class ItemPostService : IItemPostService
         var candidate = candidateLocation.Trim().ToLowerInvariant();
 
         return source.Contains(candidate) || candidate.Contains(source);
+    }
+
+    private static string SlugifyText(string text)
+    {
+        var lower = text.ToLowerInvariant().Trim();
+        var noSpecial = Regex.Replace(lower, @"[^a-z0-9\s-]", "");
+        var slug = Regex.Replace(noSpecial.Replace(' ', '-'), @"-+", "-").Trim('-');
+        return string.IsNullOrWhiteSpace(slug) ? "post" : slug;
+    }
+
+    private static string GenerateRandomSuffix()
+    {
+        const string chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+        return new string(Enumerable.Range(0, 6)
+            .Select(_ => chars[Random.Shared.Next(chars.Length)])
+            .ToArray());
+    }
+
+    private async Task<string> GenerateUniqueSlugAsync(string title)
+    {
+        var baseSlug = SlugifyText(title);
+        for (var attempt = 0; attempt < 10; attempt++)
+        {
+            var slug = $"{baseSlug}-{GenerateRandomSuffix()}";
+            if (!await _context.ItemPosts.AnyAsync(x => x.Slug == slug))
+                return slug;
+        }
+        return $"{baseSlug}-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}";
     }
 }

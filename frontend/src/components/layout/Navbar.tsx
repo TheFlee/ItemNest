@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Link, NavLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../context/AuthContext";
+import { LLink, LNavLink } from "../common/LLink";
 import LanguageSwitcher from "./LanguageSwitcher";
 
 const navIconMap: Record<string, string> = {
@@ -57,10 +57,15 @@ export default function Navbar() {
 
   function renderNavLink(to: string, label: string, iconMap: Record<string, string>) {
     return (
-      <NavLink key={to} to={to} className={({ isActive }) => navLinkClass(isActive)}>
+      <LNavLink
+        key={to}
+        to={to}
+        end={to === "/"}
+        className={({ isActive }) => navLinkClass(isActive)}
+      >
         <ion-icon name={iconMap[to] ?? "ellipse-outline"} style={{ fontSize: "15px" }} />
         {label}
-      </NavLink>
+      </LNavLink>
     );
   }
 
@@ -71,7 +76,7 @@ export default function Navbar() {
           <div className="flex flex-col gap-4">
             {/* Top bar */}
             <div className="flex items-center justify-between gap-4">
-              <Link to="/" className="flex items-center gap-3">
+              <LLink to="/" className="flex items-center gap-3">
                 <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--accent)] text-sm font-semibold tracking-wide text-white">
                   IN
                 </span>
@@ -81,12 +86,12 @@ export default function Navbar() {
                   </p>
                   <p className="text-sm text-[var(--text-secondary)]">{t("brand.tagline")}</p>
                 </div>
-              </Link>
+              </LLink>
 
               <div className="flex items-center gap-2">
                 <LanguageSwitcher />
 
-                {/* Mobile hamburger — hidden at lg and above */}
+                {/* Mobile hamburger */}
                 <button
                   onClick={() => setMenuOpen((o) => !o)}
                   className="flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] lg:hidden"
@@ -95,11 +100,11 @@ export default function Navbar() {
                   <ion-icon name={menuOpen ? "close-outline" : "menu-outline"} style={{ fontSize: "18px" }} />
                 </button>
 
-                {/* Desktop auth actions — hidden on mobile */}
+                {/* Desktop auth actions */}
                 <div className="hidden lg:flex lg:items-center lg:gap-3">
                   {isAuthenticated ? (
                     <>
-                      <Link
+                      <LLink
                         to="/account"
                         className="flex items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] px-3 py-2 transition hover:border-[var(--accent)]"
                       >
@@ -112,14 +117,14 @@ export default function Navbar() {
                             {user?.fullName}
                           </p>
                         </div>
-                      </Link>
-                      <Link
+                      </LLink>
+                      <LLink
                         to="/create-post"
                         className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[var(--accent-hover)]"
                       >
                         <ion-icon name="add-circle-outline" style={{ fontSize: "15px" }} />
                         {t("nav.createPost")}
-                      </Link>
+                      </LLink>
                       <button
                         onClick={logout}
                         className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
@@ -130,25 +135,25 @@ export default function Navbar() {
                     </>
                   ) : (
                     <>
-                      <Link
+                      <LLink
                         to="/login"
                         className="inline-flex items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
                       >
                         {t("nav.login")}
-                      </Link>
-                      <Link
+                      </LLink>
+                      <LLink
                         to="/register"
                         className="inline-flex items-center justify-center rounded-xl bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[var(--accent-hover)]"
                       >
                         {t("nav.register")}
-                      </Link>
+                      </LLink>
                     </>
                   )}
                 </div>
               </div>
             </div>
 
-            {/* Desktop nav links (authenticated) — hidden on mobile */}
+            {/* Desktop nav links (authenticated) */}
             {isAuthenticated && (
               <div className="hidden lg:block">
                 <div className="flex flex-col gap-3 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] px-3 py-3">
@@ -156,7 +161,7 @@ export default function Navbar() {
                     {memberLinks.map((link) => renderNavLink(link.to, link.label, navIconMap))}
                   </div>
                   {isAdmin && (
-                    <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-3 ">
+                    <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-3">
                       <div className="flex flex-wrap gap-2">
                         {adminLinks.map((link) => renderNavLink(link.to, link.label, adminIconMap))}
                       </div>
@@ -175,27 +180,27 @@ export default function Navbar() {
                       {memberLinks.map((link) => renderNavLink(link.to, link.label, navIconMap))}
                     </div>
                     {isAdmin && (
-                      <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-3 ">
+                      <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-3">
                         <div className="flex flex-col gap-1">
                           {adminLinks.map((link) => renderNavLink(link.to, link.label, adminIconMap))}
                         </div>
                       </div>
                     )}
                     <div className="border-t border-[var(--border)] pt-3 flex flex-col gap-2">
-                      <Link
+                      <LLink
                         to="/account"
                         className="flex items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-3 py-2"
                       >
                         <ion-icon name="person-circle-outline" style={{ fontSize: "16px" }} />
                         <span className="text-sm font-semibold text-[var(--text-primary)]">{user?.fullName}</span>
-                      </Link>
-                      <Link
+                      </LLink>
+                      <LLink
                         to="/create-post"
                         className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-white"
                       >
                         <ion-icon name="add-circle-outline" style={{ fontSize: "15px" }} />
                         {t("nav.createPost")}
-                      </Link>
+                      </LLink>
                       <button
                         onClick={logout}
                         className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)]"
@@ -207,18 +212,18 @@ export default function Navbar() {
                   </div>
                 ) : (
                   <div className="flex flex-col gap-2">
-                    <Link
+                    <LLink
                       to="/login"
                       className="inline-flex items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)]"
                     >
                       {t("nav.login")}
-                    </Link>
-                    <Link
+                    </LLink>
+                    <LLink
                       to="/register"
                       className="inline-flex items-center justify-center rounded-xl bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-white"
                     >
                       {t("nav.register")}
-                    </Link>
+                    </LLink>
                   </div>
                 )}
               </div>

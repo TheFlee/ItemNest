@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
+import { LLink } from "../../components/common/LLink";
+import { useLangNavigate } from "../../hooks/useLangPath";
 import { createContactRequest } from "../../api/contactRequestApi";
 import { addFavorite, removeFavorite } from "../../api/favoriteApi";
-import { deletePost, getPostById, getPostMatches, updatePost } from "../../api/itemPostApi";
+import { deletePost, getPostBySlug, getPostMatches, updatePost } from "../../api/itemPostApi";
 import { createReport } from "../../api/reportApi";
 import PageState from "../../components/common/PageState";
 import FormTextarea from "../../components/forms/FormTextarea";
@@ -31,9 +33,9 @@ interface LocationState {
 
 export default function PostDetailsPage() {
   const { t } = useTranslation();
-  const { id } = useParams();
+  const { slug } = useParams();
   const location = useLocation();
-  const navigate = useNavigate();
+  const langNavigate = useLangNavigate();
   const routeState = (location.state ?? {}) as LocationState;
   const { isAuthenticated } = useAuth();
 
@@ -58,25 +60,25 @@ export default function PostDetailsPage() {
 
   useEffect(() => {
     async function loadPost() {
-      if (!id) { setErrorMessage(t("postDetails.errors.postIdMissing")); setIsLoading(false); return; }
+      if (!slug) { setErrorMessage(t("postDetails.errors.postIdMissing")); setIsLoading(false); return; }
       setIsLoading(true); setErrorMessage(""); setSuccessMessage("");
-      try { setPost(await getPostById(id)); }
+      try { setPost(await getPostBySlug(slug)); }
       catch (error: any) { setErrorMessage(getApiErrorMessage(error)); }
       finally { setIsLoading(false); }
     }
     void loadPost();
-  }, [id, t]);
+  }, [slug, t]);
 
   useEffect(() => {
     async function loadMatches() {
-      if (!id || !isAuthenticated) { setMatches([]); return; }
+      if (!post?.id || !isAuthenticated) { setMatches([]); return; }
       setIsMatchesLoading(true);
-      try { setMatches(await getPostMatches(id)); }
+      try { setMatches(await getPostMatches(post.id)); }
       catch { setMatches([]); }
       finally { setIsMatchesLoading(false); }
     }
     void loadMatches();
-  }, [id, isAuthenticated]);
+  }, [post?.id, isAuthenticated]);
 
   function handleImagesChanged(updatedImages: ItemPost["images"]) {
     setPost((prev) => prev ? { ...prev, images: updatedImages, primaryImageUrl: updatedImages[0]?.imageUrl ?? "" } : prev);
@@ -146,7 +148,7 @@ export default function PostDetailsPage() {
     setErrorMessage(""); setSuccessMessage(""); setIsDeletingPost(true);
     try {
       await deletePost(post.id);
-      navigate("/my-posts", { replace: true, state: { successMessage: t("postDetails.messages.deleted") } });
+      langNavigate("/my-posts", { replace: true, state: { successMessage: t("postDetails.messages.deleted") } });
     } catch (error: any) { setErrorMessage(getApiErrorMessage(error)); setIsDeletingPost(false); }
   }
 
@@ -175,17 +177,27 @@ export default function PostDetailsPage() {
 
   const btnBase = "inline-flex items-center justify-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-semibold transition-all active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60";
 
+  const ogImage = post.primaryImageUrl ? buildFileUrl(post.primaryImageUrl) : undefined;
+  const metaDescription = post.description.slice(0, 160);
+
   return (
     <div className="space-y-6">
+      <title>{post.title} | ItemNest</title>
+      <meta name="description" content={metaDescription} />
+      <meta property="og:title" content={`${post.title} | ItemNest`} />
+      <meta property="og:description" content={metaDescription} />
+      <meta property="og:type" content="article" />
+      {ogImage && <meta property="og:image" content={ogImage} />}
+      <link rel="canonical" href={window.location.href} />
 
       {/* Back link */}
-      <Link
+      <LLink
         to="/"
         className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
       >
         <ion-icon name="arrow-back-outline" style={{ fontSize: "14px" }} />
         {t("postDetails.backToPosts")}
-      </Link>
+      </LLink>
 
       {/* Banners */}
       {routeState.warningMessage && (
@@ -332,13 +344,13 @@ export default function PostDetailsPage() {
               {/* Owner actions */}
               {post.isOwner && (
                 <div className="flex flex-wrap gap-2">
-                  <Link
-                    to={`/posts/${post.id}/edit`}
+                  <LLink
+                    to={`/posts/${post.slug}/edit`}
                     className={`${btnBase} border border-[var(--border)] bg-[var(--bg-card)] text-[var(--text-primary)] hover:bg-[var(--bg-surface)]`}
                   >
                     <ion-icon name="create-outline" style={{ fontSize: "14px" }} />
                     {t("postDetails.actions.editPost")}
-                  </Link>
+                  </LLink>
 
                   {canMarkReturned && (
                     <button
@@ -421,14 +433,14 @@ export default function PostDetailsPage() {
 
               {/* Not authenticated */}
               {!isAuthenticated && (
-                <Link
+                <LLink
                   to="/login"
                   className={`${btnBase} text-white`}
                   style={{ background: typeColor }}
                 >
                   <ion-icon name="log-in-outline" style={{ fontSize: "14px" }} />
                   {t("postDetails.actions.loginToContact")}
-                </Link>
+                </LLink>
               )}
             </div>
           </div>
@@ -546,9 +558,9 @@ export default function PostDetailsPage() {
           ) : (
             <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {matches.map((match) => (
-                <Link
+                <LLink
                   key={match.id}
-                  to={`/posts/${match.id}`}
+                  to={`/posts/${match.slug}`}
                   className="group overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[var(--accent)]/50 hover:shadow-[0_6px_20px_rgba(0,0,0,0.07)]"
                 >
                   {/* Match image */}
@@ -602,7 +614,7 @@ export default function PostDetailsPage() {
                       </div>
                     )}
                   </div>
-                </Link>
+                </LLink>
               ))}
             </div>
           )}

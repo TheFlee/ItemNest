@@ -28,8 +28,7 @@ public static class DatabaseExtensions
         services.AddScoped<ICategoryRepository, CategoryRepository>();
         services.AddScoped<IFavoriteRepository, FavoriteRepository>();
         services.AddScoped<IItemPostRepository, ItemPostRepository>();
-        services.AddScoped<IContactRequestRepository, ContactRequestRepository>();
-        services.AddScoped<IReportRepository, ReportRepository>();
+services.AddScoped<IReportRepository, ReportRepository>();
 
         return services;
     }

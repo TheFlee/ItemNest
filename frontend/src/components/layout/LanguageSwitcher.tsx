@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 
 const languageOptions = [
   { value: "en", labelKey: "language.english" },
@@ -6,12 +7,19 @@ const languageOptions = [
 ] as const;
 
 export default function LanguageSwitcher() {
-  const { i18n, t } = useTranslation();
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { lang } = useParams<{ lang?: string }>();
 
-  const activeLanguage = i18n.resolvedLanguage === "az" ? "az" : "en";
+  const activeLanguage = lang === "az" ? "az" : "en";
 
   function handleLanguageChange(language: "en" | "az") {
-    void i18n.changeLanguage(language);
+    const currentLang = activeLanguage;
+    const newPathname = location.pathname.startsWith(`/${currentLang}`)
+      ? `/${language}${location.pathname.slice(currentLang.length + 1)}`
+      : `/${language}`;
+    navigate(newPathname + location.search, { replace: true });
   }
 
   return (
