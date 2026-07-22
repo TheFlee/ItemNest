@@ -420,7 +420,7 @@ export default function PostDetailsPage() {
 
                   <button
                     type="button"
-                    onClick={() => { setShowReportForm((p) => !p); setShowContactForm(false); setErrorMessage(""); setSuccessMessage(""); }}
+                    onClick={() => { setShowReportForm((p) => !p); setErrorMessage(""); setSuccessMessage(""); }}
                     className={`${btnBase} border border-red-200 text-red-700 hover:bg-red-50`}
                   >
                     <ion-icon name="flag-outline" style={{ fontSize: "14px" }} />

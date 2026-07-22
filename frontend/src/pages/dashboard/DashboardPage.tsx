@@ -124,7 +124,6 @@ export default function DashboardPage() {
     },
   ];
 
-  const totalChats = chats.length;
   const unreadChats = chats.filter((c) => c.unreadCount > 0).length;
 
   const summaryRows = [
